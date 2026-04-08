@@ -1,0 +1,45 @@
+﻿Starting dataset merge...
+
+  [OK]  banana_healthy                      <- 1057 images
+  [OK]  banana_sigatoka                     <- 126 images
+  [OK]  banana_panama_wilt                  <- 54 images
+  [OK]  banana_healthy                      <- 155 images
+  [OK]  banana_sigatoka                     <- 320 images
+  [OK]  banana_healthy                      <- 155 images
+  [OK]  banana_sigatoka                     <- 320 images
+  [OK]  banana_healthy                      <- 129 images
+  [OK]  banana_sigatoka                     <- 473 images
+  [OK]  banana_cordana                      <- 162 images
+ml\scanom-ml-env\Scripts\python.exe : Traceback (most recent call 
+last):
+At line:1 char:32
++ ... NG='utf-8'; ml\scanom-ml-env\Scripts\python.exe 
+ml\merge_datasets.py  ...
++                 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent 
+    call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\Jim Dejito\OneDrive\Desktop\Jim 
+Codes\Thesis\Scanom\ml\merge_datasets.py", line 104, in <module>
+    shutil.copy(
+    ~~~~~~~~~~~^
+        os.path.join(source_path, filename),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        os.path.join(dest_path, new_name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Python313\Lib\shutil.py", line 428, in copy
+    copyfile(src, dst, follow_symlinks=follow_symlinks)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\shutil.py", line 260, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 
+'C:/Users/Jim Dejito/OneDrive/Desktop/Jim 
+Codes/Thesis/Scanom/Tomato Dataset 1/train/healthy\\single-a-green-l
+eaf-of-tomato-picture-id496662675-k-6-m-496662675-s-612x612-w-0-h-6z
+Kfv022H_9cLQSIR_kpcOAlTeg1eIVtLBbc80PQA7Y-_jpg.rf.37087dcecbd2df0cf0
+7ab88559dfa9c7.jpg'

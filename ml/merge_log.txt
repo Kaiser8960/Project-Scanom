@@ -1,0 +1,40 @@
+﻿Starting dataset merge...
+
+  [OK]  banana_healthy                      <- 1057 images
+  [OK]  banana_sigatoka                     <- 126 images
+  [OK]  banana_panama_wilt                  <- 54 images
+  [OK]  banana_healthy                      <- 155 images
+  [OK]  banana_sigatoka                     <- 320 images
+  [OK]  banana_healthy                      <- 155 images
+  [OK]  banana_sigatoka                     <- 320 images
+  [OK]  banana_healthy                      <- 129 images
+  [OK]  banana_sigatoka                     <- 473 images
+  [OK]  banana_cordana                      <- 162 images
+  [OK]  tomato_healthy                      <- 3051 images
+  [OK]  tomato_bacterial_spot               <- 2826 images
+  [OK]  tomato_early_blight                 <- 2452 images
+  [OK]  tomato_late_blight                  <- 3113 images
+  [OK]  tomato_leaf_mold                    <- 2754 images
+  [OK]  tomato_powdery_mildew               <- 1004 images
+  [OK]  tomato_healthy                      <- 805 images
+  [OK]  tomato_bacterial_spot               <- 732 images
+  [OK]  tomato_early_blight                 <- 643 images
+  [OK]  tomato_late_blight                  <- 792 images
+  [OK]  tomato_leaf_mold                    <- 739 images
+  [OK]  tomato_powdery_mildew               <- 252 images
+
+ΓöÇΓöÇ Class Summary ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  banana_cordana                     :   162 images  [!] UNDER 300 - needs augmentation or more data
+  banana_healthy                     :  1496 images
+  banana_panama_wilt                 :    54 images  [!] UNDER 300 - needs augmentation or more data
+  banana_sigatoka                    :  1239 images
+  tomato_bacterial_spot              :  3558 images
+  tomato_early_blight                :  3095 images
+  tomato_healthy                     :  3856 images
+  tomato_late_blight                 :  3905 images
+  tomato_leaf_mold                   :  3493 images
+  tomato_powdery_mildew              :  1256 images
+
+  TOTAL: 22114 images across 10 classes
+
+Merge complete! Now run split_dataset.py

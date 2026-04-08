@@ -1,0 +1,18 @@
+﻿Starting dataset split (70% train / 15% val / 15% test)...
+
+  Γ£ô  banana_cordana                      train: 113 | val:  24 | test:  25
+  Γ£ô  banana_healthy                      train:1047 | val: 224 | test: 225
+  Γ£ô  banana_panama_wilt                  train:  37 | val:   8 | test:   9
+  Γ£ô  banana_sigatoka                     train: 867 | val: 185 | test: 187
+  Γ£ô  tomato_bacterial_spot               train:2490 | val: 533 | test: 535
+  Γ£ô  tomato_early_blight                 train:2166 | val: 464 | test: 465
+  Γ£ô  tomato_healthy                      train:2699 | val: 578 | test: 579
+  Γ£ô  tomato_late_blight                  train:2733 | val: 585 | test: 587
+  Γ£ô  tomato_leaf_mold                    train:2445 | val: 523 | test: 525
+  Γ£ô  tomato_powdery_mildew               train: 879 | val: 188 | test: 189
+
+Split complete!
+Output structure:
+  C:/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/dataset/train/  ΓåÉ 70%
+  C:/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/dataset/val/    ΓåÉ 15%
+  C:/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/dataset/test/   ΓåÉ 15%

@@ -1,0 +1,21 @@
+# Datasets
+*Dataset*
+dataset/
+
+# Model Output
+model_output/
+*.h5
+*.keras
+*.pt
+*.pth
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
