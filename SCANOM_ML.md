@@ -31,7 +31,8 @@
 | **GPU Training** | WSL2 + `tensorflow[and-cuda]` | TF 2.11+ dropped native Windows GPU support. The RTX 4060 is idle on native Windows. WSL2 is the correct path. See Section 9. |
 | **Model File Storage** | Backend repo only — NOT Supabase | Supabase free tier is 1 GB total. The `.tflite` file (~25 MB) must live in `scanom-backend/model/` directly, never in Supabase Storage. |
 | **Class Imbalance** | Class weights — standard, not optional | Banana classes are severely underrepresented vs. Tomato. Without class weights, banana diseases score 0% F1. Class weights are now applied by default in train.py. |
-| **Pipeline Order** | `cache()` → augment → normalize → prefetch | `.cache()` must come BEFORE augmentation. If placed after, the same augmented images repeat every epoch, defeating augmentation entirely. |
+| **Pipeline Order** | `cache("/tmp/tf_cache")` -> augment -> normalize -> prefetch | `.cache()` must come BEFORE augmentation. Cache must target a disk path (`/tmp/tf_cache`), NOT in-memory — caching 24k images in GPU VRAM causes `CUDA_ERROR_OUT_OF_MEMORY`. |
+| **Batch Size** | 16 (not 32) | RTX 4060 Laptop (8GB VRAM) OOMs at batch size 32 with ResNet50 + 24k images. Batch 16 fits comfortably. |
 
 ---
 
@@ -653,35 +654,68 @@ Step 5 — Class weights (ALREADY APPLIED BY DEFAULT in train.py)
 
 > IMPORTANT: TensorFlow 2.11+ has NO native Windows GPU support. Your RTX 4060 will be idle unless you use WSL2 (Option B). Option A uses CPU only.
 
-### Option A — CPU Only (Native Windows)
+### Option A -- CPU Only (Native Windows)
 ```bash
 python -m venv scanom-ml-env
 scanom-ml-env\Scripts\activate
 pip install tensorflow scikit-learn numpy pillow matplotlib
-# Training time: ~1.5–3 hours per run on i7-13620H
+# Training time: ~1.5-3 hours per run on i7-13620H
 ```
 
-### Option B — GPU Accelerated (WSL2, Recommended)
+### Option B -- GPU Accelerated (WSL2, Recommended)
+
+> VERIFIED WORKING on: Ubuntu 24.04 LTS (WSL2), Python 3.11, TF 2.21.0, RTX 4060 Laptop 8GB
+> Follow EVERY step exactly -- skipping any step will cause GPU not to be detected.
+
 ```bash
-# Step 1: Enable WSL2 — run in PowerShell as Admin, then restart PC
+# Step 1: Enable WSL2 -- run in PowerShell as Admin, then restart PC
 wsl --install
 
-# Step 2: Inside Ubuntu (WSL2 terminal)
-python3 -m venv scanom-ml-env
-source scanom-ml-env/bin/activate
+# Step 2: Inside Ubuntu (WSL2 terminal) -- install Python 3.11
+# CRITICAL: tensorflow[and-cuda] does NOT support Python 3.12 (Ubuntu 24.04 default).
+# You MUST use Python 3.11.
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt install -y python3.11 python3.11-venv python3.11-dev
 
-# Step 3: Install TensorFlow with CUDA bundled
+# Step 3: Create the venv in the LINUX home directory -- NOT inside /mnt/c/...
+# CRITICAL: TensorFlow .so binaries cannot execute from NTFS (Windows filesystem).
+# The venv MUST live on the Linux ext4 filesystem.
+cd ~
+python3.11 -m venv scanom-ml-env
+source ~/scanom-ml-env/bin/activate
+
+# Step 4: Install TensorFlow with CUDA bundled
 pip install "tensorflow[and-cuda]" scikit-learn numpy pillow matplotlib
 
-# Step 4: Verify GPU is detected
-python3 -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+# Step 5: Fix GPU library path -- required for WSL2
+# tensorflow[and-cuda] installs CUDA libs into the venv but they are not auto-discovered.
+# ldconfig registers libcuda.so.1 from WSL2 NVIDIA driver:
+sudo sh -c "echo /usr/lib/wsl/lib > /etc/ld.so.conf.d/ld.wsl.conf"
+sudo ldconfig
+
+# Add all bundled nvidia CUDA lib paths to the venv activate script permanently:
+echo 'export LD_LIBRARY_PATH=$(find ~/scanom-ml-env/lib/python3.11/site-packages/nvidia -name "lib" -type d | tr '"'"'\n'"'"' '"'"':'"'"'):/usr/lib/wsl/lib:$LD_LIBRARY_PATH' >> ~/scanom-ml-env/bin/activate
+
+# Step 6: Re-activate to apply the path fix, then verify GPU is detected
+source ~/scanom-ml-env/bin/activate
+python3 -c "import tensorflow as tf; print('GPU:', tf.config.list_physical_devices('GPU'))"
 # Expected: [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
 
-# Step 5: Your Windows project files are accessible at:
-# /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom
-# Update the BASE variable in all scripts when running from WSL2
+# Step 7: Run training (data stays on Windows, only venv is on Linux)
+python3 "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/ml/train.py"
 ```
-> Training time with RTX 4060: ~8–15 minutes per run.
+> Training time with RTX 4060 Laptop: ~15-30 minutes per run.
+
+### Known WSL2 Issues & Fixes
+
+| Issue | Cause | Fix |
+|---|---|---|
+| `No module named 'tensorflow.python'` | venv stored on `/mnt/c/` (NTFS) | Move venv to Linux home `~/` |
+| `GPU: []` after install | Bundled CUDA libs not in path | Run Steps 5-6 above (ldconfig + LD_LIBRARY_PATH) |
+| `python3 -m venv` fails with ensurepip error | Ubuntu missing venv package | `sudo apt install -y python3.11-venv` |
+| `CUDA_ERROR_OUT_OF_MEMORY` during training | BATCH_SIZE=32 too large for 8GB VRAM | Use BATCH_SIZE=16 and `.cache("/tmp/tf_cache")` |
+| `Permission denied` on apt install | Forgot `sudo` | Always prefix apt commands with `sudo` |
+
 
 ---
 

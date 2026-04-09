@@ -13,7 +13,7 @@ BASE         = "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom
 DATASET_DIR  = f"{BASE}/dataset"
 OUTPUT_DIR   = f"{BASE}/model_output"
 IMG_SIZE     = (224, 224)
-BATCH_SIZE   = 32
+BATCH_SIZE   = 16       # Reduced from 32 — RTX 4060 Laptop (8GB) OOMs at 32 with ResNet50
 EPOCHS_HEAD  = 20       # Phase 1: train only new head layers
 EPOCHS_FINE  = 30       # Phase 2: fine-tune deeper layers
 LR_HEAD      = 1e-3     # Phase 1 learning rate
@@ -89,7 +89,7 @@ normalization = layers.Rescaling(1./255)
 
 train_ds = (
     train_ds
-    .cache()                                              # ← cache raw images FIRST
+    .cache("/tmp/tf_cache")                    # cache to disk, not GPU memory
     .map(lambda x, y: (augmentation(x, training=True), y),
          num_parallel_calls=tf.data.AUTOTUNE)
     .map(lambda x, y: (normalization(x), y),
