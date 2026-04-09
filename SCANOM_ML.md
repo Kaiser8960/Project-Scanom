@@ -77,12 +77,12 @@ Index  Class Name               Display Name
 
 ```
 Thesis/
-  Banana Dataset 1/            ← FLAT structure (classes directly inside)
+  Banana Dataset 1/            <- FLAT structure
     Black and Yellow Sigatoka/
     Healthy Banana leaf/
     Panama Wilt Disease/
 
-  Banana Dataset 2/            ← PRE-SPLIT structure
+  Banana Dataset 2/            <- PRE-SPLIT structure
     train/
       healthy/
       Sigatoka/
@@ -90,101 +90,130 @@ Thesis/
       healthy/
       Sigatoka/
 
-  Banana Dataset 3/            ← FLAT structure
+  Banana Dataset 3/            <- FLAT structure
     cordana/
     healthy/
     sigatoka/
 
-  Tomato Dataset 1/            ← PRE-SPLIT structure
+  Banana Dataset 4/            <- ROBOFLOW CSV structure
+    train/                       All images in one flat folder.
+      _classes.csv               CSV maps filename -> one-hot labels:
+      <image files>              columns: cordana, healthy,
+    valid/                       pestalotiopsis, sigatoka
+      _classes.csv             We extract ONLY cordana == 1 rows.
+      <image files>
+    test/
+      _classes.csv
+      <image files>
+
+  Banana Dataset 5/            <- NESTED FLAT structure
+    Original Images/
+      Original Images/
+        Banana Panama Disease/
+        Banana Black Sigatoka Disease/
+        Banana Yellow Sigatoka Disease/
+    Augmented images/
+      Augmented images/
+        Augmented Banana Panama Disease/
+        Augmented Banana Black Sigatoka Disease/
+        Augmented Banana Yellow Sigatoka Disease/
+
+  Tomato Dataset 1/            <- PRE-SPLIT structure
     train/
       Bacterial_spot/
       Early_blight/
       healthy/
       Late_blight/
       Leaf_Mold/
+      powdery_mildew/
     valid/
       (same structure as train)
 ```
 
----
+### Dataset Merge Notes
+```
+DS1  -> banana_healthy, banana_sigatoka, banana_panama_wilt
+DS2  -> banana_healthy, banana_sigatoka (train + test merged)
+DS3  -> banana_healthy, banana_sigatoka, banana_cordana
+DS4  -> banana_cordana ONLY (CSV parsed, cordana==1 rows)
+DS5  -> banana_panama_wilt + banana_sigatoka
+         Black Sigatoka + Yellow Sigatoka are BOTH mapped to
+         banana_sigatoka (same Mycosphaerella family, one class).
+         Original AND Augmented images both included.
+Tom1 -> all 6 tomato classes (train + valid merged)
+```
 
 ## 4. Step 1 — merge_datasets.py
 
-Run this first. It combines all sources into one unified folder.
+Run this first. Clears `dataset/all/` and rebuilds it from all sources.
+Handles two dataset types: standard flat folders AND Roboflow CSV format.
 
 ```python
 import os
 import shutil
 import uuid
+import csv
 
-# ── CHANGE THIS to your actual Thesis folder path ──────────
-BASE = "C:/Users/Jim Dejito/Thesis/Scanom"
+# -- CHANGE THIS to your actual Thesis folder path
+BASE       = "C:/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom"
 OUTPUT_DIR = f"{BASE}/dataset/all"
 
-# ── MAPPINGS: (source path, destination class name) ────────
-# Pre-split datasets: list train/ AND test/valid/ separately,
-# both pointing to the SAME destination class name.
-# Their original splits are ignored — we re-split from scratch.
+# -- CLEAN SLATE: prevents duplicate images on re-runs
+print("Cleaning output directory (fresh start)...")
+shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+print("Done.\n")
 
 mappings = [
+    # -- BANANA DATASET 1 (flat)
+    (f"{BASE}/Banana Dataset 1/Healthy Banana  leaf",  "banana_healthy"),
+    (f"{BASE}/Banana Dataset 1/Black and Yellow Sigatoka", "banana_sigatoka"),
+    (f"{BASE}/Banana Dataset 1/Panama Wilt Disease",   "banana_panama_wilt"),
 
-    # ── BANANA DATASET 1 (flat) ────────────────────────────
-    (f"{BASE}/Banana Dataset 1/Healthy Banana leaf",
-     "banana_healthy"),
-    (f"{BASE}/Banana Dataset 1/Black and Yellow Sigatoka",
-     "banana_sigatoka"),
-    (f"{BASE}/Banana Dataset 1/Panama Wilt Disease",
+    # -- BANANA DATASET 2 (pre-split: merge train + test)
+    (f"{BASE}/Banana Dataset 2/train/healthy",          "banana_healthy"),
+    (f"{BASE}/Banana Dataset 2/train/Sigatoka",         "banana_sigatoka"),
+    (f"{BASE}/Banana Dataset 2/test/healthy",           "banana_healthy"),
+    (f"{BASE}/Banana Dataset 2/test/Sigatoka",          "banana_sigatoka"),
+
+    # -- BANANA DATASET 3 (flat)
+    (f"{BASE}/Banana Dataset 3/healthy",                "banana_healthy"),
+    (f"{BASE}/Banana Dataset 3/sigatoka",               "banana_sigatoka"),
+    (f"{BASE}/Banana Dataset 3/cordana",                "banana_cordana"),
+
+    # -- BANANA DATASET 5: Original images
+    (f"{BASE}/Banana Dataset 5/Original Images/Original Images/Banana Panama Disease",
      "banana_panama_wilt"),
-    
-
-    # ── BANANA DATASET 2 (pre-split: merge train + test) ───
-    (f"{BASE}/Banana Dataset 2/train/healthy",
-     "banana_healthy"),
-    (f"{BASE}/Banana Dataset 2/train/segatoka",
+    (f"{BASE}/Banana Dataset 5/Original Images/Original Images/Banana Black Sigatoka Disease",
      "banana_sigatoka"),
-    (f"{BASE}/Banana Dataset 2/test/healthy",
-     "banana_healthy"),
-    (f"{BASE}/Banana Dataset 2/test/segatoka",
+    (f"{BASE}/Banana Dataset 5/Original Images/Original Images/Banana Yellow Sigatoka Disease",
      "banana_sigatoka"),
 
-    # ── BANANA DATASET 3 (flat) ────────────────────────────
-    (f"{BASE}/Banana Dataset 3/healthy",
-     "banana_healthy"),
-    (f"{BASE}/Banana Dataset 3/sigatoka",
+    # -- BANANA DATASET 5: Augmented images
+    (f"{BASE}/Banana Dataset 5/Augmented images/Augmented images/Augmented Banana Panama Disease",
+     "banana_panama_wilt"),
+    (f"{BASE}/Banana Dataset 5/Augmented images/Augmented images/Augmented Banana Black Sigatoka Disease",
      "banana_sigatoka"),
-    (f"{BASE}/Banana Dataset 3/cordana",
-     "banana_cordana"),
+    (f"{BASE}/Banana Dataset 5/Augmented images/Augmented images/Augmented Banana Yellow Sigatoka Disease",
+     "banana_sigatoka"),
 
-    # ── TOMATO DATASET 1 TRAIN (pre-split) ────────────────
-    (f"{BASE}/Tomato Dataset 1/train/healthy",
-     "tomato_healthy"),
-    (f"{BASE}/Tomato Dataset 1/train/Bacterial_spot",
-     "tomato_bacterial_spot"),
-    (f"{BASE}/Tomato Dataset 1/train/Early_blight",
-     "tomato_early_blight"),
-    (f"{BASE}/Tomato Dataset 1/train/Late_blight",
-     "tomato_late_blight"),
-    (f"{BASE}/Tomato Dataset 1/train/Leaf_Mold",
-     "tomato_leaf_mold"),
-    (f"{BASE}/Tomato Dataset 1/train/powdery_mildew",
-     "tomato_powdery_mildew"),
+    # -- TOMATO DATASET 1 TRAIN
+    (f"{BASE}/Tomato Dataset 1/train/healthy",          "tomato_healthy"),
+    (f"{BASE}/Tomato Dataset 1/train/Bacterial_spot",   "tomato_bacterial_spot"),
+    (f"{BASE}/Tomato Dataset 1/train/Early_blight",     "tomato_early_blight"),
+    (f"{BASE}/Tomato Dataset 1/train/Late_blight",      "tomato_late_blight"),
+    (f"{BASE}/Tomato Dataset 1/train/Leaf_Mold",        "tomato_leaf_mold"),
+    (f"{BASE}/Tomato Dataset 1/train/powdery_mildew",   "tomato_powdery_mildew"),
 
-    # ── TOMATO DATASET 1 VALID (merge with train) ─────────
-    (f"{BASE}/Tomato Dataset 1/valid/healthy",
-     "tomato_healthy"),
-    (f"{BASE}/Tomato Dataset 1/valid/Bacterial_spot",
-     "tomato_bacterial_spot"),
-    (f"{BASE}/Tomato Dataset 1/valid/Early_blight",
-     "tomato_early_blight"),
-    (f"{BASE}/Tomato Dataset 1/valid/Late_blight",
-     "tomato_late_blight"),
-    (f"{BASE}/Tomato Dataset 1/valid/Leaf_Mold",
-     "tomato_leaf_mold"),
-    (f"{BASE}/Tomato Dataset 1/valid/powdery_mildew",
-     "tomato_powdery_mildew"),
+    # -- TOMATO DATASET 1 VALID (merge with train)
+    (f"{BASE}/Tomato Dataset 1/valid/healthy",          "tomato_healthy"),
+    (f"{BASE}/Tomato Dataset 1/valid/Bacterial_spot",   "tomato_bacterial_spot"),
+    (f"{BASE}/Tomato Dataset 1/valid/Early_blight",     "tomato_early_blight"),
+    (f"{BASE}/Tomato Dataset 1/valid/Late_blight",      "tomato_late_blight"),
+    (f"{BASE}/Tomato Dataset 1/valid/Leaf_Mold",        "tomato_leaf_mold"),
+    (f"{BASE}/Tomato Dataset 1/valid/powdery_mildew",   "tomato_powdery_mildew"),
 
-    # ── DA-RFU VII MANUAL SHOTS ────────────────────────────
-    # Uncomment after your DA-RFU VII visit and sort photos into these folders
+    # -- DA-RFU VII MANUAL SHOTS (uncomment after field visit)
     # (f"{BASE}/manual_shots/banana_healthy",        "banana_healthy"),
     # (f"{BASE}/manual_shots/banana_sigatoka",       "banana_sigatoka"),
     # (f"{BASE}/manual_shots/banana_panama_wilt",    "banana_panama_wilt"),
@@ -197,44 +226,78 @@ mappings = [
     # (f"{BASE}/manual_shots/tomato_powdery_mildew", "tomato_powdery_mildew"),
 ]
 
-# ── RUN ────────────────────────────────────────────────────
-print("Starting dataset merge...\n")
 
+def long_path(p):
+    """Add \\?\ prefix so Windows handles paths longer than 260 chars."""
+    p = os.path.abspath(p)
+    if not p.startswith("\\\\?\\"):
+        p = "\\\\?\\" + p
+    return p
+
+
+def process_roboflow_cordana():
+    """
+    Dataset 4 uses Roboflow CSV format. All images sit in flat
+    train/valid/test folders. _classes.csv maps filename -> one-hot labels.
+    We extract ONLY rows where cordana == 1.
+    """
+    ds4_base  = f"{BASE}/Banana Dataset 4"
+    dest_path = os.path.join(OUTPUT_DIR, "banana_cordana")
+    os.makedirs(dest_path, exist_ok=True)
+    total = 0
+    for split in ["train", "valid", "test"]:
+        csv_path = os.path.join(ds4_base, split, "_classes.csv")
+        img_dir  = os.path.join(ds4_base, split)
+        if not os.path.exists(csv_path):
+            print(f"  WARNING: CSV not found -- {csv_path}")
+            continue
+        with open(csv_path, newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            count  = 0
+            for row in reader:
+                if row.get("cordana", "0").strip() == "1":
+                    src = os.path.join(img_dir, row["filename"])
+                    if os.path.exists(src):
+                        ext  = row["filename"].split('.')[-1].lower()
+                        dst  = os.path.join(dest_path, f"{uuid.uuid4().hex}.{ext}")
+                        shutil.copy(long_path(src), long_path(dst))
+                        count += 1
+            total += count
+            print(f"    [{split:5s}] {count} cordana images")
+    print(f"  [OK]  {'banana_cordana (DS4 Roboflow)':35s} <- {total} images total")
+
+
+# Phase 1: standard folder datasets
+print("[1/2] Processing standard folder datasets...\n")
 for source_path, class_name in mappings:
     dest_path = os.path.join(OUTPUT_DIR, class_name)
     os.makedirs(dest_path, exist_ok=True)
-
     if not os.path.exists(source_path):
-        print(f"  WARNING: Path not found — {source_path}")
+        print(f"  WARNING: Path not found -- {source_path}")
         continue
-
     count = 0
     for filename in os.listdir(source_path):
         if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
             ext = filename.split('.')[-1].lower()
-            new_name = f"{uuid.uuid4().hex}.{ext}"
-            shutil.copy(
-                os.path.join(source_path, filename),
-                os.path.join(dest_path, new_name)
-            )
+            shutil.copy(long_path(os.path.join(source_path, filename)),
+                        long_path(os.path.join(dest_path, f"{uuid.uuid4().hex}.{ext}")))
             count += 1
+    print(f"  [OK]  {class_name:35s} <- {count} images")
 
-    print(f"  ✓  {class_name:35s} ← {count} images")
+# Phase 2: Roboflow CSV datasets
+print("\n[2/2] Processing Roboflow CSV dataset (Dataset 4 -- cordana only)...\n")
+process_roboflow_cordana()
 
-# ── SUMMARY ────────────────────────────────────────────────
-print("\n── Class Summary ──────────────────────────────────────")
+# Summary
+print("\n-- Class Summary --")
 total = 0
-for class_folder in sorted(os.listdir(OUTPUT_DIR)):
-    class_path = os.path.join(OUTPUT_DIR, class_folder)
-    if os.path.isdir(class_path):
-        count = len([
-            f for f in os.listdir(class_path)
-            if f.lower().endswith(('.jpg', '.jpeg', '.png'))
-        ])
-        flag = "  ⚠️  UNDER 300 — needs augmentation or more data" if count < 300 else ""
-        print(f"  {class_folder:35s}: {count:5d} images{flag}")
-        total += count
-
+for cf in sorted(os.listdir(OUTPUT_DIR)):
+    cp = os.path.join(OUTPUT_DIR, cf)
+    if os.path.isdir(cp):
+        n    = len([f for f in os.listdir(cp) if f.lower().endswith(('.jpg','.jpeg','.png'))])
+        flag = "  [!] UNDER 300" if n < 300 else ""
+        print(f"  {cf:35s}: {n:5d} images{flag}")
+        total += n
 print(f"\n  TOTAL: {total} images across 10 classes")
 print("\nMerge complete! Now run split_dataset.py")
 ```

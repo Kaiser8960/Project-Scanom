@@ -14,6 +14,7 @@ venv/
 .venv/
 env/
 .env/
+scanom-ml-env/
 
 # Python caches
 __pycache__/

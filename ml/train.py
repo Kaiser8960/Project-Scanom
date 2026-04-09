@@ -1,10 +1,15 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers, callbacks
+import numpy as np
 import json
 import os
+from sklearn.utils.class_weight import compute_class_weight
 
 # ── CONFIG ─────────────────────────────────────────────────
-BASE         = "C:/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom"
+# WSL2 path (use this when running from Ubuntu terminal)
+BASE         = "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom"
+# Windows path (use this if ever running from native Windows Python)
+# BASE       = "C:/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom"
 DATASET_DIR  = f"{BASE}/dataset"
 OUTPUT_DIR   = f"{BASE}/model_output"
 IMG_SIZE     = (224, 224)
@@ -60,12 +65,31 @@ print(f"Classes ({len(class_names)}): {class_names}")
 with open(f"{OUTPUT_DIR}/class_names.json", "w") as f:
     json.dump(class_names, f, indent=2)
 
+# ── CLASS WEIGHTS (standard — counteracts class imbalance) ──
+# Counts training images per class from disk to compute balanced weights.
+# Applied to BOTH Phase 1 and Phase 2. Do not remove.
+y_labels = []
+for idx, cname in enumerate(class_names):
+    class_dir = os.path.join(DATASET_DIR, "train", cname)
+    count = len([f for f in os.listdir(class_dir)
+                 if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+    y_labels.extend([idx] * count)
+
+y_labels     = np.array(y_labels)
+weights_arr  = compute_class_weight('balanced',
+                                    classes=np.unique(y_labels),
+                                    y=y_labels)
+class_weights = dict(enumerate(weights_arr))
+print("\nClass weights applied:")
+for i, cname in enumerate(class_names):
+    print(f"  [{i}] {cname:35s}: {class_weights[i]:.4f}")
+
 # ── NORMALIZATION + AUGMENTATION PIPELINE ──────────────────
 normalization = layers.Rescaling(1./255)
 
 train_ds = (
     train_ds
-    .cache()
+    .cache()                                              # ← cache raw images FIRST
     .map(lambda x, y: (augmentation(x, training=True), y),
          num_parallel_calls=tf.data.AUTOTUNE)
     .map(lambda x, y: (normalization(x), y),
@@ -139,7 +163,8 @@ history_phase1 = model.fit(
     train_ds,
     validation_data=val_ds,
     epochs=EPOCHS_HEAD,
-    callbacks=[cb_early_stop, cb_reduce_lr, cb_checkpoint]
+    callbacks=[cb_early_stop, cb_reduce_lr, cb_checkpoint],
+    class_weight=class_weights
 )
 
 # ── PHASE 2: FINE-TUNE DEEPER LAYERS ────────────────────────
@@ -160,7 +185,8 @@ history_phase2 = model.fit(
     train_ds,
     validation_data=val_ds,
     epochs=EPOCHS_FINE,
-    callbacks=[cb_early_stop, cb_reduce_lr, cb_checkpoint]
+    callbacks=[cb_early_stop, cb_reduce_lr, cb_checkpoint],
+    class_weight=class_weights
 )
 
 # ── EVALUATE ON TEST SET ────────────────────────────────────
@@ -171,7 +197,6 @@ print(f"Test Loss:     {test_loss:.4f}")
 
 # ── F1 SCORE ────────────────────────────────────────────────
 from sklearn.metrics import classification_report
-import numpy as np
 
 y_true = np.concatenate([y for x, y in test_ds], axis=0)
 y_true = np.argmax(y_true, axis=1)
