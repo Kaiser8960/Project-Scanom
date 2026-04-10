@@ -15,9 +15,9 @@ OUTPUT_DIR   = f"{BASE}/model_output"
 IMG_SIZE     = (224, 224)
 BATCH_SIZE   = 16       # Reduced from 32 — RTX 4060 Laptop (8GB) OOMs at 32 with ResNet50
 EPOCHS_HEAD  = 20       # Phase 1: train only new head layers
-EPOCHS_FINE  = 30       # Phase 2: fine-tune deeper layers
+EPOCHS_FINE  = 50       # Phase 2: extended — EarlyStopping will cap it
 LR_HEAD      = 1e-3     # Phase 1 learning rate
-LR_FINE      = 1e-5     # Phase 2 learning rate (very low)
+LR_FINE      = 5e-6     # Phase 2: reduced from 1e-5 to stop val_accuracy oscillation
 NUM_CLASSES  = 10
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -89,26 +89,26 @@ normalization = layers.Rescaling(1./255)
 
 train_ds = (
     train_ds
-    .cache("/tmp/tf_cache")                    # cache to disk, not GPU memory
+    .cache("/home/jim_dejito/tf_cache")        # cache to real Linux disk (not /tmp tmpfs)
     .map(lambda x, y: (augmentation(x, training=True), y),
          num_parallel_calls=tf.data.AUTOTUNE)
     .map(lambda x, y: (normalization(x), y),
          num_parallel_calls=tf.data.AUTOTUNE)
-    .prefetch(tf.data.AUTOTUNE)
+    .prefetch(2)                               # fixed prefetch=2, avoids RAM budget warning
 )
 
 val_ds = (
     val_ds
     .map(lambda x, y: (normalization(x), y),
          num_parallel_calls=tf.data.AUTOTUNE)
-    .prefetch(tf.data.AUTOTUNE)
+    .prefetch(2)
 )
 
 test_ds = (
     test_ds
     .map(lambda x, y: (normalization(x), y),
          num_parallel_calls=tf.data.AUTOTUNE)
-    .prefetch(tf.data.AUTOTUNE)
+    .prefetch(2)
 )
 
 # ── BUILD MODEL (PHASE 1: HEAD ONLY) ───────────────────────
@@ -137,7 +137,7 @@ model.compile(
 # ── CALLBACKS ───────────────────────────────────────────────
 cb_early_stop = callbacks.EarlyStopping(
     monitor="val_accuracy",
-    patience=5,
+    patience=10,             # increased from 5 — gives unstable Phase 2 more room
     restore_best_weights=True,
     verbose=1
 )
@@ -170,9 +170,9 @@ history_phase1 = model.fit(
 # ── PHASE 2: FINE-TUNE DEEPER LAYERS ────────────────────────
 print("\n=== PHASE 2: Fine-tuning deeper ResNet layers ===")
 
-# Unfreeze last 30 layers of ResNet50 for fine-tuning
+# Unfreeze last 50 layers of ResNet50 for fine-tuning (was 30 — not enough for plant diseases)
 base_model.trainable = True
-for layer in base_model.layers[:-30]:
+for layer in base_model.layers[:-50]:
     layer.trainable = False
 
 model.compile(
