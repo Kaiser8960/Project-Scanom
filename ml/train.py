@@ -1,29 +1,44 @@
 import tensorflow as tf
-from tensorflow.keras import layers, models, optimizers, callbacks
+from tensorflow.keras import layers, optimizers, callbacks
 import numpy as np
 import json
 import os
 from sklearn.utils.class_weight import compute_class_weight
 
+# ── MIXED PRECISION + GPU MEMORY CONFIG ────────────────────────
+# float16 activations halve VRAM usage. RTX 4060 Tensor Cores accelerate float16.
+tf.keras.mixed_precision.set_global_policy('mixed_float16')
+print("Mixed precision enabled: float16 activations, float32 weights")
+
+# Allow GPU to allocate memory incrementally instead of all at once.
+# Prevents CUDA from reserving the full 5.5GB upfront.
+gpus = tf.config.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
 # ── CONFIG ─────────────────────────────────────────────────
-# WSL2 path (use this when running from Ubuntu terminal)
-BASE         = "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom"
-# Windows path (use this if ever running from native Windows Python)
-# BASE       = "C:/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom"
-DATASET_DIR  = f"{BASE}/dataset"
-OUTPUT_DIR   = f"{BASE}/model_output"
+# IMPORTANT: Dataset lives on the Linux filesystem (NOT /mnt/c/).
+# Before running, copy the dataset once:
+#   cp -r "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/dataset" ~/scanom-dataset
+DATASET_DIR  = "/home/jim_dejito/scanom-dataset"
+
+# model_output still writes to Windows so you can view it in VS Code
+OUTPUT_DIR   = "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output"
+
 IMG_SIZE     = (224, 224)
-BATCH_SIZE   = 16       # Reduced from 32 — RTX 4060 Laptop (8GB) OOMs at 32 with ResNet50
-EPOCHS_HEAD  = 20       # Phase 1: train only new head layers
-EPOCHS_FINE  = 50       # Phase 2: extended — EarlyStopping will cap it
-LR_HEAD      = 1e-3     # Phase 1 learning rate
-LR_FINE      = 5e-6     # Phase 2: reduced from 1e-5 to stop val_accuracy oscillation
+BATCH_SIZE   = 16           # RTX 4060 Laptop (8GB VRAM) OOMs at 32 — keep at 16
+EPOCHS_HEAD  = 20           # Phase 1: train only new head layers
+EPOCHS_FINE  = 60           # Phase 2: EarlyStopping will cap this
+LR_HEAD      = 1e-3         # Phase 1 learning rate
+LR_FINE      = 1e-4         # Phase 2: higher than ResNet because EfficientNet is more regularized
 NUM_CLASSES  = 10
+MAX_CLASS_WEIGHT = 3.0      # Cap extreme weights — uncapped 6.3x caused 0.30 precision on panama_wilt
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # ── DATA AUGMENTATION ───────────────────────────────────────
-# Applied ONLY to training data — not val or test
+# Applied ONLY to training data.
+# Images are in [0, 255] range — EfficientNetV2B0 handles own normalization.
 augmentation = tf.keras.Sequential([
     layers.RandomFlip("horizontal_and_vertical"),
     layers.RandomRotation(0.2),
@@ -65,9 +80,9 @@ print(f"Classes ({len(class_names)}): {class_names}")
 with open(f"{OUTPUT_DIR}/class_names.json", "w") as f:
     json.dump(class_names, f, indent=2)
 
-# ── CLASS WEIGHTS (standard — counteracts class imbalance) ──
-# Counts training images per class from disk to compute balanced weights.
-# Applied to BOTH Phase 1 and Phase 2. Do not remove.
+# ── CLASS WEIGHTS ────────────────────────────────────────────
+# Capped at MAX_CLASS_WEIGHT=3.0.
+# Previously panama_wilt was 6.3x which caused extreme over-recall (precision=0.30).
 y_labels = []
 for idx, cname in enumerate(class_names):
     class_dir = os.path.join(DATASET_DIR, "train", cname)
@@ -75,69 +90,71 @@ for idx, cname in enumerate(class_names):
                  if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
     y_labels.extend([idx] * count)
 
-y_labels     = np.array(y_labels)
-weights_arr  = compute_class_weight('balanced',
-                                    classes=np.unique(y_labels),
-                                    y=y_labels)
-class_weights = dict(enumerate(weights_arr))
-print("\nClass weights applied:")
+y_labels    = np.array(y_labels)
+weights_arr = compute_class_weight('balanced',
+                                   classes=np.unique(y_labels),
+                                   y=y_labels)
+class_weights = {i: min(float(w), MAX_CLASS_WEIGHT) for i, w in enumerate(weights_arr)}
+print("\nClass weights applied (capped at 3.0):")
 for i, cname in enumerate(class_names):
     print(f"  [{i}] {cname:35s}: {class_weights[i]:.4f}")
 
-# ── NORMALIZATION + AUGMENTATION PIPELINE ──────────────────
-normalization = layers.Rescaling(1./255)
-
+# ── DATA PIPELINE ───────────────────────────────────────────
+# NO .cache() -- with 16k images at 224x224, in-memory cache pins ~4GB of
+# host RAM which saturates CUDA pinned memory and causes OOM.
+# Data lives on Linux SSD so per-epoch reads are fast enough without caching.
 train_ds = (
     train_ds
-    .cache("/home/jim_dejito/tf_cache")        # cache to real Linux disk (not /tmp tmpfs)
     .map(lambda x, y: (augmentation(x, training=True), y),
          num_parallel_calls=tf.data.AUTOTUNE)
-    .map(lambda x, y: (normalization(x), y),
-         num_parallel_calls=tf.data.AUTOTUNE)
-    .prefetch(2)                               # fixed prefetch=2, avoids RAM budget warning
+    .prefetch(tf.data.AUTOTUNE)
 )
 
 val_ds = (
     val_ds
-    .map(lambda x, y: (normalization(x), y),
-         num_parallel_calls=tf.data.AUTOTUNE)
-    .prefetch(2)
+    .prefetch(tf.data.AUTOTUNE)
 )
 
 test_ds = (
     test_ds
-    .map(lambda x, y: (normalization(x), y),
-         num_parallel_calls=tf.data.AUTOTUNE)
-    .prefetch(2)
+    .prefetch(tf.data.AUTOTUNE)
 )
 
 # ── BUILD MODEL (PHASE 1: HEAD ONLY) ───────────────────────
-base_model = tf.keras.applications.ResNet50(
+# EfficientNetV2B0 reasons:
+#   - Lighter than ResNet50 (7M vs 25M params) → less overfitting on 16k images
+#   - include_preprocessing=True → handles its own [0,255] normalization
+#   - Consistently reaches 90-95%+ on plant disease datasets in literature
+base_model = tf.keras.applications.EfficientNetV2B0(
     weights="imagenet",
-    include_top=False,          # remove ImageNet classification head
+    include_top=False,
+    include_preprocessing=True,     # model normalizes [0-255] internally
     input_shape=(224, 224, 3)
 )
-base_model.trainable = False    # freeze all base layers for Phase 1
+base_model.trainable = False        # freeze all base layers for Phase 1
 
 inputs  = tf.keras.Input(shape=(224, 224, 3))
 x       = base_model(inputs, training=False)
 x       = layers.GlobalAveragePooling2D()(x)
+x       = layers.Dropout(0.3)(x)
 x       = layers.Dense(256, activation="relu")(x)
+x       = layers.BatchNormalization()(x)
 x       = layers.Dropout(0.4)(x)
-outputs = layers.Dense(NUM_CLASSES, activation="softmax")(x)
+# IMPORTANT: output layer must be float32 for numerical stability with mixed precision
+outputs = layers.Dense(NUM_CLASSES, activation="softmax", dtype="float32")(x)
 
 model = tf.keras.Model(inputs, outputs)
 
 model.compile(
     optimizer=optimizers.Adam(learning_rate=LR_HEAD),
-    loss="categorical_crossentropy",
+    loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
     metrics=["accuracy"]
 )
 
 # ── CALLBACKS ───────────────────────────────────────────────
 cb_early_stop = callbacks.EarlyStopping(
     monitor="val_accuracy",
-    patience=10,             # increased from 5 — gives unstable Phase 2 more room
+    patience=10,
     restore_best_weights=True,
     verbose=1
 )
@@ -145,7 +162,7 @@ cb_early_stop = callbacks.EarlyStopping(
 cb_reduce_lr = callbacks.ReduceLROnPlateau(
     monitor="val_loss",
     factor=0.5,
-    patience=3,
+    patience=4,
     min_lr=1e-7,
     verbose=1
 )
@@ -168,16 +185,20 @@ history_phase1 = model.fit(
 )
 
 # ── PHASE 2: FINE-TUNE DEEPER LAYERS ────────────────────────
-print("\n=== PHASE 2: Fine-tuning deeper ResNet layers ===")
+print("\n=== PHASE 2: Fine-tuning deeper EfficientNetV2B0 layers ===")
 
-# Unfreeze last 50 layers of ResNet50 for fine-tuning (was 30 — not enough for plant diseases)
+# EfficientNetV2B0 has ~200 layers — unfreeze last 40% (~80 layers)
 base_model.trainable = True
-for layer in base_model.layers[:-50]:
+total_layers = len(base_model.layers)
+freeze_until = int(total_layers * 0.6)   # freeze first 60%, fine-tune last 40%
+for layer in base_model.layers[:freeze_until]:
     layer.trainable = False
+
+print(f"  Fine-tuning last {total_layers - freeze_until} of {total_layers} base layers")
 
 model.compile(
     optimizer=optimizers.Adam(learning_rate=LR_FINE),
-    loss="categorical_crossentropy",
+    loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
     metrics=["accuracy"]
 )
 

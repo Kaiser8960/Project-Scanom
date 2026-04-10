@@ -1,0 +1,630 @@
+jim_dejito@LAPTOP-UOBBLVQP:~$ source ~/scanom-ml-env/bin/activate
+(scanom-ml-env) jim_dejito@LAPTOP-UOBBLVQP:~$ cd "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom"
+(scanom-ml-env) jim_dejito@LAPTOP-UOBBLVQP:/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom$ python3 ml/train.py
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1775754381.183171     431 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1775754381.922886     431 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1775754384.175288     431 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1775754386.778041     431 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 5561 MB memory:  -> device: 0, name: NVIDIAGeForce RTX 4060 Laptop GPU, pci bus id: 0000:01:00.0, compute capability: 8.9
+Found 16815 files belonging to 10 classes.
+Found 3598 files belonging to 10 classes.
+Found 3613 files belonging to 10 classes.
+Classes (10): ['banana_cordana', 'banana_healthy', 'banana_panama_wilt', 'banana_sigatoka', 'tomato_bacterial_spot', 'tomato_early_blight', 'tomato_healthy', 'tomato_late_blight', 'tomato_leaf_mold', 'tomato_powdery_mildew']
+
+Class weights applied:
+  [0] banana_cordana                     : 2.3419
+  [1] banana_healthy                     : 1.6060
+  [2] banana_panama_wilt                 : 6.2978
+  [3] banana_sigatoka                    : 1.2265
+  [4] tomato_bacterial_spot              : 0.6753
+  [5] tomato_early_blight                : 0.7763
+  [6] tomato_healthy                     : 0.6230
+  [7] tomato_late_blight                 : 0.6153
+  [8] tomato_leaf_mold                   : 0.6877
+  [9] tomato_powdery_mildew              : 1.9130
+
+=== PHASE 1: Training classification head ===
+Epoch 1/20
+I0000 00:00:1775754394.191584     498 service.cc:153] XLA service 0x727fe4066ed0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1775754394.191648     498 service.cc:161]   StreamExecutor [0]: NVIDIA GeForce RTX 4060 Laptop GPU, Compute Capability 8.9 (Driver: 13.0.0; Runtime: 12.9.0; Toolkit: 12.5.0; DNN: 9.20.0)
+I0000 00:00:1775754394.452088     498 dump_mlir_util.cc:269] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+I0000 00:00:1775754395.774746     498 cuda_dnn.cc:461] Loaded cuDNN version 92000
+I0000 00:00:1775754395.854193     498 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_11603__.186
+I0000 00:00:1775754402.725094     498 device_compiler.h:208] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 41ms/step - accuracy: 0.1304 - loss: 2.3434I0000 00:00:1775754446.947184     497 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_11603__.186
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step - accuracy: 0.1305 - loss: 2.3433
+Epoch 1: val_accuracy improved from None to 0.25347, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 1: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 80s 65ms/step - accuracy: 0.1471 - loss: 2.2987 - val_accuracy: 0.2535 - val_loss: 2.2315 - learning_rate: 0.0010
+Epoch 2/20
+W0000 00:00:1775754470.851877     431 cache_dataset_ops.cc:330] The calling iterator did not fully read the dataset being cached. In order to avoid unexpected truncation of the dataset, the partially cached contents of the dataset  will be discarded. This can happen if you have an input pipeline similar to `dataset.cache().take(k).repeat()`. You should use `dataset.take(k).cache().repeat()` instead.
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 30ms/step - accuracy: 0.1847 - loss: 2.2377W0000 00:00:1775754502.642676    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 2: val_accuracy did not improve from 0.25347
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 38s 36ms/step - accuracy: 0.1876 - loss: 2.2554 - val_accuracy: 0.1467 - val_loss: 2.2161 - learning_rate: 0.0010
+Epoch 3/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 121ms/step - accuracy: 0.1880 - loss: 2.2251W0000 00:00:1775754638.917543    1338 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 3: val_accuracy did not improve from 0.25347
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 156s 145ms/step - accuracy: 0.1917 - loss: 2.2401 - val_accuracy: 0.1876 - val_loss: 2.2072 - learning_rate: 0.0010
+Epoch 4/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 119ms/step - accuracy: 0.1945 - loss: 2.2047W0000 00:00:1775754789.402500    1338 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 4: val_accuracy did not improve from 0.25347
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 131s 125ms/step - accuracy: 0.1990 - loss: 2.2149 - val_accuracy: 0.2437 - val_loss: 2.1707 - learning_rate: 0.0010
+Epoch 5/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.2097 - loss: 2.1804W0000 00:00:1775754827.149930    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 5: val_accuracy improved from 0.25347 to 0.28766, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 5: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 38s 36ms/step - accuracy: 0.2088 - loss: 2.1955 - val_accuracy: 0.2877 - val_loss: 2.1278 - learning_rate: 0.0010
+Epoch 6/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 30ms/step - accuracy: 0.2230 - loss: 2.1591W0000 00:00:1775754866.280303    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 6: val_accuracy improved from 0.28766 to 0.29294, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 6: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 40s 38ms/step - accuracy: 0.2248 - loss: 2.1742 - val_accuracy: 0.2929 - val_loss: 2.1013 - learning_rate: 0.0010
+Epoch 7/20
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 30ms/step - accuracy: 0.2293 - loss: 2.1400W0000 00:00:1775754905.892287    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 7: val_accuracy did not improve from 0.29294
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 37s 35ms/step - accuracy: 0.2293 - loss: 2.1604 - val_accuracy: 0.2082 - val_loss: 2.1660 - learning_rate: 0.0010
+Epoch 8/20
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step - accuracy: 0.2376 - loss: 2.1396W0000 00:00:1775754967.423736    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 8: val_accuracy did not improve from 0.29294
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 62s 59ms/step - accuracy: 0.2314 - loss: 2.1596 - val_accuracy: 0.2137 - val_loss: 2.1551 - learning_rate: 0.0010
+Epoch 9/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step - accuracy: 0.2289 - loss: 2.1257W0000 00:00:1775755028.883943    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 9: val_accuracy did not improve from 0.29294
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 62s 58ms/step - accuracy: 0.2317 - loss: 2.1469 - val_accuracy: 0.2807 - val_loss: 2.0708 - learning_rate: 0.0010
+Epoch 10/20
+W0000 00:00:1775755035.241355    2315 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 9634432 bytes after encountering the first element of size 9634432 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+W0000 00:00:1775755035.244353     646 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 9634560 bytes after encountering the first element of size 9634560 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 30ms/step - accuracy: 0.2313 - loss: 2.1189W0000 00:00:1775755066.627855    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 10: val_accuracy improved from 0.29294 to 0.29433, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 10: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 39s 37ms/step - accuracy: 0.2304 - loss: 2.1401 - val_accuracy: 0.2943 - val_loss: 2.0832 - learning_rate: 0.0010
+Epoch 11/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.2342 - loss: 2.1100W0000 00:00:1775755104.694770    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 11: val_accuracy did not improve from 0.29433
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 37s 35ms/step - accuracy: 0.2324 - loss: 2.1220 - val_accuracy: 0.2760 - val_loss: 2.0122 - learning_rate: 0.0010
+Epoch 12/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step - accuracy: 0.2369 - loss: 2.1067W0000 00:00:1775755169.148531    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 12: val_accuracy improved from 0.29433 to 0.29572, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 12: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 65s 58ms/step - accuracy: 0.2348 - loss: 2.1191 - val_accuracy: 0.2957 - val_loss: 2.0190 - learning_rate: 0.0010
+Epoch 13/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 30ms/step - accuracy: 0.2334 - loss: 2.0997W0000 00:00:1775755207.383110    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 13: val_accuracy did not improve from 0.29572
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 37s 35ms/step - accuracy: 0.2293 - loss: 2.1103 - val_accuracy: 0.2601 - val_loss: 1.9637 - learning_rate: 0.0010
+Epoch 14/20
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.2384 - loss: 2.0803W0000 00:00:1775755244.710184    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 14: val_accuracy did not improve from 0.29572
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 37s 35ms/step - accuracy: 0.2350 - loss: 2.0975 - val_accuracy: 0.2902 - val_loss: 1.9712 - learning_rate: 0.0010
+Epoch 15/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 30ms/step - accuracy: 0.2296 - loss: 2.0591W0000 00:00:1775755282.380551    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 15: val_accuracy did not improve from 0.29572
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 38s 36ms/step - accuracy: 0.2299 - loss: 2.0778 - val_accuracy: 0.2849 - val_loss: 1.9327 - learning_rate: 0.0010
+Epoch 16/20
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 38ms/step - accuracy: 0.2322 - loss: 2.0592W0000 00:00:1775755328.630573    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 16: val_accuracy improved from 0.29572 to 0.30739, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 16: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 53s 50ms/step - accuracy: 0.2280 - loss: 2.0782 - val_accuracy: 0.3074 - val_loss: 1.9080 - learning_rate: 0.0010
+Epoch 17/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.2372 - loss: 2.0313W0000 00:00:1775755372.413706    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 17: val_accuracy did not improve from 0.30739
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 37s 35ms/step - accuracy: 0.2328 - loss: 2.0609 - val_accuracy: 0.3010 - val_loss: 1.9150 - learning_rate: 0.0010
+Epoch 18/20
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step - accuracy: 0.2289 - loss: 2.0441W0000 00:00:1775755434.339198    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 18: val_accuracy did not improve from 0.30739
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 62s 59ms/step - accuracy: 0.2307 - loss: 2.0595 - val_accuracy: 0.2977 - val_loss: 1.9582 - learning_rate: 0.0010
+Epoch 19/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.2269 - loss: 2.0279W0000 00:00:1775755566.422909    1338 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 19: val_accuracy did not improve from 0.30739
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 132s 125ms/step - accuracy: 0.2205 - loss: 2.0508 - val_accuracy: 0.2971 - val_loss: 1.8861 - learning_rate: 0.0010
+Epoch 20/20
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.2114 - loss: 2.0271W0000 00:00:1775755603.179943    1338 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 20: val_accuracy did not improve from 0.30739
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 41s 39ms/step - accuracy: 0.2106 - loss: 2.0484 - val_accuracy: 0.2674 - val_loss: 1.8896 - learning_rate: 0.0010
+Restoring model weights from the end of the best epoch: 16.
+
+=== PHASE 2: Fine-tuning deeper ResNet layers ===
+Epoch 1/30
+I0000 00:00:1775755627.792552     501 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_140614__.222
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 38ms/step - accuracy: 0.1891 - loss: 6.1778I0000 00:00:1775755675.533467     500 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_140614__.222
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.1891 - loss: 6.1719
+Epoch 1: val_accuracy improved from 0.30739 to 0.33630, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 1: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 78s 55ms/step - accuracy: 0.2090 - loss: 3.0845 - val_accuracy: 0.3363 - val_loss: 1.9169 - learning_rate: 1.0000e-05
+Epoch 2/30
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 39ms/step - accuracy: 0.2671 - loss: 2.0059W0000 00:00:1775755733.614531    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 2: val_accuracy improved from 0.33630 to 0.39772, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 2: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 50s 47ms/step - accuracy: 0.2847 - loss: 1.9666 - val_accuracy: 0.3977 - val_loss: 1.7415 - learning_rate: 1.0000e-05
+Epoch 3/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 40ms/step - accuracy: 0.3240 - loss: 1.7998W0000 00:00:1775755784.030520    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 3: val_accuracy did not improve from 0.39772
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 52s 49ms/step - accuracy: 0.3407 - loss: 1.7621 - val_accuracy: 0.3683 - val_loss: 1.6979 - learning_rate: 1.0000e-05
+Epoch 4/30
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 40ms/step - accuracy: 0.3831 - loss: 1.6193W0000 00:00:1775755836.509009    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 4: val_accuracy improved from 0.39772 to 0.46331, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 4: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 55s 52ms/step - accuracy: 0.3943 - loss: 1.5965 - val_accuracy: 0.4633 - val_loss: 1.4406 - learning_rate: 1.0000e-05
+Epoch 5/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 39ms/step - accuracy: 0.4194 - loss: 1.4947W0000 00:00:1775755890.857993    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 5: val_accuracy did not improve from 0.46331
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 48s 45ms/step - accuracy: 0.4275 - loss: 1.4834 - val_accuracy: 0.4361 - val_loss: 1.4920 - learning_rate: 1.0000e-05
+Epoch 6/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.4504 - loss: 1.3968W0000 00:00:1775756023.659064    3601 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 6: val_accuracy did not improve from 0.46331
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 133s 126ms/step - accuracy: 0.4599 - loss: 1.3926 - val_accuracy: 0.3391 - val_loss: 2.3254 - learning_rate: 1.0000e-05
+Epoch 7/30
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 55ms/step - accuracy: 0.4800 - loss: 1.3314W0000 00:00:1775756097.432256    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 7: ReduceLROnPlateau reducing learning rate to 4.999999873689376e-06.
+
+Epoch 7: val_accuracy did not improve from 0.46331
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 74s 61ms/step - accuracy: 0.4871 - loss: 1.3161 - val_accuracy: 0.4589 - val_loss: 1.6107 - learning_rate: 1.0000e-05
+Epoch 8/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.5159 - loss: 1.2243W0000 00:00:1775756229.462682    3601 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 8: val_accuracy improved from 0.46331 to 0.48499, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 8: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 139s 132ms/step - accuracy: 0.5211 - loss: 1.2175 - val_accuracy: 0.4850 - val_loss: 1.5404 - learning_rate: 5.0000e-06
+Epoch 9/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 38ms/step - accuracy: 0.5291 - loss: 1.1868W0000 00:00:1775756282.799954    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 9: val_accuracy improved from 0.48499 to 0.49611, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 9: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 48s 46ms/step - accuracy: 0.5311 - loss: 1.1779 - val_accuracy: 0.4961 - val_loss: 1.4303 - learning_rate: 5.0000e-06
+Epoch 10/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 39ms/step - accuracy: 0.5413 - loss: 1.1642W0000 00:00:1775756331.414677    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 10: val_accuracy did not improve from 0.49611
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 51s 49ms/step - accuracy: 0.5432 - loss: 1.1625 - val_accuracy: 0.4897 - val_loss: 1.6843 - learning_rate: 5.0000e-06
+Epoch 11/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.5492 - loss: 1.1229W0000 00:00:1775756468.141384    3601 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 11: val_accuracy did not improve from 0.49611
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 132s 126ms/step - accuracy: 0.5490 - loss: 1.1255 - val_accuracy: 0.3758 - val_loss: 2.5581 - learning_rate: 5.0000e-06
+Epoch 12/30
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 55ms/step - accuracy: 0.5609 - loss: 1.1039W0000 00:00:1775756532.150229    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 12: val_accuracy improved from 0.49611 to 0.60561, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 12: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 66s 62ms/step - accuracy: 0.5600 - loss: 1.1003 - val_accuracy: 0.6056 - val_loss: 1.0999 - learning_rate: 5.0000e-06
+Epoch 13/30
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 39ms/step - accuracy: 0.5691 - loss: 1.0687W0000 00:00:1775756580.768662    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 13: val_accuracy did not improve from 0.60561
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 47s 45ms/step - accuracy: 0.5705 - loss: 1.0705 - val_accuracy: 0.5478 - val_loss: 1.3593 - learning_rate: 5.0000e-06
+Epoch 14/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.5726 - loss: 1.0663W0000 00:00:1775756713.585539    3601 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 14: val_accuracy did not improve from 0.60561
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 137s 130ms/step - accuracy: 0.5703 - loss: 1.0694 - val_accuracy: 0.5520 - val_loss: 1.3895 - learning_rate: 5.0000e-06
+Epoch 15/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 38ms/step - accuracy: 0.5752 - loss: 1.0457W0000 00:00:1775756768.891496    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 15: ReduceLROnPlateau reducing learning rate to 2.499999936844688e-06.
+
+Epoch 15: val_accuracy did not improve from 0.60561
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 55s 47ms/step - accuracy: 0.5798 - loss: 1.0452 - val_accuracy: 0.5628 - val_loss: 1.3383 - learning_rate: 5.0000e-06
+Epoch 16/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 55ms/step - accuracy: 0.5913 - loss: 1.0114W0000 00:00:1775756837.671526    3601 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 16: val_accuracy did not improve from 0.60561
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 65s 61ms/step - accuracy: 0.5980 - loss: 1.0021 - val_accuracy: 0.5870 - val_loss: 1.2132 - learning_rate: 2.5000e-06
+Epoch 17/30
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.6004 - loss: 0.9799W0000 00:00:1775756969.635563    3601 prefetch_autotuner.cc:55] Prefetch autotuner triedto allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+
+Epoch 17: val_accuracy did not improve from 0.60561
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 132s 125ms/step - accuracy: 0.6042 - loss: 0.9777 - val_accuracy: 0.5862 - val_loss: 1.2649 - learning_rate: 2.5000e-06
+Epoch 17: early stopping
+Restoring model weights from the end of the best epoch: 12.
+
+=== EVALUATION ON TEST SET ===
+226/226 ━━━━━━━━━━━━━━━━━━━━ 16s 70ms/step - accuracy: 0.6103 - loss: 1.1158
+Test Accuracy: 0.6103 (61.03%)
+Test Loss:     1.1158
+W0000 00:00:1775756991.877356     431 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+W0000 00:00:1775757003.282789     431 prefetch_autotuner.cc:55] Prefetch autotuner tried to allocate 16777984 bytes after encountering the first element of size 16777984 bytes.This already causes the autotune ram budget to be exceeded. To stay within the ram budget, either increase the ram budget or reduce element size
+226/226 ━━━━━━━━━━━━━━━━━━━━ 13s 38ms/step
+
+Classification Report:
+                       precision    recall  f1-score   support
+
+       banana_cordana       0.62      0.81      0.70       155
+       banana_healthy       0.69      0.88      0.77       225
+   banana_panama_wilt       0.37      0.81      0.51        58
+      banana_sigatoka       0.76      0.55      0.63       295
+tomato_bacterial_spot       0.71      0.57      0.63       535
+  tomato_early_blight       0.51      0.66      0.57       465
+       tomato_healthy       0.62      0.96      0.75       579
+   tomato_late_blight       0.66      0.21      0.32       587
+     tomato_leaf_mold       0.65      0.49      0.56       525
+tomato_powdery_mildew       0.47      0.67      0.55       189
+
+             accuracy                           0.61      3613
+            macro avg       0.60      0.66      0.60      3613
+         weighted avg       0.63      0.61      0.59      3613
+
+
+Report saved to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/classification_report.txt
+
+=== EXPORTING TO TFLITE ===
+Saved artifact at '/tmp/tmpfht877a5'. The following endpoints are available:
+
+* Endpoint 'serve'
+  args_0 (POSITIONAL_ONLY): TensorSpec(shape=(None, 224, 224, 3), dtype=tf.float32, name='keras_tensor_181')
+Output Type:
+  TensorSpec(shape=(None, 10), dtype=tf.float32, name=None)
+Captures:
+  125898611154896: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611155472: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611157200: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611157392: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611155856: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611156624: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611159504: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611159312: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611160464: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611160656: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611157968: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611158736: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611161040: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611160848: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611157584: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611162000: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611161808: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611161232: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611161616: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611155280: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611155088: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611157008: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611158160: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611159120: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611158928: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611158352: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611159696: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611162192: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611162384: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611161424: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611160272: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611162960: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606740880: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606741072: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898611156816: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606739920: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606739536: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606740304: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606740496: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606742224: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606742032: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606740688: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606741840: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606741264: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606740112: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606743376: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606743184: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606741456: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606743760: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606743568: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606742608: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606744720: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606744528: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606743952: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606745104: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606744912: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606741648: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606746064: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606745872: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606745296: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606745680: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606742416: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606739728: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606747216: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606747024: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606742992: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606747984: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606747408: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606745488: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606749520: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606749328: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606747600: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606749136: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606748560: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606746640: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606750672: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606750480: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606748752: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606750288: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606749712: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606746832: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606746256: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606744336: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606748368: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606748176: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606746448: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606747792: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606751824: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606751632: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606749904: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606751440: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606750864: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606748944: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606752976: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606752784: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606751056: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606752592: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606752016: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606750096: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606754128: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606753936: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606752208: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606753744: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606753168: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606751248: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606755280: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606755088: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606753360: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606754896: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606754512: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606755472: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606754704: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606755664: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606754320: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606752400: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898606753552: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579199568: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579199760: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579198992: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579198416: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579198224: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579198800: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579199184: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579200912: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579200720: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579199376: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579200528: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579199952: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579198608: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579202064: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579201872: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579200144: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579201680: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579201104: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579198032: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579203216: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579203024: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579201296: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579202832: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579202256: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579200336: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579204368: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579204176: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579202448: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579205136: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579204560: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579202640: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579206672: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579206480: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579204752: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579206288: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579205712: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579203792: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579207824: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579207632: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579205904: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579207440: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579206864: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579203984: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579203408: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579201488: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579205520: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579205328: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579203600: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579204944: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579208976: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579208784: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579207056: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579208592: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579208016: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579206096: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579210128: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579209936: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579208208: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579209744: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579209168: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579207248: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579211280: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579211088: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579209360: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579210896: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579210320: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579208400: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579212432: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579212240: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579210512: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579212048: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579211472: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579209552: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579213584: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579213392: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579211664: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579213200: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579214160: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579213776: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579212624: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579211856: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579212816: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579213968: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579213008: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377609872: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377610832: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898579210704: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377610064: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377610256: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377609680: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377610640: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377611984: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377611792: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377609296: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377611600: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377611024: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377609488: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377613136: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377612944: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377611216: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377612752: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377612176: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377610448: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377614288: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377614096: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377612368: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377613904: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377613328: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377611408: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377615440: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377615248: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377613520: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377615056: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377614480: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377612560: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377616592: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377616400: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377614672: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377616208: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377615632: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377613712: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377617744: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377617552: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377615824: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377617360: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377616784: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377614864: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377618896: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377618704: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377616976: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377618512: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377617936: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377616016: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377620048: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377619856: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377618128: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377619664: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377619088: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377617168: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377621200: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377621008: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377619280: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377621968: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377621392: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377619472: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377623504: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377623312: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377621584: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377623120: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377622544: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377620624: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377624656: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377624464: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377622736: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377624272: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377625424: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377620816: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377620240: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377618320: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377622352: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377622160: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377620432: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377622928: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377621776: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377624848: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377623888: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377623696: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377625232: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308256976: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308257168: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377624080: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898377625040: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308255824: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308256400: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308256784: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308258320: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308258128: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308256592: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308257936: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308257360: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308256208: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308259472: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308259280: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308257552: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308259088: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308258512: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308256016: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308260624: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308260432: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308258704: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308260240: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308259664: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308257744: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308261776: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308261584: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308259856: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308261392: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308260816: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308258896: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308262928: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308262736: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308261008: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308262544: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308261968: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308262160: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  125898308263888: TensorSpec(shape=(), dtype=tf.resource, name=None)
+W0000 00:00:1775757027.111109     431 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1775757027.111149     431 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1775757027.115756     431 reader.cc:83] Reading SavedModel from: /tmp/tmpfht877a5
+I0000 00:00:1775757027.125043     431 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1775757027.125078     431 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpfht877a5
+I0000 00:00:1775757027.203487     431 mlir_graph_optimization_pass.cc:437] MLIR V1 optimization pass is not enabled
+I0000 00:00:1775757027.219676     431 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1775757027.809579     431 loader.cc:220] Running initialization op on SavedModel bundle at path: /tmp/tmpfht877a5
+I0000 00:00:1775757027.928360     431 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 812614 microseconds.
+TFLite model saved: /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/resnet50.tflite
+TFLite file size:   23.3 MB
+
+Done! Copy resnet50.tflite and class_names.json to scanom-backend/model/
+(scanom-ml-env) jim_dejito@LAPTOP-UOBBLVQP:/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom$

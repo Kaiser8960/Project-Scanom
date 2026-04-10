@@ -1,0 +1,661 @@
+jim_dejito@LAPTOP-UOBBLVQP:~$ rm -rf ~/tf_cache
+jim_dejito@LAPTOP-UOBBLVQP:~$ source ~/scanom-ml-env/bin/activate
+(scanom-ml-env) jim_dejito@LAPTOP-UOBBLVQP:~$ python3 "/mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/ml/train.py"
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1775783199.734633    8823 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1775783200.562805    8823 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1775783202.980039    8823 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1775783205.667370    8823 gpu_device.cc:2043] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 5561 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4060 Laptop GPU, pci bus id: 0000:01:00.0, compute capability: 8.9
+Found 16815 files belonging to 10 classes.
+Found 3598 files belonging to 10 classes.
+Found 3613 files belonging to 10 classes.
+Classes (10): ['banana_cordana', 'banana_healthy', 'banana_panama_wilt', 'banana_sigatoka', 'tomato_bacterial_spot', 'tomato_early_blight', 'tomato_healthy', 'tomato_late_blight', 'tomato_leaf_mold', 'tomato_powdery_mildew']
+
+Class weights applied:
+  [0] banana_cordana                     : 2.3419
+  [1] banana_healthy                     : 1.6060
+  [2] banana_panama_wilt                 : 6.2978
+  [3] banana_sigatoka                    : 1.2265
+  [4] tomato_bacterial_spot              : 0.6753
+  [5] tomato_early_blight                : 0.7763
+  [6] tomato_healthy                     : 0.6230
+  [7] tomato_late_blight                 : 0.6153
+  [8] tomato_leaf_mold                   : 0.6877
+  [9] tomato_powdery_mildew              : 1.9130
+
+=== PHASE 1: Training classification head ===
+Epoch 1/20
+I0000 00:00:1775783213.060620    8893 service.cc:153] XLA service 0x7f9cf8079920 initializedfor platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1775783213.060651    8893 service.cc:161]   StreamExecutor [0]: NVIDIA GeForce RTX 4060 Laptop GPU, Compute Capability 8.9 (Driver: 13.0.0; Runtime: 12.9.0; Toolkit: 12.5.0;DNN: 9.20.0)
+I0000 00:00:1775783212.012860    8893 dump_mlir_util.cc:269] disabling MLIR crash reproducer, set env var `MLIR_CRASH_REPRODUCER_DIRECTORY` to enable.
+I0000 00:00:1775783213.314858    8893 cuda_dnn.cc:461] Loaded cuDNN version 92000
+I0000 00:00:1775783213.385601    8893 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_11603__.186
+I0000 00:00:1775783219.554247    8893 device_compiler.h:208] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 37ms/step - accuracy: 0.1340 - loss: 2.3230I0000 00:00:1775783259.736134    8891 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_11603__.186
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step - accuracy: 0.1341 - loss: 2.3230
+Epoch 1: val_accuracy improved from None to 0.16843, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 1: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 67s 54ms/step - accuracy: 0.1455 - loss: 2.2969 - val_accuracy: 0.1684 - val_loss: 2.2312 - learning_rate: 0.0010
+Epoch 2/20
+W0000 00:00:1775783276.095153    8823 cache_dataset_ops.cc:330] The calling iterator did notfully read the dataset being cached. In order to avoid unexpected truncation of the dataset,the partially cached contents of the dataset  will be discarded. This can happen if you havean input pipeline similar to `dataset.cache().take(k).repeat()`. You should use `dataset.take(k).cache().repeat()` instead.
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.1917 - loss: 2.2451
+Epoch 2: val_accuracy did not improve from 0.16843
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 40s 38ms/step - accuracy: 0.1825 - loss: 2.2621 - val_accuracy: 0.1537 - val_loss: 2.2435 - learning_rate: 0.0010
+Epoch 3/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 116ms/step - accuracy: 0.1519 - loss: 2.2362
+Epoch 3: val_accuracy improved from 0.16843 to 0.21790, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 3: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 130s 123ms/step - accuracy: 0.1482 - loss: 2.2549 - val_accuracy: 0.2179 - val_loss: 2.1956 - learning_rate: 0.0010
+Epoch 4/20
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 27ms/step - accuracy: 0.1624 - loss: 2.2250
+Epoch 4: val_accuracy did not improve from 0.21790
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 47s 33ms/step - accuracy: 0.1605 - loss: 2.2433 - val_accuracy: 0.2157 - val_loss: 2.1937 - learning_rate: 0.0010
+Epoch 5/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 114ms/step - accuracy: 0.1587 - loss: 2.2206
+Epoch 5: val_accuracy improved from 0.21790 to 0.26848, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 5: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 125s 119ms/step - accuracy: 0.1583 - loss: 2.2380 - val_accuracy: 0.2685 - val_loss: 2.1726 - learning_rate: 0.0010
+Epoch 6/20
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 26ms/step - accuracy: 0.1686 - loss: 2.2038
+Epoch 6: val_accuracy did not improve from 0.26848
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 55s 36ms/step - accuracy: 0.1703 - loss: 2.2208 - val_accuracy: 0.2460 - val_loss: 2.1434 - learning_rate: 0.0010
+Epoch 7/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 114ms/step - accuracy: 0.1839 - loss: 2.1962
+Epoch 7: val_accuracy did not improve from 0.26848
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 126s 119ms/step - accuracy: 0.1813 - loss: 2.2122 - val_accuracy: 0.2282 - val_loss: 2.1386 - learning_rate: 0.0010
+Epoch 8/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 113ms/step - accuracy: 0.1860 - loss: 2.1827
+Epoch 8: val_accuracy did not improve from 0.26848
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 125s 118ms/step - accuracy: 0.1845 - loss: 2.2017 - val_accuracy: 0.2615 - val_loss: 2.1369 - learning_rate: 0.0010
+Epoch 9/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step - accuracy: 0.1988 - loss: 2.1633
+Epoch 9: val_accuracy did not improve from 0.26848
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 58s 55ms/step - accuracy: 0.1964 - loss: 2.1765 - val_accuracy: 0.2651 - val_loss: 2.1242 - learning_rate: 0.0010
+Epoch 10/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step - accuracy: 0.1970 - loss: 2.1500
+Epoch 10: val_accuracy improved from 0.26848 to 0.30656, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 10: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 59s 56ms/step - accuracy: 0.2015 - loss: 2.1696 - val_accuracy: 0.3066 - val_loss: 2.0718 - learning_rate: 0.0010
+Epoch 11/20
+1019/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.1993 - loss: 2.1366
+Epoch 11: val_accuracy did not improve from 0.30656
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 36s 34ms/step - accuracy: 0.1976 - loss: 2.1527 - val_accuracy: 0.2941 - val_loss: 2.0570 - learning_rate: 0.0010
+Epoch 12/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step - accuracy: 0.2021 - loss: 2.1271
+Epoch 12: val_accuracy did not improve from 0.30656
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 60s 57ms/step - accuracy: 0.2015 - loss: 2.1440 - val_accuracy: 0.2499 - val_loss: 2.0766 - learning_rate: 0.0010
+Epoch 13/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step - accuracy: 0.2039 - loss: 2.1151
+Epoch 13: val_accuracy did not improve from 0.30656
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 60s 57ms/step - accuracy: 0.2029 - loss: 2.1311 - val_accuracy: 0.2860 - val_loss: 1.9906 - learning_rate: 0.0010
+Epoch 14/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 37ms/step - accuracy: 0.2096 - loss: 2.0973
+Epoch 14: val_accuracy did not improve from 0.30656
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 46s 44ms/step - accuracy: 0.2018 - loss: 2.1108 - val_accuracy: 0.2335 - val_loss: 2.0631 - learning_rate: 0.0010
+Epoch 15/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.2089 - loss: 2.0957
+Epoch 15: val_accuracy did not improve from 0.30656
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 133s 126ms/step - accuracy: 0.2062 - loss: 2.1030 - val_accuracy: 0.2715 - val_loss: 1.9346 - learning_rate: 0.0010
+Epoch 16/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.2105 - loss: 2.0781
+Epoch 16: val_accuracy improved from 0.30656 to 0.30712, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 16: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 142s 128ms/step - accuracy: 0.2089 - loss: 2.0929 - val_accuracy: 0.3071 - val_loss: 1.9320 - learning_rate: 0.0010
+Epoch 17/20
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.2078 - loss: 2.0730
+Epoch 17: val_accuracy did not improve from 0.30712
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 37s 35ms/step - accuracy: 0.2072 - loss: 2.0855 - val_accuracy: 0.2487 - val_loss: 1.9325 - learning_rate: 0.0010
+Epoch 18/20
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.2103 - loss: 2.0577
+Epoch 18: val_accuracy did not improve from 0.30712
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 133s 126ms/step - accuracy: 0.2091 - loss: 2.0708 - val_accuracy: 0.2638 - val_loss: 1.9031 - learning_rate: 0.0010
+Epoch 19/20
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step - accuracy: 0.2076 - loss: 2.0546
+Epoch 19: val_accuracy did not improve from 0.30712
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 69s 58ms/step - accuracy: 0.2109 - loss: 2.0698 - val_accuracy: 0.2593 - val_loss: 1.8858 - learning_rate: 0.0010
+Epoch 20/20
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 29ms/step - accuracy: 0.2116 - loss: 2.0448
+Epoch 20: val_accuracy did not improve from 0.30712
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 42s 39ms/step - accuracy: 0.2138 - loss: 2.0559 - val_accuracy: 0.2899 - val_loss: 1.8662 - learning_rate: 0.0010
+Restoring model weights from the end of the best epoch: 16.
+
+=== PHASE 2: Fine-tuning deeper ResNet layers ===
+Epoch 1/50
+I0000 00:00:1775784815.061684    8891 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_143017__.246
+1049/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step - accuracy: 0.1589 - loss: 8.8924I0000 00:00:1775784873.535474    8889 dot_merger.cc:481] Merging Dots in computation: a_inference_one_step_on_data_143017__.246
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step - accuracy: 0.1590 - loss: 8.8830
+Epoch 1: val_accuracy improved from 0.30712 to 0.31184, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 1: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 95s 66ms/step - accuracy: 0.1709 - loss: 3.9475 - val_accuracy: 0.3118 - val_loss: 2.0112 - learning_rate: 5.0000e-06
+Epoch 2/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step - accuracy: 0.2428 - loss: 2.0804
+Epoch 2: val_accuracy improved from 0.31184 to 0.32963, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 2: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 57s 54ms/step - accuracy: 0.2525 - loss: 2.0498 - val_accuracy: 0.3296 - val_loss: 2.0057 - learning_rate: 5.0000e-06
+Epoch 3/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step - accuracy: 0.2998 - loss: 1.8911
+Epoch 3: val_accuracy improved from 0.32963 to 0.38688, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 3: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 55s 52ms/step - accuracy: 0.3053 - loss: 1.8776 - val_accuracy: 0.3869 - val_loss: 1.6576 - learning_rate: 5.0000e-06
+Epoch 4/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step - accuracy: 0.3502 - loss: 1.7593
+Epoch 4: val_accuracy did not improve from 0.38688
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 55s 52ms/step - accuracy: 0.3490 - loss: 1.7552 - val_accuracy: 0.3838 - val_loss: 1.6220 - learning_rate: 5.0000e-06
+Epoch 5/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step - accuracy: 0.3743 - loss: 1.6586
+Epoch 5: val_accuracy did not improve from 0.38688
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 69s 65ms/step - accuracy: 0.3804 - loss: 1.6490 - val_accuracy: 0.3338 - val_loss: 1.7717 - learning_rate: 5.0000e-06
+Epoch 6/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step - accuracy: 0.4035 - loss: 1.5649
+Epoch 6: val_accuracy improved from 0.38688 to 0.47693, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 6: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 72s 68ms/step - accuracy: 0.4037 - loss: 1.5608 - val_accuracy: 0.4769 - val_loss: 1.4329 - learning_rate: 5.0000e-06
+Epoch 7/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step - accuracy: 0.4313 - loss: 1.4799
+Epoch 7: val_accuracy did not improve from 0.47693
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 53s 51ms/step - accuracy: 0.4321 - loss: 1.4760 - val_accuracy: 0.3694 - val_loss: 1.8260 - learning_rate: 5.0000e-06
+Epoch 8/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.4439 - loss: 1.4303
+Epoch 8: val_accuracy improved from 0.47693 to 0.53585, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 8: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 138s 132ms/step - accuracy: 0.4522 - loss: 1.4175 - val_accuracy: 0.5359 - val_loss: 1.2812 - learning_rate: 5.0000e-06
+Epoch 9/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.4644 - loss: 1.3687
+Epoch 9: val_accuracy did not improve from 0.53585
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 54s 51ms/step - accuracy: 0.4704 - loss: 1.3657 - val_accuracy: 0.5295 - val_loss: 1.2357 - learning_rate: 5.0000e-06
+Epoch 10/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 121ms/step - accuracy: 0.4914 - loss: 1.2987
+Epoch 10: val_accuracy did not improve from 0.53585
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 160s 127ms/step - accuracy: 0.4905 - loss: 1.3061 - val_accuracy: 0.5083 - val_loss: 1.3923 - learning_rate: 5.0000e-06
+Epoch 11/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step - accuracy: 0.5074 - loss: 1.2395
+Epoch 11: val_accuracy improved from 0.53585 to 0.55197, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 11: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 69s 66ms/step - accuracy: 0.5048 - loss: 1.2517 - val_accuracy: 0.5520 - val_loss: 1.2418 - learning_rate: 5.0000e-06
+Epoch 12/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.5169 - loss: 1.2353
+Epoch 12: ReduceLROnPlateau reducing learning rate to 2.499999936844688e-06.
+
+Epoch 12: val_accuracy did not improve from 0.55197
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 54s 51ms/step - accuracy: 0.5164 - loss: 1.2431 - val_accuracy: 0.4847 - val_loss: 1.4652 - learning_rate: 5.0000e-06
+Epoch 13/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 59ms/step - accuracy: 0.5464 - loss: 1.1463
+Epoch 13: val_accuracy improved from 0.55197 to 0.58671, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 13: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 71s 67ms/step - accuracy: 0.5475 - loss: 1.1488 - val_accuracy: 0.5867 - val_loss: 1.1565 - learning_rate: 2.5000e-06
+Epoch 14/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.5551 - loss: 1.1220
+Epoch 14: val_accuracy improved from 0.58671 to 0.60534, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 14: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 71s 56ms/step - accuracy: 0.5536 - loss: 1.1268 - val_accuracy: 0.6053 - val_loss: 1.0817 - learning_rate: 2.5000e-06
+Epoch 15/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.5770 - loss: 1.0663
+Epoch 15: val_accuracy did not improve from 0.60534
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 54s 51ms/step - accuracy: 0.5675 - loss: 1.0842 - val_accuracy: 0.5598 - val_loss: 1.3023 - learning_rate: 2.5000e-06
+Epoch 16/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.5695 - loss: 1.0764
+Epoch 16: val_accuracy did not improve from 0.60534
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 53s 50ms/step - accuracy: 0.5653 - loss: 1.0948 - val_accuracy: 0.5734 - val_loss: 1.1614 - learning_rate: 2.5000e-06
+Epoch 17/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step - accuracy: 0.5697 - loss: 1.0455
+Epoch 17: ReduceLROnPlateau reducing learning rate to 1.249999968422344e-06.
+
+Epoch 17: val_accuracy improved from 0.60534 to 0.60978, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 17: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 71s 68ms/step - accuracy: 0.5722 - loss: 1.0544 - val_accuracy: 0.6098 - val_loss: 1.0935 - learning_rate: 2.5000e-06
+Epoch 18/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.5940 - loss: 1.0063
+Epoch 18: val_accuracy did not improve from 0.60978
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 57s 54ms/step - accuracy: 0.5905 - loss: 1.0130 - val_accuracy: 0.6059 - val_loss: 1.0829 - learning_rate: 1.2500e-06
+Epoch 19/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step - accuracy: 0.5928 - loss: 0.9992
+Epoch 19: val_accuracy did not improve from 0.60978
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 53s 50ms/step - accuracy: 0.5920 - loss: 1.0010 - val_accuracy: 0.6067 - val_loss: 1.1301 - learning_rate: 1.2500e-06
+Epoch 20/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 121ms/step - accuracy: 0.5943 - loss: 0.9765
+Epoch 20: ReduceLROnPlateau reducing learning rate to 6.24999984211172e-07.
+
+Epoch 20: val_accuracy did not improve from 0.60978
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 134s 127ms/step - accuracy: 0.5930 - loss: 0.9903 - val_accuracy: 0.5948 - val_loss: 1.1589 - learning_rate: 1.2500e-06
+Epoch 21/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 59ms/step - accuracy: 0.6013 - loss: 0.9750
+Epoch 21: val_accuracy improved from 0.60978 to 0.63369, saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+
+Epoch 21: finished saving model to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/best_model.keras
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 69s 66ms/step - accuracy: 0.6014 - loss: 0.9728 - val_accuracy: 0.6337 - val_loss: 1.0277 - learning_rate: 6.2500e-07
+Epoch 22/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step - accuracy: 0.6028 - loss: 0.9580
+Epoch 22: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 55s 52ms/step - accuracy: 0.5982 - loss: 0.9685 - val_accuracy: 0.6253 - val_loss: 1.0508 - learning_rate: 6.2500e-07
+Epoch 23/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step - accuracy: 0.6067 - loss: 0.9752
+Epoch 23: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 53s 50ms/step - accuracy: 0.6099 - loss: 0.9663 - val_accuracy: 0.6245 - val_loss: 1.0777 - learning_rate: 6.2500e-07
+Epoch 24/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step - accuracy: 0.6072 - loss: 0.9540
+Epoch 24: ReduceLROnPlateau reducing learning rate to 3.12499992105586e-07.
+
+Epoch 24: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 70s 66ms/step - accuracy: 0.6070 - loss: 0.9590 - val_accuracy: 0.6234 - val_loss: 1.0918 - learning_rate: 6.2500e-07
+Epoch 25/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 121ms/step - accuracy: 0.6129 - loss: 0.9338
+Epoch 25: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 144s 127ms/step - accuracy: 0.6147 - loss: 0.9317 - val_accuracy: 0.6167 - val_loss: 1.1107 - learning_rate: 3.1250e-07
+Epoch 26/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step - accuracy: 0.6157 - loss: 0.9301
+Epoch 26: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 67s 64ms/step - accuracy: 0.6181 - loss: 0.9330 - val_accuracy: 0.6217 - val_loss: 1.0986 - learning_rate: 3.1250e-07
+Epoch 27/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.6198 - loss: 0.9285
+Epoch 27: ReduceLROnPlateau reducing learning rate to 1.56249996052793e-07.
+
+Epoch 27: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 131s 125ms/step - accuracy: 0.6175 - loss: 0.9293 - val_accuracy: 0.6242 - val_loss: 1.0880 - learning_rate: 3.1250e-07
+Epoch 28/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 121ms/step - accuracy: 0.6208 - loss: 0.9125
+Epoch 28: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 133s 127ms/step - accuracy: 0.6197 - loss: 0.9213 - val_accuracy: 0.6223 - val_loss: 1.1058 - learning_rate: 1.5625e-07
+Epoch 29/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 121ms/step - accuracy: 0.6239 - loss: 0.9100
+Epoch 29: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 133s 127ms/step - accuracy: 0.6233 - loss: 0.9178 - val_accuracy: 0.6226 - val_loss: 1.0973 - learning_rate: 1.5625e-07
+Epoch 30/50
+1050/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step - accuracy: 0.6108 - loss: 0.9216
+Epoch 30: ReduceLROnPlateau reducing learning rate to 1e-07.
+
+Epoch 30: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 75s 63ms/step - accuracy: 0.6157 - loss: 0.9212 - val_accuracy: 0.6217 - val_loss: 1.1205 - learning_rate: 1.5625e-07
+Epoch 31/50
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step - accuracy: 0.6303 - loss: 0.8983
+Epoch 31: val_accuracy did not improve from 0.63369
+1051/1051 ━━━━━━━━━━━━━━━━━━━━ 133s 126ms/step - accuracy: 0.6250 - loss: 0.9169 - val_accuracy: 0.6262 - val_loss: 1.0997 - learning_rate: 1.0000e-07
+Epoch 31: early stopping
+Restoring model weights from the end of the best epoch: 21.
+
+=== EVALUATION ON TEST SET ===
+226/226 ━━━━━━━━━━━━━━━━━━━━ 13s 56ms/step - accuracy: 0.6236 - loss: 1.0535
+Test Accuracy: 0.6236 (62.36%)
+Test Loss:     1.0535
+226/226 ━━━━━━━━━━━━━━━━━━━━ 15s 44ms/step
+
+Classification Report:
+                       precision    recall  f1-score   support
+
+       banana_cordana       0.59      0.92      0.72       155
+       banana_healthy       0.76      0.91      0.83       225
+   banana_panama_wilt       0.30      0.93      0.46        58
+      banana_sigatoka       0.81      0.44      0.57       295
+tomato_bacterial_spot       0.77      0.60      0.68       535
+  tomato_early_blight       0.53      0.59      0.55       465
+       tomato_healthy       0.66      0.94      0.78       579
+   tomato_late_blight       0.63      0.31      0.41       587
+     tomato_leaf_mold       0.64      0.50      0.56       525
+tomato_powdery_mildew       0.46      0.73      0.56       189
+
+             accuracy                           0.62      3613
+            macro avg       0.61      0.69      0.61      3613
+         weighted avg       0.65      0.62      0.61      3613
+
+
+Report saved to /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/classification_report.txt
+
+=== EXPORTING TO TFLITE ===
+Saved artifact at '/tmp/tmpyfpt5xrs'. The following endpoints are available:
+
+* Endpoint 'serve'
+  args_0 (POSITIONAL_ONLY): TensorSpec(shape=(None, 224, 224, 3), dtype=tf.float32, name='keras_tensor_181')
+Output Type:
+  TensorSpec(shape=(None, 10), dtype=tf.float32, name=None)
+Captures:
+  140316983795664: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983796240: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983797968: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983798160: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983796624: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983797392: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983800272: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983800080: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983801232: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983801424: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983798736: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983799504: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983801808: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983801616: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983798352: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983802768: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983802576: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983802000: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983802384: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983796048: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983795856: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983797776: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983798928: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983799888: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983799696: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983799120: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983800464: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983802960: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983803152: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983802192: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983801040: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983803728: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874655120: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874655312: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316983797584: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874654160: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874653776: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874654544: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874654736: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874656464: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874656272: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874654928: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874656080: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874655504: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874654352: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874657616: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874657424: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874655696: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874658000: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874657808: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874656848: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874658960: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874658768: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874658192: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874659344: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874659152: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874655888: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874660304: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874660112: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874659536: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874659920: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874656656: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874653968: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874661456: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874661264: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874657232: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874662224: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874661648: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874659728: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874663760: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874663568: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874661840: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874663376: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874662800: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874660880: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874664912: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874664720: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874662992: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874664528: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874663952: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874661072: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874660496: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874658576: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874662608: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874662416: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874660688: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874662032: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874666064: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874665872: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874664144: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874665680: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874665104: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874663184: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874667216: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874667024: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874665296: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874666832: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874666256: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874664336: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874668368: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874668176: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874666448: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874667984: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874667408: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874665488: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874669520: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874669328: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874667600: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874669136: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874668752: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874669712: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874668944: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874669904: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874668560: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874666640: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316874667792: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031157840: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031158032: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031157264: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031156688: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031156496: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031157072: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031157456: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031159184: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031158992: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031157648: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031158800: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031158224: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031156880: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031160336: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031160144: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031158416: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031159952: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031159376: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031156304: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031161488: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031161296: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031159568: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031161104: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031160528: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031158608: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031162640: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031162448: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031160720: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031163408: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031162832: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031160912: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031164944: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031164752: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031163024: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031164560: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031163984: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031162064: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031166096: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031165904: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031164176: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031165712: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031165136: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031162256: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031161680: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031159760: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031163792: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031163600: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031161872: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031163216: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031167248: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031167056: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031165328: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031166864: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031166288: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031164368: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031168400: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031168208: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031166480: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031168016: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031167440: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031165520: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031169552: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031169360: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031167632: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031169168: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031168592: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031166672: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031170704: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031170512: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031168784: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031170320: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031169744: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031167824: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031171856: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031171664: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031169936: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031171472: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031172432: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031172048: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031170896: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031170128: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031171088: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031172240: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031171280: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031993232: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031993424: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031168976: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031993040: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031992848: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031992272: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031992080: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031994576: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031994384: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031991888: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031994192: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031993616: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031992464: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031995728: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031995536: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031993808: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031995344: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031994768: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031992656: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031996880: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031996688: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031994960: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031996496: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031995920: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031994000: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031998032: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031997840: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031996112: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031997648: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031997072: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031995152: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031999184: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031998992: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031997264: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031998800: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031998224: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031996304: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032000336: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032000144: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031998416: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031999952: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031999376: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031997456: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032001488: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032001296: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031999568: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032001104: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032000528: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031998608: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032002640: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032002448: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032000720: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032002256: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032001680: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316031999760: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032003792: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032003600: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032001872: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032004560: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032003984: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032002064: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032006096: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032005904: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032004176: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032005712: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032005136: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032003216: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032007248: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032007056: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032005328: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032006864: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032008016: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032003408: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032002832: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032000912: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032004944: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032004752: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032003024: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032005520: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032004368: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032007440: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032006480: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032006288: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032007824: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729822928: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729823120: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032006672: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140316032007632: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729821776: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729822352: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729822736: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729824272: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729824080: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729822544: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729823888: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729823312: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729822160: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729825424: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729825232: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729823504: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729825040: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729824464: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729821968: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729826576: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729826384: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729824656: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729826192: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729825616: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729823696: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729827728: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729827536: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729825808: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729827344: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729826768: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729824848: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729828880: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729828688: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729826960: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729828496: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729827920: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729828112: TensorSpec(shape=(), dtype=tf.resource, name=None)
+  140315729829840: TensorSpec(shape=(), dtype=tf.resource, name=None)
+W0000 00:00:1775787409.591136    8823 tf_tfl_flatbuffer_helpers.cc:364] Ignored output_format.
+W0000 00:00:1775787409.591178    8823 tf_tfl_flatbuffer_helpers.cc:367] Ignored drop_control_dependency.
+I0000 00:00:1775787409.595997    8823 reader.cc:83] Reading SavedModel from: /tmp/tmpyfpt5xrs
+I0000 00:00:1775787409.605275    8823 reader.cc:52] Reading meta graph with tags { serve }
+I0000 00:00:1775787409.605312    8823 reader.cc:147] Reading SavedModel debug info (if present) from: /tmp/tmpyfpt5xrs
+I0000 00:00:1775787409.691529    8823 mlir_graph_optimization_pass.cc:437] MLIR V1 optimization pass is not enabled
+I0000 00:00:1775787409.709379    8823 loader.cc:236] Restoring SavedModel bundle.
+I0000 00:00:1775787410.331497    8823 loader.cc:220] Running initialization op on SavedModelbundle at path: /tmp/tmpyfpt5xrs
+I0000 00:00:1775787410.463028    8823 loader.cc:471] SavedModel load for tags { serve }; Status: success: OK. Took 867046 microseconds.
+TFLite model saved: /mnt/c/Users/Jim Dejito/OneDrive/Desktop/Jim Codes/Thesis/Scanom/model_output/resnet50.tflite
+TFLite file size:   23.3 MB
+
+Done! Copy resnet50.tflite and class_names.json to scanom-backend/model/
+(scanom-ml-env) jim_dejito@LAPTOP-UOBBLVQP:~$
