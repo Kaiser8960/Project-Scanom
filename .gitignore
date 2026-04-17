@@ -20,3 +20,8 @@ scanom-ml-env/
 __pycache__/
 *.pyc
 *.pyo
+
+# Local-only files 
+Initial UI sketches v1/
+Submission_Schedule/
+UPDATE.md
