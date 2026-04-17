@@ -13,8 +13,14 @@ model_output/
 venv/
 .venv/
 env/
-.env/
 scanom-ml-env/
+
+# Environment variable files (NEVER commit actual secrets)
+# .env.example files ARE tracked (they contain no real secrets)
+.env
+**/.env
+scanom-backend/.env
+scanom-app/.env
 
 # Python caches
 __pycache__/
