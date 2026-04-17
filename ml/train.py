@@ -233,17 +233,28 @@ with open(f"{OUTPUT_DIR}/classification_report.txt", "w") as f:
 
 print(f"\nReport saved to {OUTPUT_DIR}/classification_report.txt")
 
-# ── EXPORT TO TFLITE ────────────────────────────────────────
+# ── EXPORT TO TFLITE ─────────────────────────────────────────────
 print("\n=== EXPORTING TO TFLITE ===")
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
+# EfficientNetV2B0 with include_preprocessing=True contains tf.Mul, tf.Sub,
+# tf.RealDiv, tf.Sigmoid ops that are not in the standard TFLite op set.
+# SELECT_TF_OPS enables the Flex delegate to run these ops via full TF.
+# This is required for any Keras model using EfficientNetV2B0 include_preprocessing.
+converter.target_spec.supported_ops = [
+    tf.lite.OpsSet.TFLITE_BUILTINS,   # standard TFLite ops
+    tf.lite.OpsSet.SELECT_TF_OPS      # TF Flex delegate for unsupported ops
+]
+converter._experimental_lower_tensor_list_ops = False
+
 tflite_model = converter.convert()
 
-tflite_path = f"{OUTPUT_DIR}/resnet50.tflite"
+tflite_path = f"{OUTPUT_DIR}/efficientnetv2b0.tflite"
 with open(tflite_path, "wb") as f:
     f.write(tflite_model)
 
 size_mb = os.path.getsize(tflite_path) / (1024 * 1024)
 print(f"TFLite model saved: {tflite_path}")
 print(f"TFLite file size:   {size_mb:.1f} MB")
-print("\nDone! Copy resnet50.tflite and class_names.json to scanom-backend/model/")
+print("\nDone! Copy efficientnetv2b0.tflite and class_names.json to scanom-backend/model/")

@@ -9,7 +9,7 @@
 
 | Field | Value |
 |---|---|
-| **Model** | ResNet-50 |
+| **Model** | EfficientNetV2B0 |
 | **Approach** | Transfer Learning (ImageNet pre-trained weights) |
 | **Framework** | TensorFlow / Keras |
 | **Export Format** | TensorFlow Lite (TFLite) |
@@ -31,8 +31,8 @@
 | **GPU Training** | WSL2 + `tensorflow[and-cuda]` | TF 2.11+ dropped native Windows GPU support. The RTX 4060 is idle on native Windows. WSL2 is the correct path. See Section 9. |
 | **Model File Storage** | Backend repo only — NOT Supabase | Supabase free tier is 1 GB total. The `.tflite` file (~25 MB) must live in `scanom-backend/model/` directly, never in Supabase Storage. |
 | **Class Imbalance** | Class weights — standard, not optional | Banana classes are severely underrepresented vs. Tomato. Without class weights, banana diseases score 0% F1. Class weights are now applied by default in train.py. |
-| **Pipeline Order** | `cache("/tmp/tf_cache")` -> augment -> normalize -> prefetch | `.cache()` must come BEFORE augmentation. Cache must target a disk path (`/tmp/tf_cache`), NOT in-memory — caching 24k images in GPU VRAM causes `CUDA_ERROR_OUT_OF_MEMORY`. |
-| **Batch Size** | 16 (not 32) | RTX 4060 Laptop (8GB VRAM) OOMs at batch size 32 with ResNet50 + 24k images. Batch 16 fits comfortably. |
+| **Pipeline Order** | augment → prefetch (NO cache) | In-memory `.cache()` on 16k images at 224×224 tries to pin ~4GB of host RAM, hitting CUDA pinned memory limits. Data is on Linux SSD — per-epoch reads are fast without cache. |
+| **Batch Size** | 16 (not 32) | RTX 4060 Laptop only gets ~5.5GB VRAM after WSL2 overhead. Batch 32 causes CUDA_ERROR_OUT_OF_MEMORY even with mixed precision. Batch 16 is stable. |
 
 ---
 
@@ -593,7 +593,7 @@ with open(tflite_path, "wb") as f:
 size_mb = os.path.getsize(tflite_path) / (1024 * 1024)
 print(f"TFLite model saved: {tflite_path}")
 print(f"TFLite file size:   {size_mb:.1f} MB")
-print("\nDone! Copy resnet50.tflite and class_names.json to scanom-backend/model/")
+print("\nDone! Copy efficientnetv2b0.tflite and class_names.json to scanom-backend/model/")
 ```
 
 ---
@@ -604,13 +604,13 @@ print("\nDone! Copy resnet50.tflite and class_names.json to scanom-backend/model
 PHASE 1 — Train Head Only (faster, ~20 epochs)
   base_model.trainable = False
   Only the new Dense layers learn
-  Purpose: teach the new head to use ResNet features
+  Purpose: teach the new head to use EfficientNetV2B0 features
   LR: 0.001 (higher — new layers need bigger steps)
 
-PHASE 2 — Fine-tune Deeper Layers (~30 epochs)
-  Unfreeze last 30 ResNet layers
+PHASE 2 — Fine-tune Deeper Layers (~42 epochs, stopped by EarlyStopping)
+  Unfreeze last 108 of 270 EfficientNetV2B0 layers (last 40%)
   Purpose: adapt deep features to plant disease patterns
-  LR: 0.00001 (very low — avoid destroying learned weights)
+  LR: 0.0001 (low — avoid destroying learned weights)
 
 This two-phase approach is the standard way to
 hit 95%+ accuracy with Transfer Learning on
@@ -862,7 +862,7 @@ and re-run both scripts.
 After training, fill in this table for Chapter 4:
 
 ```
-Table X. Classification Performance of the ResNet-50 CNN Model
+Table X. Classification Performance of the EfficientNetV2B0 CNN Model
 
 Class                    Precision   Recall   F1-Score   Support
 ────────────────────────────────────────────────────────────────

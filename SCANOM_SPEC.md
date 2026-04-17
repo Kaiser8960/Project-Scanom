@@ -45,7 +45,7 @@ Plant type is automatically extracted from the class name prefix:
 | Testing | Expo Go (QR code) | Fast on-device testing |
 | Production | EAS Build → APK | Final thesis demo build |
 | Backend | FastAPI (Python) | API server, main logic hub |
-| CNN Model | ResNet-50 → TFLite | Plant disease classification |
+| CNN Model | EfficientNetV2B0 → TFLite | Plant disease classification |
 | Fuzzy Logic | scikit-fuzzy (Python) | Risk level + spread radius |
 | Map Display | react-native-maps + Google Maps API | Visual map + risk circles |
 | Weather Data | Open-Meteo API (free, no key) | Humidity + temperature inputs |
@@ -736,7 +736,7 @@ scanom-backend/
   requirements.txt
   .env
   model/
-    resnet50.tflite           # trained + exported model
+    efficientnetv2b0.tflite  # trained + exported model (EfficientNetV2B0, SELECT_TF_OPS)
     class_names.json          # class index → class name mapping
   routers/
     auth.py                   # POST /auth/login, POST /auth/register
