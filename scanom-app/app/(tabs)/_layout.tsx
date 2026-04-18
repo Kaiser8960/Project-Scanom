@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 
 /**

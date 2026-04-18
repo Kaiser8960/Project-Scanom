@@ -1,28 +1,37 @@
 {
   "expo": {
-    "name": "scanom-app",
-    "slug": "scanom-app",
+    "name": "Scanom",
+    "slug": "scanom",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "scanomapp",
-    "userInterfaceStyle": "automatic",
+    "scheme": "scanom",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0F2419"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Scanom needs camera access to scan plant leaves for disease detection.",
+        "NSLocationWhenInUseUsageDescription": "Scanom uses your location to show nearby disease risk areas on the map."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0F2419"
       },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "package": "com.scanom.app"
     },
     "web": {
       "bundler": "metro",
@@ -31,10 +40,18 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-camera",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Scanom uses your location to show nearby disease risk areas."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     }
   }
 }
+
