@@ -9,5 +9,5 @@ python-multipart
 scipy
 scikit-fuzzy
 networkx
-google-generativeai
+google-genai
 tensorflow

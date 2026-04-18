@@ -5,17 +5,17 @@ Returns structured JSON: overview, causes, prevention tips, treatment steps, sev
 
 import json
 import os
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL   = os.getenv("GEMINI_MODEL",   "gemini-1.5-flash")
 
 if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    _model = genai.GenerativeModel(GEMINI_MODEL)
+    _client = genai.Client(api_key=GEMINI_API_KEY)
 else:
     print("WARNING: GEMINI_API_KEY not set — AI explanations will use fallback text.")
-    _model = None
+    _client = None
 
 
 async def get_disease_explanation(
@@ -30,7 +30,7 @@ async def get_disease_explanation(
     Generate a structured disease explanation using Gemini.
     Falls back to generic text if Gemini is unreachable or API key is missing.
     """
-    if not _model:
+    if not _client:
         return _fallback_explanation(disease_class, plant, risk_level)
 
     disease_name = disease_class.replace("_", " ").replace(plant, "").strip().title()
@@ -54,7 +54,10 @@ severity must be exactly one of: mild | moderate | severe
 Keep language simple and practical for farmers in the Philippines."""
 
     try:
-        response = await _model.generate_content_async(prompt)
+        response = _client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+        )
         text = response.text.strip()
 
         # Strip markdown code fences if present
