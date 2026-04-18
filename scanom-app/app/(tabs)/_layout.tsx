@@ -8,8 +8,6 @@ import ProfileAvatar from "@/components/ui/ProfileAvatar";
  * Profile is a floating avatar in the header of every tab — not a tab itself.
  */
 export default function TabLayout() {
-  const router = useRouter();
-
   return (
     <Tabs
       screenOptions={{

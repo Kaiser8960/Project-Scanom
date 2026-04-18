@@ -1077,13 +1077,12 @@ FALLBACK_TEMPERATURE = 29.0   # Cebu average
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE TABLE users (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at   TIMESTAMPTZ DEFAULT NOW(),
-  name         TEXT NOT NULL,
-  email        TEXT UNIQUE NOT NULL,
-  password     TEXT NOT NULL,  -- store hashed
-  location     TEXT,
-  avatar_url   TEXT
+  id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  name        TEXT NOT NULL,
+  email       TEXT UNIQUE NOT NULL,
+  location    TEXT,
+  avatar_url  TEXT
 );
 
 CREATE TABLE detections (
