@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+supabase
+httpx
+pillow
+numpy
+python-multipart
+scipy
+scikit-fuzzy
+networkx
+google-generativeai
+tensorflow

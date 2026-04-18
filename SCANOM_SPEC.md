@@ -47,11 +47,12 @@ Plant type is automatically extracted from the class name prefix:
 | Backend | FastAPI (Python) | API server, main logic hub |
 | CNN Model | EfficientNetV2B0 → TFLite | Plant disease classification |
 | Fuzzy Logic | scikit-fuzzy (Python) | Risk level + spread radius |
-| Map Display | react-native-maps + Google Maps API | Visual map + risk circles |
+| Map Display | react-native-maps (OpenStreetMap, no key) | Visual map + risk circles |
 | Weather Data | Open-Meteo API (free, no key) | Humidity + temperature inputs |
 | Database | Supabase (PostgreSQL + PostGIS) | Detection records + geo queries |
-| AI Explanation | TBD API | Disease overview + recommendations |
-| Hosting | Railway or Render | FastAPI backend deployment |
+| Auth | Supabase Auth | User sessions — no custom JWT needed |
+| AI Explanation | Gemini 1.5 Flash (Google AI Studio) | Disease overview + recommendations |
+| Hosting | Railway | FastAPI backend deployment |
 
 ---
 
@@ -175,40 +176,36 @@ scanom-app/
       sign-in.tsx            # Sign In screen
       sign-up.tsx            # Sign Up screen
     (tabs)/
-      _layout.tsx            # Bottom tab navigator
-      index.tsx              # Dashboard / Home screen
-      map.tsx                # Geospatial Risk Map screen
-      scan.tsx               # Scanner screen
+      _layout.tsx            # 3-tab navigator: Map | Scanner (center) | History
+      map.tsx                # Geospatial Risk Map (DEFAULT landing screen)
+      scan.tsx               # Scanner screen (elevated center tab)
       history.tsx            # Scan History screen
-      profile.tsx            # Profile screen
-    result.tsx               # Diagnosis Result screen (modal/push)
-    rejection.tsx            # Invalid scan screen
+    result.tsx               # Diagnosis Result screen (push)
+    rejection.tsx            # Low-confidence rejection screen (push)
   components/
     ui/
       Button.tsx             # Reusable pill button
       Badge.tsx              # Risk/severity badge
       Card.tsx               # Surface card wrapper
-      Header.tsx             # Top app bar
-      BottomNav.tsx          # Bottom navigation bar
+      ProfileAvatar.tsx      # Top-right floating avatar button
+      ProfileBottomSheet.tsx # Slide-up: user info + settings + logout
     diagnosis/
       DiseaseCard.tsx        # Disease name + confidence
       SeverityBadge.tsx      # Severity level pill
-      SymptomsList.tsx       # Observed symptoms list
       TreatmentCard.tsx      # Treatment recommendation card
       SpreadForecast.tsx     # Mini risk map + radius text
     map/
       RiskCircle.tsx         # Colored circle overlay on map
-      DetectionPin.tsx       # Map pin for past detections
       MapLegend.tsx          # Legend card (Low/Moderate/High/Safe)
     history/
       ScanCard.tsx           # Individual scan record card
       MonthlySummary.tsx     # Monthly activity summary card
   services/
     api.ts                   # All FastAPI endpoint calls
-    auth.ts                  # Login, signup, session management
+    auth.ts                  # Supabase Auth session management
     location.ts              # expo-location wrapper
   constants/
-    config.ts                # API base URL, Maps key
+    config.ts                # API base URL, confidence threshold
     classes.ts               # Class names and display labels
   types/
     index.ts                 # TypeScript interfaces
@@ -218,13 +215,33 @@ scanom-app/
 
 ## 7. Screen Specifications
 
-### Standard Bottom Navigation (ALL screens)
+### Navigation Architecture (ALL screens after login)
+
+**Bottom Tab Bar (3 tabs):**
 ```
-Order: Home | Map | SCAN (center, elevated, #1B3A2D circle) | History | Profile
-Icons: house | map | barcode-scanner | clock-rotate-left | person
-Active color: #1B3A2D
-Inactive color: #6B7280
-SCAN button: elevated circular button, always #1B3A2D, white icon
+Map (left)  |  ◉ Scanner (elevated center)  |  History (right)
+   🗺️                    ◉                        🕐
+```
+- Tab icons: map | barcode-scanner | clock-rotate-left
+- Active color: #1B3A2D | Inactive: #6B7280
+- Scanner: elevated circular FAB (#1B3A2D circle, white icon)
+- Scanner opens scan.tsx as a push screen — NOT a tab page
+- **Default landing after login: Map tab**
+
+**Floating Profile Avatar (top-right of ALL screens after login):**
+```
+36px circle — user photo or initials on #1B3A2D background
+Fixed position in header area on every screen
+Tap → ProfileBottomSheet slides up:
+  ┌────────────────────────────────────┐
+  │  👤  [Name]  ·  [City]             │
+  │  ──────────────────────────────    │
+  │  🔔  Notifications             >   │
+  │  🔒  Privacy & Security        >   │
+  │  ❓  Support Center            >   │
+  │  ──────────────────────────────    │
+  │  ↪  Logout              (red)      │
+  └────────────────────────────────────┘
 ```
 
 ---
@@ -320,7 +337,16 @@ Background: #F5F7F5
 
 ---
 
-### Screen 3 — Dashboard / Home (tabs/index.tsx)
+### ~~Screen 3 — Dashboard / Home~~ **[REMOVED]**
+
+> **This screen no longer exists.** After login the app lands directly on the **Map tab**.
+> See Screen 3 below (formerly Screen 6).
+
+---
+
+### Screen 3 (DEFAULT LANDING) — Geospatial Risk Map (tabs/map.tsx)
+
+> ⬇ This section moved — see the full spec at the original Screen 6 heading below.
 
 **Layout (top to bottom):**
 ```
@@ -563,7 +589,7 @@ Background: #F5F7F5, centered content
 
 ---
 
-### Screen 6 — Geospatial Risk Map (tabs/map.tsx)
+### Screen 3 (DEFAULT LANDING) — Geospatial Risk Map (tabs/map.tsx)
 
 **Layout:**
 ```
@@ -585,7 +611,7 @@ Background: Map fills full screen
    - "Current environmental risks in your area." — Caption
 
 4. Map Area (react-native-maps, Google Maps)
-   - Fills entire screen behind overlays
+   - Fills entire screen behind overlays (OpenStreetMap via react-native-maps, no API key)
    - User location blue dot
    - For each nearby detection (from GET /detections/nearby):
      Circle overlay:
@@ -693,7 +719,7 @@ Background: #F5F7F5
 
 ---
 
-### Screen 8 — Profile (tabs/profile.tsx)
+### Profile — Bottom Sheet (ProfileBottomSheet.tsx, NOT a tab screen)
 
 **Layout (top to bottom):**
 ```
@@ -1107,25 +1133,35 @@ FOR EACH ROW EXECUTE FUNCTION set_location();
 
 ## 14. Environment Variables
 
-### Backend (.env)
-```
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_service_role_key
-AI_API_KEY=your_ai_api_key
-AI_API_URL=your_ai_api_endpoint
-OPEN_METEO_BASE=https://api.open-meteo.com/v1/forecast
-JWT_SECRET=your_jwt_secret_key
-CONFIDENCE_THRESHOLD=0.70
-```
+> Both `.env.example` files have been created in each project folder.
+> Copy to `.env` and fill in your actual values before running.
 
-### Expo App (constants/config.ts)
-```typescript
-export const CONFIG = {
-  API_BASE_URL:       "https://your-backend.railway.app",
-  GOOGLE_MAPS_API_KEY: "your_google_maps_key",
-  CONFIDENCE_THRESHOLD: 0.70,
-};
+### Backend (scanom-backend/.env)
 ```
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your-anon-public-key
+SUPABASE_SERVICE_KEY=your-service-role-secret-key
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-1.5-flash
+MODEL_PATH=model/efficientnetv2b0.tflite
+CLASS_NAMES_PATH=model/class_names.json
+HOST=0.0.0.0
+PORT=8000
+ALLOWED_ORIGINS=*
+CONFIDENCE_THRESHOLD=0.70
+ENVIRONMENT=development
+```
+> No JWT_SECRET needed — Supabase Auth issues and verifies tokens automatically.
+
+### Expo App (scanom-app/.env)
+```
+EXPO_PUBLIC_API_URL=http://192.168.x.x:8000
+EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+EXPO_PUBLIC_CONFIDENCE_THRESHOLD=0.70
+EXPO_PUBLIC_NEARBY_RADIUS_KM=5
+```
+> Update EXPO_PUBLIC_API_URL with your machine LAN IP every time you change WiFi networks.
 
 ---
 
@@ -1177,8 +1213,8 @@ Include this sentence in Chapter 3 Methodology under Data Collection:
 
 ### Sprint 3 — Mobile App (April 20–25)
 ```
-□ Build all 8 screens per spec above
-□ Implement bottom nav (standard order: Home|Map|SCAN|History|Profile)
+□ Build 7 screens: sign-in, sign-up, map, scan, result, rejection, history
+□ Implement 3-tab nav (Map | ◉ Scanner center | History) + ProfileBottomSheet
 □ Implement three result states (diseased / healthy / rejected)
 □ Connect all screens to FastAPI via services/api.ts
 □ Test full flow on physical device via Expo Go QR
