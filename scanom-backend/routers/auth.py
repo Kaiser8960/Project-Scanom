@@ -4,7 +4,7 @@ No custom JWT: Supabase issues, signs, and verifies all tokens.
 """
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from database.supabase_client import get_supabase
 
 router = APIRouter()
@@ -13,12 +13,12 @@ router = APIRouter()
 class RegisterRequest(BaseModel):
     name:     str
     location: str
-    email:    EmailStr
+    email:    str
     password: str
 
 
 class LoginRequest(BaseModel):
-    email:    EmailStr
+    email:    str
     password: str
 
 
