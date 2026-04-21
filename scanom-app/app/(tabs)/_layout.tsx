@@ -11,15 +11,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarStyle:            styles.tabBar,
-        tabBarActiveTintColor:  "#4ADE80",
-        tabBarInactiveTintColor: "#6B7280",
-        tabBarShowLabel:        true,
-        tabBarLabelStyle:       styles.label,
-        headerStyle:            styles.header,
-        headerTintColor:        "#F0FDF4",
-        headerTitleStyle:       styles.headerTitle,
-        // Floating profile avatar shown on every tab
+        tabBarStyle:             styles.tabBar,
+        tabBarActiveTintColor:   "#2C5C2E",
+        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarShowLabel:         true,
+        tabBarLabelStyle:        styles.label,
+        headerStyle:             styles.header,
+        headerTintColor:         "#1C2E1C",
+        headerTitleStyle:        styles.headerTitle,
         headerRight: () => <ProfileAvatar />,
         headerRightContainerStyle: styles.headerRightContainer,
       }}
@@ -28,10 +27,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          title:        "Map",
-          headerTitle:  "Risk Map",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map-outline" size={size} color={color} />
+          title:       "Map",
+          headerTitle: "Risk Map",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <Ionicons name="map-outline" size={22} color={color} />
+            </View>
           ),
         }}
       />
@@ -40,14 +41,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="scan"
         options={{
-          title:        "Scan",
-          headerTitle:  "Scanner",
+          title:       "Scan",
+          headerTitle: "Scanner",
           tabBarIcon: ({ focused }) => (
             <View style={[styles.scanFab, focused && styles.scanFabActive]}>
-              <Ionicons name="scan-outline" size={28} color="#F0FDF4" />
+              <Ionicons name="camera-outline" size={26} color="#FFFFFF" />
             </View>
           ),
-          tabBarLabel:  () => null,    // No label under the FAB
+          tabBarLabel: () => null,
         }}
       />
 
@@ -57,8 +58,10 @@ export default function TabLayout() {
         options={{
           title:       "History",
           headerTitle: "Scan History",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time-outline" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <Ionicons name="time-outline" size={22} color={color} />
+            </View>
           ),
         }}
       />
@@ -68,50 +71,60 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor:     "#0F2419",
-    borderTopColor:      "#1B3A2D",
-    borderTopWidth:      1,
-    height:              68,
-    paddingBottom:       8,
-    paddingTop:          4,
+    backgroundColor: "#FFFFFF",
+    borderTopColor:  "#E5E2DB",
+    borderTopWidth:  1,
+    height:          68,
+    paddingBottom:   8,
+    paddingTop:      4,
+    elevation:       8,
+    shadowColor:     "#000",
+    shadowOpacity:   0.08,
+    shadowOffset:    { width: 0, height: -2 },
+    shadowRadius:    8,
   },
   label: {
     fontSize:   11,
     fontWeight: "600",
   },
   header: {
-    backgroundColor: "#0F2419",
-    borderBottomColor: "#1B3A2D",
+    backgroundColor:  "#E8E5DE",
+    borderBottomColor: "#DDD9D2",
     borderBottomWidth: 1,
-    elevation: 0,
+    elevation:  0,
     shadowOpacity: 0,
   },
   headerTitle: {
-    color:      "#F0FDF4",
+    color:      "#1C2E1C",
     fontWeight: "700",
     fontSize:   18,
   },
   headerRightContainer: {
     paddingRight: 16,
   },
+  // Lit pill behind active tab icon
+  activeIconWrap: {
+    backgroundColor: "#CCEAD0",
+    borderRadius:    16,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  // Center scan FAB
   scanFab: {
     width:           56,
     height:          56,
     borderRadius:    28,
-    backgroundColor: "#1B3A2D",
+    backgroundColor: "#2C5C2E",
     justifyContent:  "center",
     alignItems:      "center",
     marginBottom:    20,
-    borderWidth:     2,
-    borderColor:     "#4ADE80",
-    shadowColor:     "#4ADE80",
-    shadowOffset:    { width: 0, height: 2 },
-    shadowOpacity:   0.3,
+    shadowColor:     "#2C5C2E",
+    shadowOffset:    { width: 0, height: 3 },
+    shadowOpacity:   0.35,
     shadowRadius:    6,
     elevation:       6,
   },
   scanFabActive: {
-    backgroundColor: "#1B4A2F",
-    borderColor:     "#86EFAC",
+    backgroundColor: "#1E3F20",
   },
 });
