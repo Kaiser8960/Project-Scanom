@@ -8,13 +8,13 @@ import { useRouter } from "expo-router";
 import { signUp } from "@/services/auth";
 
 export default function SignUpScreen() {
-  const router   = useRouter();
-  const [name,     setName]     = useState("");
+  const router = useRouter();
+  const [name, setName] = useState("");
   const [location, setLocation] = useState("");
-  const [email,    setEmail]    = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm,  setConfirm]  = useState("");
-  const [loading,  setLoading]  = useState(false);
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleRegister() {
     if (!name.trim() || !location.trim() || !email.trim() || !password.trim()) {
@@ -145,21 +145,21 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  root:        { flex: 1, backgroundColor: "#0F2419" },
-  scroll:      { flexGrow: 1, padding: 24 },
-  header:      { marginBottom: 28, paddingTop: 12 },
-  backBtn:     { marginBottom: 16 },
-  backText:    { color: "#4ADE80", fontSize: 15 },
-  title:       { fontSize: 26, fontWeight: "700", color: "#F0FDF4", marginBottom: 6 },
-  subtitle:    { fontSize: 14, color: "#9CA3AF" },
-  card:        { backgroundColor: "#1A2E22", borderRadius: 20, padding: 24, marginBottom: 24, borderWidth: 1, borderColor: "#2D4A38" },
-  inputGroup:  { marginBottom: 16 },
-  label:       { fontSize: 12, fontWeight: "600", color: "#9CA3AF", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
-  input:       { backgroundColor: "#243B2F", borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: "#F0FDF4", fontSize: 15, borderWidth: 1, borderColor: "#2D4A38" },
-  btn:         { backgroundColor: "#1B3A2D", borderRadius: 14, paddingVertical: 16, alignItems: "center", marginTop: 8, borderWidth: 1, borderColor: "#4ADE80" },
+  root: { flex: 1, backgroundColor: "#0F2419" },
+  scroll: { flexGrow: 1, padding: 24 },
+  header: { marginBottom: 28, paddingTop: 12 },
+  backBtn: { marginBottom: 16 },
+  backText: { color: "#4ADE80", fontSize: 15 },
+  title: { fontSize: 26, fontWeight: "700", color: "#F0FDF4", marginBottom: 6 },
+  subtitle: { fontSize: 14, color: "#9CA3AF" },
+  card: { backgroundColor: "#1A2E22", borderRadius: 20, padding: 24, marginBottom: 24, borderWidth: 1, borderColor: "#2D4A38" },
+  inputGroup: { marginBottom: 16 },
+  label: { fontSize: 12, fontWeight: "600", color: "#9CA3AF", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
+  input: { backgroundColor: "#243B2F", borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: "#F0FDF4", fontSize: 15, borderWidth: 1, borderColor: "#2D4A38" },
+  btn: { backgroundColor: "#1B3A2D", borderRadius: 14, paddingVertical: 16, alignItems: "center", marginTop: 8, borderWidth: 1, borderColor: "#4ADE80" },
   btnDisabled: { opacity: 0.6 },
-  btnText:     { color: "#4ADE80", fontSize: 16, fontWeight: "700", letterSpacing: 0.5 },
-  footer:      { flexDirection: "row", justifyContent: "center", alignItems: "center" },
-  footerText:  { color: "#6B7280", fontSize: 14 },
-  footerLink:  { color: "#4ADE80", fontSize: 14, fontWeight: "600" },
+  btnText: { color: "#4ADE80", fontSize: 16, fontWeight: "700", letterSpacing: 0.5 },
+  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
+  footerText: { color: "#6B7280", fontSize: 14 },
+  footerLink: { color: "#4ADE80", fontSize: 14, fontWeight: "600" },
 });

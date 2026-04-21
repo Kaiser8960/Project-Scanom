@@ -9,18 +9,18 @@ import { getUserDetections } from "@/services/api";
 import type { HistoryDetection } from "@/types";
 
 const RISK_COLORS: Record<string, string> = {
-  none:      "#4ADE80",
-  low:       "#4ADE80",
-  moderate:  "#EAB308",
-  high:      "#EF4444",
+  none: "#4ADE80",
+  low: "#4ADE80",
+  moderate: "#EAB308",
+  high: "#EF4444",
 };
 
 export default function HistoryScreen() {
-  const router   = useRouter();
-  const [history,  setHistory]  = useState<HistoryDetection[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [page,     setPage]     = useState(0);
-  const [hasMore,  setHasMore]  = useState(true);
+  const router = useRouter();
+  const [history, setHistory] = useState<HistoryDetection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -129,17 +129,17 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  list:      { flex: 1, backgroundColor: "#0F2419" },
-  loader:    { flex: 1, backgroundColor: "#0F2419", justifyContent: "center", alignItems: "center" },
-  empty:     { flex: 1, backgroundColor: "#0F2419", justifyContent: "center", alignItems: "center", padding: 40 },
-  emptyTitle:{ color: "#F0FDF4", fontSize: 20, fontWeight: "700", marginTop: 16, marginBottom: 8 },
+  list: { flex: 1, backgroundColor: "#0F2419" },
+  loader: { flex: 1, backgroundColor: "#0F2419", justifyContent: "center", alignItems: "center" },
+  empty: { flex: 1, backgroundColor: "#0F2419", justifyContent: "center", alignItems: "center", padding: 40 },
+  emptyTitle: { color: "#F0FDF4", fontSize: 20, fontWeight: "700", marginTop: 16, marginBottom: 8 },
   emptyText: { color: "#6B7280", fontSize: 14, textAlign: "center", lineHeight: 22 },
-  card:      { flexDirection: "row", alignItems: "center", backgroundColor: "#1A2E22", borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#2D4A38" },
-  strip:     { width: 5, alignSelf: "stretch" },
-  cardBody:  { flex: 1, padding: 14 },
-  cardDisease:{ color: "#F0FDF4", fontWeight: "700", fontSize: 15, marginBottom: 3 },
-  cardMeta:  { color: "#9CA3AF", fontSize: 12 },
-  cardDate:  { color: "#6B7280", fontSize: 12, marginTop: 4 },
+  card: { flexDirection: "row", alignItems: "center", backgroundColor: "#1A2E22", borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#2D4A38" },
+  strip: { width: 5, alignSelf: "stretch" },
+  cardBody: { flex: 1, padding: 14 },
+  cardDisease: { color: "#F0FDF4", fontWeight: "700", fontSize: 15, marginBottom: 3 },
+  cardMeta: { color: "#9CA3AF", fontSize: 12 },
+  cardDate: { color: "#6B7280", fontSize: 12, marginTop: 4 },
   cardRight: { paddingRight: 14, alignItems: "center", gap: 4 },
-  confidence:{ color: "#4ADE80", fontWeight: "700", fontSize: 14 },
+  confidence: { color: "#4ADE80", fontWeight: "700", fontSize: 14 },
 });

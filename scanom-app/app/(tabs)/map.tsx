@@ -12,41 +12,41 @@ import type { NearbyDetection, RiskSummary, Coordinates } from "@/types";
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const RISK_COLORS: Record<string, string> = {
-  high:     "rgba(239, 68, 68,  0.25)",
+  high: "rgba(239, 68, 68,  0.25)",
   moderate: "rgba(234, 179, 8,  0.20)",
-  low:      "rgba(74,  222, 128, 0.15)",
+  low: "rgba(74,  222, 128, 0.15)",
 };
 const RISK_BORDER: Record<string, string> = {
-  high:     "#EF4444",
+  high: "#EF4444",
   moderate: "#EAB308",
-  low:      "#4ADE80",
+  low: "#4ADE80",
 };
 const RISK_BADGE: Record<string, { bg: string; text: string; label: string }> = {
-  none:     { bg: "#1A2E22", text: "#4ADE80",  label: "No Active Cases" },
-  low:      { bg: "#14532D", text: "#4ADE80",  label: "Low Risk" },
-  moderate: { bg: "#713F12", text: "#EAB308",  label: "Moderate Risk" },
-  high:     { bg: "#7F1D1D", text: "#EF4444",  label: "High Risk" },
+  none: { bg: "#1A2E22", text: "#4ADE80", label: "No Active Cases" },
+  low: { bg: "#14532D", text: "#4ADE80", label: "Low Risk" },
+  moderate: { bg: "#713F12", text: "#EAB308", label: "Moderate Risk" },
+  high: { bg: "#7F1D1D", text: "#EF4444", label: "High Risk" },
 };
 
 type FilterKey = "all" | "tomato" | "banana" | "high" | "moderate" | "low";
 
 const FILTER_OPTIONS: { key: FilterKey; label: string }[] = [
-  { key: "all",      label: "All" },
-  { key: "tomato",   label: "🍅 Tomato" },
-  { key: "banana",   label: "🍌 Banana" },
-  { key: "high",     label: "🔴 High" },
+  { key: "all", label: "All" },
+  { key: "tomato", label: "🍅 Tomato" },
+  { key: "banana", label: "🍌 Banana" },
+  { key: "high", label: "🔴 High" },
   { key: "moderate", label: "🟡 Moderate" },
-  { key: "low",      label: "🟢 Low" },
+  { key: "low", label: "🟢 Low" },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function MapScreen() {
-  const [location,    setLocation]    = useState<Coordinates>(DEFAULT_LOCATION);
-  const [detections,  setDetections]  = useState<NearbyDetection[]>([]);
+  const [location, setLocation] = useState<Coordinates>(DEFAULT_LOCATION);
+  const [detections, setDetections] = useState<NearbyDetection[]>([]);
   const [riskSummary, setRiskSummary] = useState<RiskSummary | null>(null);
-  const [loading,     setLoading]     = useState(true);
-  const [selected,    setSelected]    = useState<NearbyDetection | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<NearbyDetection | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
   useFocusEffect(
@@ -77,12 +77,12 @@ export default function MapScreen() {
   // Client-side filter — no extra API calls needed
   const filteredDetections = useMemo(() => {
     switch (activeFilter) {
-      case "tomato":   return detections.filter(d => d.plant === "tomato");
-      case "banana":   return detections.filter(d => d.plant === "banana");
-      case "high":     return detections.filter(d => d.risk_level === "high");
+      case "tomato": return detections.filter(d => d.plant === "tomato");
+      case "banana": return detections.filter(d => d.plant === "banana");
+      case "high": return detections.filter(d => d.risk_level === "high");
       case "moderate": return detections.filter(d => d.risk_level === "moderate");
-      case "low":      return detections.filter(d => d.risk_level === "low");
-      default:         return detections;
+      case "low": return detections.filter(d => d.risk_level === "low");
+      default: return detections;
     }
   }, [detections, activeFilter]);
 
@@ -148,9 +148,9 @@ export default function MapScreen() {
         <MapView
           style={styles.map}
           initialRegion={{
-            latitude:       location.lat,
-            longitude:      location.lng,
-            latitudeDelta:  0.05,
+            latitude: location.lat,
+            longitude: location.lng,
+            latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           }}
           showsUserLocation
@@ -231,38 +231,38 @@ export default function MapScreen() {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: "#0F2419" },
-  banner:           { padding: 14, paddingHorizontal: 18 },
-  bannerLevel:      { fontSize: 15, fontWeight: "700" },
-  bannerSub:        { fontSize: 12, color: "#9CA3AF", marginTop: 2 },
+  container: { flex: 1, backgroundColor: "#0F2419" },
+  banner: { padding: 14, paddingHorizontal: 18 },
+  bannerLevel: { fontSize: 15, fontWeight: "700" },
+  bannerSub: { fontSize: 12, color: "#9CA3AF", marginTop: 2 },
 
   // Filter bar
-  filterBar:        { maxHeight: 52, backgroundColor: "#0F2419" },
-  filterContent:    { paddingHorizontal: 12, paddingVertical: 10, gap: 8, flexDirection: "row" },
-  filterChip:       { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: "#1A2E22", borderWidth: 1, borderColor: "#2D4A38" },
+  filterBar: { maxHeight: 52, backgroundColor: "#0F2419" },
+  filterContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8, flexDirection: "row" },
+  filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: "#1A2E22", borderWidth: 1, borderColor: "#2D4A38" },
   filterChipActive: { backgroundColor: "#14532D", borderColor: "#4ADE80" },
-  filterLabel:      { color: "#9CA3AF", fontSize: 13, fontWeight: "500" },
-  filterLabelActive:{ color: "#4ADE80", fontWeight: "700" },
+  filterLabel: { color: "#9CA3AF", fontSize: 13, fontWeight: "500" },
+  filterLabelActive: { color: "#4ADE80", fontWeight: "700" },
 
   // Map
-  map:              { flex: 1 },
-  loader:           { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
-  loaderText:       { color: "#9CA3AF", fontSize: 14 },
+  map: { flex: 1 },
+  loader: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
+  loaderText: { color: "#9CA3AF", fontSize: 14 },
 
   // Callout card
-  infoCard:         { position: "absolute", bottom: 24, left: 16, right: 16, backgroundColor: "#1A2E22", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#2D4A38", shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 5 },
-  infoHeader:       { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
-  infoRiskDot:      { width: 10, height: 10, borderRadius: 5 },
-  infoDisease:      { flex: 1, color: "#F0FDF4", fontWeight: "700", fontSize: 15 },
-  closeBtn:         { padding: 4 },
-  closeBtnText:     { color: "#6B7280", fontSize: 14 },
-  infoMeta:         { color: "#9CA3AF", fontSize: 13, marginBottom: 2 },
-  infoRadius:       { color: "#6B7280", fontSize: 12, marginTop: 2 },
-  infoDate:         { color: "#6B7280", fontSize: 12, marginTop: 4 },
+  infoCard: { position: "absolute", bottom: 24, left: 16, right: 16, backgroundColor: "#1A2E22", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#2D4A38", shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 5 },
+  infoHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
+  infoRiskDot: { width: 10, height: 10, borderRadius: 5 },
+  infoDisease: { flex: 1, color: "#F0FDF4", fontWeight: "700", fontSize: 15 },
+  closeBtn: { padding: 4 },
+  closeBtnText: { color: "#6B7280", fontSize: 14 },
+  infoMeta: { color: "#9CA3AF", fontSize: 13, marginBottom: 2 },
+  infoRadius: { color: "#6B7280", fontSize: 12, marginTop: 2 },
+  infoDate: { color: "#6B7280", fontSize: 12, marginTop: 4 },
 
   // Legend
-  legend:           { position: "absolute", bottom: 24, right: 16, backgroundColor: "#1A2E22", borderRadius: 12, padding: 10, borderWidth: 1, borderColor: "#2D4A38" },
-  legendRow:        { flexDirection: "row", alignItems: "center", marginVertical: 3 },
-  legendDot:        { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
-  legendLabel:      { color: "#D1FAE5", fontSize: 12 },
+  legend: { position: "absolute", bottom: 24, right: 16, backgroundColor: "#1A2E22", borderRadius: 12, padding: 10, borderWidth: 1, borderColor: "#2D4A38" },
+  legendRow: { flexDirection: "row", alignItems: "center", marginVertical: 3 },
+  legendDot: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
+  legendLabel: { color: "#D1FAE5", fontSize: 12 },
 });
