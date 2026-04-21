@@ -86,7 +86,10 @@ export default function HistoryScreen() {
           style={styles.card}
           activeOpacity={0.85}
           onPress={() =>
-            router.push({ pathname: "/result", params: { data: JSON.stringify(item) } })
+            router.push({
+              pathname: "/result",
+              params: { data: JSON.stringify(item), fromHistory: "true" },
+            })
           }
         >
           {/* Left: risk color strip */}

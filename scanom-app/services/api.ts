@@ -110,3 +110,21 @@ export async function getRiskSummary(
   if (!res.ok) throw new Error("Failed to fetch risk summary");
   return res.json();
 }
+
+// ── RESOLVE ───────────────────────────────────────────────────────────────────
+
+/**
+ * Mark a detection as resolved / cured.
+ * Hides the risk circle from the public map while keeping the historical record.
+ */
+export async function resolveDetection(detectionId: string): Promise<void> {
+  const headers = await authHeaders();
+  const res = await fetch(`${BASE}/detections/${detectionId}/resolve`, {
+    method: "PATCH",
+    headers,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Failed to resolve detection");
+  }
+}

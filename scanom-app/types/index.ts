@@ -66,6 +66,7 @@ export interface NearbyDetection {
   spread_radius:   number;
   created_at:      string;
   distance_km?:    number;
+  status?:         "active" | "resolved";
 }
 
 export interface RiskSummary {
@@ -79,4 +80,5 @@ export interface RiskSummary {
 export interface HistoryDetection extends DetectionResult {
   id:         string;
   created_at: string;
+  status?:    "active" | "resolved";
 }

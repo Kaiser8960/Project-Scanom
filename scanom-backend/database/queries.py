@@ -5,7 +5,7 @@ Centralises data access so routers stay clean.
 
 from database.supabase_client import get_supabase
 from services.geo import haversine_distance
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 # ── DETECTIONS ───────────────────────────────────────────────────────────────
@@ -17,35 +17,74 @@ def save_detection(detection: dict) -> dict:
     return resp.data[0] if resp.data else {}
 
 
-def get_detections_nearby(lat: float, lng: float, radius_km: float = 5.0) -> list:
+def get_detections_nearby(
+    lat: float,
+    lng: float,
+    radius_km: float = 5.0,
+    max_age_days: int = 14,
+    active_only: bool = True,
+) -> list:
     """
-    Fetch all detections within radius_km of (lat, lng).
+    Fetch all active detections within radius_km of (lat, lng),
+    limited to the last max_age_days days (default 14).
     Uses PostGIS ST_DWithin for efficient spatial query.
     Falls back to in-memory Haversine if PostGIS query fails.
     """
-    sb = get_supabase()
+    sb            = get_supabase()
     radius_meters = radius_km * 1000
+    cutoff_dt     = datetime.now(timezone.utc) - timedelta(days=max_age_days)
+    cutoff_iso    = cutoff_dt.isoformat()
 
     try:
         # PostGIS spatial query — most efficient
-        resp = sb.rpc(
+        resp    = sb.rpc(
             "get_nearby_detections",
             {"user_lat": lat, "user_lng": lng, "radius_m": radius_meters},
         ).execute()
-        return resp.data or []
+        results = resp.data or []
     except Exception:
-        # Fallback: fetch recent detections and filter in-memory
-        resp = sb.table("detections").select(
-            "id,lat,lng,plant,disease,disease_display,is_healthy,"
-            "risk_level,spread_radius,created_at"
-        ).order("created_at", desc=True).limit(200).execute()
-
-        result = []
+        # Fallback: fetch recent detections and filter in-memory via Haversine
+        resp    = (
+            sb.table("detections")
+            .select(
+                "id,lat,lng,plant,disease,disease_display,is_healthy,"
+                "risk_level,spread_radius,created_at,status"
+            )
+            .gte("created_at", cutoff_iso)
+            .order("created_at", desc=True)
+            .limit(200)
+            .execute()
+        )
+        results = []
         for d in (resp.data or []):
             dist = haversine_distance(lat, lng, d["lat"], d["lng"])
             if dist <= radius_km:
-                result.append({**d, "distance_km": round(dist, 2)})
-        return result
+                results.append({**d, "distance_km": round(dist, 2)})
+
+    # ── Apply TTL and status filters in Python ────────────────────────────────
+    # This handles both PostGIS (which may not know about new columns) and
+    # the fallback path, ensuring consistent behaviour.
+    filtered = []
+    for d in results:
+        # 1. TTL filter — skip detections older than max_age_days
+        created = d.get("created_at", "")
+        if created:
+            try:
+                dt = datetime.fromisoformat(created.replace("Z", "+00:00"))
+                if dt < cutoff_dt:
+                    continue
+            except Exception:
+                pass
+
+        # 2. Status filter — treat missing/null as 'active' for backward compat
+        if active_only:
+            status = d.get("status", "active")
+            if status not in ("active", None):
+                continue
+
+        filtered.append(d)
+
+    return filtered
 
 
 def get_user_detections(user_id: str, limit: int = 20, offset: int = 0) -> list:
@@ -69,11 +108,29 @@ def get_detection_by_id(detection_id: str) -> dict | None:
     return resp.data
 
 
+def resolve_detection(detection_id: str, user_id: str) -> bool:
+    """
+    Mark a detection as resolved (plant treated / cured).
+    Only the owner of the detection can resolve it.
+    Returns True if a record was updated, False if not found / unauthorized.
+    """
+    sb   = get_supabase()
+    resp = (
+        sb.table("detections")
+        .update({"status": "resolved"})
+        .eq("id",      detection_id)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    return len(resp.data) > 0
+
+
 # ── RISK SUMMARY ──────────────────────────────────────────────────────────────
 
 def get_risk_summary(lat: float, lng: float, radius_km: float = 5.0) -> dict:
     """
     Summarise disease risk in an area: count, dominant disease, overall level.
+    Only considers active detections within the TTL window.
     """
     detections = get_detections_nearby(lat, lng, radius_km)
     active      = [d for d in detections if not d.get("is_healthy", False)]
