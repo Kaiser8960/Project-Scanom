@@ -119,8 +119,7 @@ npx expo install expo-image-manipulator
 npx expo install react-native-maps
 
 # UI styling
-npm install nativewind
-npm install --save-dev tailwindcss
+# The app uses standard React Native StyleSheet, no external UI library needed.
 
 # Safe area and screens
 npx expo install react-native-safe-area-context
@@ -1177,78 +1176,76 @@ Include this sentence in Chapter 3 Methodology under Data Collection:
 
 ## 16. Sprint Plan
 
-### Sprint 0 — Setup (April 4–7)
+### Sprint 0 — Setup (April 4-7)
 ```
-□ Run merge_datasets.py (see SCANOM_ML.md)
-□ Run split_dataset.py
-□ Check class image counts — flag under 300
-□ Set up Supabase project + run SQL schema above
-□ Set up Google Maps API key + billing alert
-□ Initialize FastAPI project structure
-□ Initialize Expo project with expo-router
-□ Set up GitHub repo
-□ Schedule DA-RFU VII visit
+[x] Run merge_datasets.py (see SCANOM_ML.md)
+[x] Run split_dataset.py
+[x] Check class image counts - flag under 300
+[x] Set up Supabase project + run SQL schema above
+[x] Initialize FastAPI project structure
+[x] Initialize Expo project with expo-router
+[x] Set up GitHub repo
 ```
 
-### Sprint 1 — CNN Model (April 8–14)
+### Sprint 1 — CNN Model (April 8-14)
 ```
-□ See SCANOM_ML.md for full training instructions
-□ Target: 95% accuracy, 0.90 F1
-□ Export TFLite → place in scanom-backend/model/
-□ Save class_names.json → place in scanom-backend/model/
-```
-
-### Sprint 2 — Backend (April 15–19)
-```
-□ Implement all routers and services
-□ Implement fuzzy_engine.py (code above)
-□ Implement inference.py with confidence threshold
-□ Implement weather.py (Open-Meteo)
-□ Implement ai_explainer.py
-□ Test all endpoints in Postman
-□ Deploy to Railway or Render
-□ Confirm /detect returns correct JSON structure
+[x] See SCANOM_ML.md for full training instructions
+[x] Achieved target: 95%+ accuracy, 0.90+ F1
+[x] Export TFLite - placed in scanom-backend/model/
+[x] Saved class_names.json - placed in scanom-backend/model/
 ```
 
-### Sprint 3 — Mobile App (April 20–25)
+### Sprint 2 — Backend (April 15-19)
 ```
-□ Build 7 screens: sign-in, sign-up, map, scan, result, rejection, history
-□ Implement 3-tab nav (Map | ◉ Scanner center | History) + ProfileBottomSheet
-□ Implement three result states (diseased / healthy / rejected)
-□ Connect all screens to FastAPI via services/api.ts
-□ Test full flow on physical device via Expo Go QR
-□ Verify camera + GPS permissions work on device
-```
-
-### Sprint 4 — DA-RFU VII + Refinement (April 26–28)
-```
-□ Visit DA-RFU VII — collect tomato + banana disease photos
-□ Shoot with DSLR (Canon EOS 750D, JPG Fine) + smartphone
-□ Sort into class folders + re-run merge/split scripts
-□ Fine-tune model if accuracy drops below 95%
-□ Update TFLite in backend
+[x] Implemented all routers and services
+[x] Implemented fuzzy_engine.py (risk level + spread radius)
+[x] Implemented inference.py with confidence threshold (0.70)
+[x] Implemented weather.py (Open-Meteo integration)
+[x] Implemented ai_explainer.py (Gemini 1.5 Flash)
+[x] Tested all endpoints in Postman
+[x] Deployed to Railway
+[x] Confirmed /detect returns correct JSON structure
 ```
 
-### Sprint 5 — Testing + Polish (April 29–May 2)
+### Sprint 3 — Mobile App (April 20-25)
 ```
-□ End-to-end test with real diseased leaves
-□ Test rejection flow with non-plant objects
-□ Test with no internet (graceful error messages)
-□ Test Open-Meteo fallback (FALLBACK_HUMIDITY/TEMP)
-□ UI polish — spacing, colors, badges
-□ Generate APK via EAS Build
-```
-
-### Sprint 6 — Docs + Defense (May 3–10)
-```
-□ Write Chapter 3 (include GNSS sentence, fuzzy logic design,
-  dataset collection, architecture, confidence threshold logic)
-□ Write Chapter 4 (metrics table, screenshots, risk map results)
-□ Prepare defense slides
-□ Rehearse demo with real leaves
-□ Submit thesis document
+[x] Built all screens: sign-in, sign-up, map, scan, result, rejection, history
+[x] Implemented 3-tab nav (Map | Scanner center | History) + ProfileAvatar
+[x] Implemented three result states (diseased / healthy / rejected)
+[x] Connected all screens to FastAPI via services/api.ts
+[x] Tested full flow on physical device via Expo Go QR
+[x] Verified camera + GPS permissions work on device
+[x] Fixed network request failures on external devices (hotspot/LAN support)
 ```
 
+### Sprint 4 — Integration, Bug Fixes & Feature Updates (April 26-28)
+```
+[x] Fixed Android 403 OpenStreetMap error - removed UrlTile, switched to native Google Maps
+[x] Implemented map filter chips (All / Tomato / Banana / High / Moderate / Low)
+[x] Implemented interactive marker callouts on map with detection details and close button
+[x] Implemented 14-day TTL filter on GET /detections/nearby (backend)
+[x] Added status column to detections table (DB migration: active / resolved)
+[x] Implemented Mark as Cured / Resolved feature (full-stack)
+[x] Added PATCH /detections/{id}/resolve endpoint (backend)
+[x] Restored missing AI data (causes, treatment, prevention) on History view
+[x] Implemented Spread Forecast mini-map on Diagnosis Result screen
+[x] Fixed profile avatar dropdown panel not showing on header tap
+[x] Added dynamic top padding for notches and Dynamic Islands (useSafeAreaInsets)
+```
+
+### Sprint 5 — UI Polish & Testing (April 29-May 2)
+```
+[x] UI color scheme refactored - applied warm cream light theme across all screens
+[x] Auth screens (sign-in, sign-up) restyled to match UI mockups
+[x] Tab bar and header restyled (white tab bar, mint green active pill)
+[x] History cards restyled with colored risk badge pills
+[x] Result, Rejection, Map screens restyled to new theme
+[ ] End-to-end test with real diseased leaves (physical field test)
+[ ] Test rejection flow with non-plant objects
+[ ] Test with no internet (graceful error messages)
+[ ] Test Open-Meteo fallback (FALLBACK_HUMIDITY/TEMP env vars)
+[ ] Generate final APK via EAS Build
+```
 ---
 
 *SCANOM_SPEC.md — Velas Co. / USPF CCS / April 2026*
