@@ -74,7 +74,7 @@ export default function ScanScreen() {
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Ionicons name="camera-outline" size={64} color="#4ADE80" />
+        <Ionicons name="camera-outline" size={64} color="#025f00" />
         <Text style={styles.permissionTitle}>Camera Access Required</Text>
         <Text style={styles.permissionText}>
           Scanom needs camera access to scan plant leaves for disease detection.
@@ -114,7 +114,7 @@ export default function ScanScreen() {
           onPress={pickFromGallery}
           disabled={processing}
         >
-          <Ionicons name="images-outline" size={28} color="#D1FAE5" />
+          <Ionicons name="images-outline" size={28} color="#1B4A2F" />
           <Text style={styles.sideBtnLabel}>Gallery</Text>
         </TouchableOpacity>
 
@@ -126,7 +126,7 @@ export default function ScanScreen() {
           activeOpacity={0.85}
         >
           {processing
-            ? <ActivityIndicator color="#0F2419" size="large" />
+            ? <ActivityIndicator color="#FFFFFF" size="large" />
             : <View style={styles.shutterInner} />
           }
         </TouchableOpacity>
@@ -137,7 +137,7 @@ export default function ScanScreen() {
           onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))}
           disabled={processing}
         >
-          <Ionicons name="camera-reverse-outline" size={28} color="#D1FAE5" />
+          <Ionicons name="camera-reverse-outline" size={28} color="#1B4A2F" />
           <Text style={styles.sideBtnLabel}>Flip</Text>
         </TouchableOpacity>
       </View>
@@ -146,20 +146,20 @@ export default function ScanScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:           { flex: 1, backgroundColor: "#0F2419" },
+  container:           { flex: 1, backgroundColor: "#FFFFFF" },
   camera:              { flex: 1 },
   overlay:             { flex: 1, alignItems: "center", justifyContent: "center" },
   frameOuter:          { width: 240, height: 240, justifyContent: "center", alignItems: "center" },
-  frame:               { width: 220, height: 220, borderWidth: 2, borderColor: "#4ADE80", borderRadius: 16, backgroundColor: "transparent" },
-  hint:                { color: "#D1FAE5", fontSize: 13, marginTop: 16, backgroundColor: "rgba(15,36,25,0.6)", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
-  controls:            { flexDirection: "row", alignItems: "center", justifyContent: "space-around", backgroundColor: "#0F2419", paddingVertical: 24, paddingBottom: 36 },
-  shutter:             { width: 72, height: 72, borderRadius: 36, backgroundColor: "#4ADE80", justifyContent: "center", alignItems: "center", borderWidth: 4, borderColor: "#1B3A2D" },
-  shutterInner:        { width: 56, height: 56, borderRadius: 28, backgroundColor: "#F0FDF4" },
+  frame:               { width: 220, height: 220, borderWidth: 2, borderColor: "#1B4A2F", borderRadius: 16, backgroundColor: "transparent" },
+  hint:                { color: "#FFFFFF", fontSize: 13, marginTop: 16, backgroundColor: "rgba(27,74,47,0.80)", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+  controls:            { flexDirection: "row", alignItems: "center", justifyContent: "space-around", backgroundColor: "#FFFFFF", paddingVertical: 24, paddingBottom: 36, borderTopWidth: 1, borderTopColor: "#E5E7EB" },
+  shutter:             { width: 72, height: 72, borderRadius: 36, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: "#E8F5E9" },
+  shutterInner:        { width: 56, height: 56, borderRadius: 28, backgroundColor: "#FFFFFF" },
   sideBtn:             { alignItems: "center", width: 70 },
-  sideBtnLabel:        { color: "#9CA3AF", fontSize: 11, marginTop: 4 },
-  permissionContainer: { flex: 1, backgroundColor: "#0F2419", justifyContent: "center", alignItems: "center", padding: 32 },
-  permissionTitle:     { color: "#F0FDF4", fontSize: 20, fontWeight: "700", marginTop: 20, marginBottom: 12 },
-  permissionText:      { color: "#9CA3AF", fontSize: 14, textAlign: "center", lineHeight: 22 },
-  permissionBtn:       { marginTop: 24, backgroundColor: "#1B3A2D", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32, borderWidth: 1, borderColor: "#4ADE80" },
-  permissionBtnText:   { color: "#4ADE80", fontWeight: "700", fontSize: 15 },
+  sideBtnLabel:        { color: "#1B4A2F", fontSize: 11, marginTop: 4, fontWeight: "600" },
+  permissionContainer: { flex: 1, backgroundColor: "#FFFFFF", justifyContent: "center", alignItems: "center", padding: 32 },
+  permissionTitle:     { color: "#111827", fontSize: 20, fontWeight: "700", marginTop: 20, marginBottom: 12 },
+  permissionText:      { color: "#504c4c", fontSize: 14, textAlign: "center", lineHeight: 22 },
+  permissionBtn:       { marginTop: 24, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32 },
+  permissionBtnText:   { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
 });

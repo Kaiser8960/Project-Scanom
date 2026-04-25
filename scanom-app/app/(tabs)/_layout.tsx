@@ -1,30 +1,36 @@
 import { Tabs } from "expo-router";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 
 /**
- * 3-tab navigator: Map (left) | Scanner (elevated center) | History (right)
- * Profile is a floating avatar in the header of every tab — not a tab itself.
+ * Tab navigator — White-primary color scheme.
+ *
+ * Design philosophy (aligned with image 2 reference):
+ *   - White is the PRIMARY color (header, nav bar, all screens)
+ *   - Dark forest green (#1B4A2F) is the ACCENT color
+ *     (active icons, borders, buttons, section titles)
+ *   - Gray (#9CA3AF) for inactive/secondary elements
+ *
+ * This makes green feel intentional and premium rather than dominant.
  */
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: "#4ADE80",
-        tabBarInactiveTintColor: "#6B7280",
+        tabBarActiveTintColor: "#1B4A2F",      // Dark forest green — active
+        tabBarInactiveTintColor: "#9CA3AF",    // Gray — inactive
         tabBarShowLabel: true,
         tabBarLabelStyle: styles.label,
         headerStyle: styles.header,
-        headerTintColor: "#F0FDF4",
+        headerTintColor: "#1B4A2F",
         headerTitleStyle: styles.headerTitle,
-        // Floating profile avatar shown on every tab
         headerRight: () => <ProfileAvatar />,
         headerRightContainerStyle: styles.headerRightContainer,
       }}
     >
-      {/* ── MAP TAB ─────────────────────────────────────────── */}
+      {/* ── MAP ─────────────────────────────────────────── */}
       <Tabs.Screen
         name="map"
         options={{
@@ -36,22 +42,24 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── SCANNER (elevated center FAB) ────────────────────── */}
+      {/* ── SCAN (center circle button) ──────────────────── */}
       <Tabs.Screen
         name="scan"
         options={{
           title: "Scan",
           headerTitle: "Scanner",
           tabBarIcon: ({ focused }) => (
-            <View style={[styles.scanFab, focused && styles.scanFabActive]}>
-              <Ionicons name="scan-outline" size={28} color="#F0FDF4" />
+            <View style={styles.fabWrap}>
+              <View style={[styles.fabCircle, focused && styles.fabCircleActive]}>
+                <Ionicons name="scan-outline" size={24} color="#FFFFFF" />
+              </View>
             </View>
           ),
-          tabBarLabel: () => null,    // No label under the FAB
+          tabBarLabel: () => null,
         }}
       />
 
-      {/* ── HISTORY TAB ─────────────────────────────────────── */}
+      {/* ── HISTORY ─────────────────────────────────────── */}
       <Tabs.Screen
         name="history"
         options={{
@@ -67,51 +75,72 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: "#0F2419",
-    borderTopColor: "#1B3A2D",
-    borderTopWidth: 1,
-    height: 68,
-    paddingBottom: 8,
-    paddingTop: 4,
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
+  // ── Header — white surface ─────────────────────────────────────────────────
   header: {
-    backgroundColor: "#0F2419",
-    borderBottomColor: "#1B3A2D",
+    backgroundColor: "#FFFFFF",
+    borderBottomColor: "#E5E7EB",
     borderBottomWidth: 1,
     elevation: 0,
-    shadowOpacity: 0,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
   },
   headerTitle: {
-    color: "#F0FDF4",
+    color: "#111827",          // Dark text on white header
     fontWeight: "700",
     fontSize: 18,
   },
   headerRightContainer: {
     paddingRight: 16,
   },
-  scanFab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#1B3A2D",
+
+  // ── Tab bar — white surface ────────────────────────────────────────────────
+  tabBar: {
+    backgroundColor: "#FFFFFF",
+    borderTopColor: "#E5E7EB",
+    borderTopWidth: 1,
+    height: Platform.select({ ios: 84, android: 68 }),
+    paddingBottom: Platform.select({ ios: 28, android: 8 }),
+    paddingTop: 6,
+    // Subtle lift shadow
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: -2 },
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  // ── Scan FAB (dark green circle, no big elevation) ─────────────────────────
+  fabWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Platform.select({ ios: 14, android: 10 }),
+  },
+  fabCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#1B4A2F",     // Dark forest green
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
     borderWidth: 2,
-    borderColor: "#4ADE80",
-    shadowColor: "#4ADE80",
-    shadowOffset: { width: 0, height: 2 },
+    borderColor: "#E8F5E9",
+    shadowColor: "#1B4A2F",
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 6,
+    elevation: 5,
   },
-  scanFabActive: {
-    backgroundColor: "#1B4A2F",
-    borderColor: "#86EFAC",
+  fabCircleActive: {
+    backgroundColor: "#0F2419",     // Deeper green when focused
+    borderColor: "#D1FAE5",
+    shadowOpacity: 0.55,
+    shadowRadius: 12,
+    elevation: 10,
   },
 });

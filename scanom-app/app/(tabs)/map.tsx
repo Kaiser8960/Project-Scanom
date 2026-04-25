@@ -22,10 +22,10 @@ const RISK_BORDER: Record<string, string> = {
   low: "#4ADE80",
 };
 const RISK_BADGE: Record<string, { bg: string; text: string; label: string }> = {
-  none: { bg: "#1A2E22", text: "#4ADE80", label: "No Active Cases" },
-  low: { bg: "#14532D", text: "#4ADE80", label: "Low Risk" },
-  moderate: { bg: "#713F12", text: "#EAB308", label: "Moderate Risk" },
-  high: { bg: "#7F1D1D", text: "#EF4444", label: "High Risk" },
+  none:     { bg: "#E8F5E9", text: "#025f00", label: "No Active Cases" },
+  low:      { bg: "#E8F5E9", text: "#025f00", label: "Low Risk" },
+  moderate: { bg: "#FEF9C3", text: "#854D0E", label: "Moderate Risk" },
+  high:     { bg: "#FEE2E2", text: "#B91C1C", label: "High Risk" },
 };
 
 type FilterKey = "all" | "tomato" | "banana" | "high" | "moderate" | "low";
@@ -141,7 +141,7 @@ export default function MapScreen() {
       {/* ── Map ── */}
       {loading ? (
         <View style={styles.loader}>
-          <ActivityIndicator size="large" color="#4ADE80" />
+          <ActivityIndicator size="large" color="#025f00" />
           <Text style={styles.loaderText}>Loading map…</Text>
         </View>
       ) : (
@@ -231,38 +231,38 @@ export default function MapScreen() {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F2419" },
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   banner: { padding: 14, paddingHorizontal: 18 },
   bannerLevel: { fontSize: 15, fontWeight: "700" },
-  bannerSub: { fontSize: 12, color: "#9CA3AF", marginTop: 2 },
+  bannerSub: { fontSize: 12, color: "#504c4c", marginTop: 2 },
 
   // Filter bar
-  filterBar: { maxHeight: 52, backgroundColor: "#0F2419" },
+  filterBar: { maxHeight: 52, backgroundColor: "#FFFFFF" },
   filterContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8, flexDirection: "row" },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: "#1A2E22", borderWidth: 1, borderColor: "#2D4A38" },
-  filterChipActive: { backgroundColor: "#14532D", borderColor: "#4ADE80" },
-  filterLabel: { color: "#9CA3AF", fontSize: 13, fontWeight: "500" },
-  filterLabelActive: { color: "#4ADE80", fontWeight: "700" },
+  filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#D1E8D8" },
+  filterChipActive: { backgroundColor: "#E8F5E9", borderColor: "#1B4A2F" },
+  filterLabel: { color: "#504c4c", fontSize: 13, fontWeight: "500" },
+  filterLabelActive: { color: "#1B4A2F", fontWeight: "700" },
 
   // Map
   map: { flex: 1 },
   loader: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
-  loaderText: { color: "#9CA3AF", fontSize: 14 },
+  loaderText: { color: "#504c4c", fontSize: 14 },
 
   // Callout card
-  infoCard: { position: "absolute", bottom: 24, left: 16, right: 16, backgroundColor: "#1A2E22", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#2D4A38", shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 5 },
+  infoCard: { position: "absolute", bottom: 24, left: 16, right: 16, backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#D1E8D8", shadowColor: "#1B4A2F", shadowOpacity: 0.10, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 5 },
   infoHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
   infoRiskDot: { width: 10, height: 10, borderRadius: 5 },
-  infoDisease: { flex: 1, color: "#F0FDF4", fontWeight: "700", fontSize: 15 },
+  infoDisease: { flex: 1, color: "#111827", fontWeight: "700", fontSize: 15 },
   closeBtn: { padding: 4 },
   closeBtnText: { color: "#6B7280", fontSize: 14 },
-  infoMeta: { color: "#9CA3AF", fontSize: 13, marginBottom: 2 },
+  infoMeta: { color: "#504c4c", fontSize: 13, marginBottom: 2 },
   infoRadius: { color: "#6B7280", fontSize: 12, marginTop: 2 },
   infoDate: { color: "#6B7280", fontSize: 12, marginTop: 4 },
 
   // Legend
-  legend: { position: "absolute", bottom: 24, right: 16, backgroundColor: "#1A2E22", borderRadius: 12, padding: 10, borderWidth: 1, borderColor: "#2D4A38" },
+  legend: { position: "absolute", bottom: 24, right: 16, backgroundColor: "#FFFFFF", borderRadius: 12, padding: 10, borderWidth: 1, borderColor: "#D1E8D8", shadowColor: "#1B4A2F", shadowOpacity: 0.08, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4, elevation: 3 },
   legendRow: { flexDirection: "row", alignItems: "center", marginVertical: 3 },
   legendDot: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
-  legendLabel: { color: "#D1FAE5", fontSize: 12 },
+  legendLabel: { color: "#111827", fontSize: 12 },
 });

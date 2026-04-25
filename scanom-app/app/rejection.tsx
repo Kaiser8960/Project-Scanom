@@ -35,7 +35,7 @@ export default function RejectionScreen() {
         <Text style={styles.tipsTitle}>Tips for a better scan</Text>
         {TIPS.map((tip, i) => (
           <View key={i} style={styles.tipRow}>
-            <Ionicons name="checkmark-circle-outline" size={16} color="#4ADE80" />
+            <Ionicons name="checkmark-circle-outline" size={16} color="#025f00" />
             <Text style={styles.tipText}>{tip}</Text>
           </View>
         ))}
@@ -47,7 +47,7 @@ export default function RejectionScreen() {
         onPress={() => router.back()}
         activeOpacity={0.85}
       >
-        <Ionicons name="camera-outline" size={18} color="#0F2419" />
+        <Ionicons name="camera-outline" size={18} color="#FFFFFF" />
         <Text style={styles.primaryBtnText}>Try Again</Text>
       </TouchableOpacity>
 
@@ -64,17 +64,17 @@ export default function RejectionScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#0F2419" },
+  root: { flex: 1, backgroundColor: "#FFFFFF" },
   content: { flexGrow: 1, padding: 28, paddingTop: 48, alignItems: "center" },
-  iconWrap: { width: 100, height: 100, borderRadius: 50, backgroundColor: "#1A2E22", justifyContent: "center", alignItems: "center", marginBottom: 24 },
-  title: { color: "#F0FDF4", fontSize: 24, fontWeight: "700", marginBottom: 12, textAlign: "center" },
-  subtitle: { color: "#9CA3AF", fontSize: 14, lineHeight: 22, textAlign: "center", marginBottom: 28 },
-  tipsCard: { backgroundColor: "#1A2E22", borderRadius: 16, padding: 18, width: "100%", borderWidth: 1, borderColor: "#2D4A38", marginBottom: 28, gap: 12 },
-  tipsTitle: { color: "#4ADE80", fontWeight: "700", fontSize: 13, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
+  iconWrap: { width: 100, height: 100, borderRadius: 50, backgroundColor: "#E8F5E9", justifyContent: "center", alignItems: "center", marginBottom: 24 },
+  title: { color: "#111827", fontSize: 24, fontWeight: "700", marginBottom: 12, textAlign: "center" },
+  subtitle: { color: "#504c4c", fontSize: 14, lineHeight: 22, textAlign: "center", marginBottom: 28 },
+  tipsCard: { backgroundColor: "#F0FDF4", borderRadius: 16, padding: 18, width: "100%", borderWidth: 1, borderColor: "#BBF7D0", marginBottom: 28, gap: 12 },
+  tipsTitle: { color: "#025f00", fontWeight: "700", fontSize: 13, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
   tipRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
-  tipText: { flex: 1, color: "#D1FAE5", fontSize: 13, lineHeight: 20 },
-  primaryBtn: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#4ADE80", borderRadius: 14, paddingVertical: 15, paddingHorizontal: 32, width: "100%", justifyContent: "center", marginBottom: 12 },
-  primaryBtnText: { color: "#0F2419", fontWeight: "700", fontSize: 15 },
+  tipText: { flex: 1, color: "#111827", fontSize: 13, lineHeight: 20 },
+  primaryBtn: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#025f00", borderRadius: 14, paddingVertical: 15, paddingHorizontal: 32, width: "100%", justifyContent: "center", marginBottom: 12 },
+  primaryBtnText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
   secondaryBtn: { paddingVertical: 12 },
   secondaryBtnText: { color: "#6B7280", fontSize: 14 },
 });

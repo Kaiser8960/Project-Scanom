@@ -56,7 +56,7 @@ export default function HistoryScreen() {
   if (loading && history.length === 0) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#4ADE80" />
+        <ActivityIndicator size="large" color="#025f00" />
       </View>
     );
   }
@@ -64,7 +64,7 @@ export default function HistoryScreen() {
   if (!loading && history.length === 0) {
     return (
       <View style={styles.empty}>
-        <Ionicons name="leaf-outline" size={64} color="#2D4A38" />
+        <Ionicons name="leaf-outline" size={64} color="#025f00" />
         <Text style={styles.emptyTitle}>No Scans Yet</Text>
         <Text style={styles.emptyText}>
           Tap the scan button to detect plant diseases.
@@ -121,7 +121,7 @@ export default function HistoryScreen() {
       )}
       ListFooterComponent={
         loading && history.length > 0
-          ? <ActivityIndicator color="#4ADE80" style={{ marginVertical: 16 }} />
+          ? <ActivityIndicator color="#025f00" style={{ marginVertical: 16 }} />
           : null
       }
     />
@@ -129,17 +129,17 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  list: { flex: 1, backgroundColor: "#0F2419" },
-  loader: { flex: 1, backgroundColor: "#0F2419", justifyContent: "center", alignItems: "center" },
-  empty: { flex: 1, backgroundColor: "#0F2419", justifyContent: "center", alignItems: "center", padding: 40 },
-  emptyTitle: { color: "#F0FDF4", fontSize: 20, fontWeight: "700", marginTop: 16, marginBottom: 8 },
+  list: { flex: 1, backgroundColor: "#FFFFFF" },
+  loader: { flex: 1, backgroundColor: "#FFFFFF", justifyContent: "center", alignItems: "center" },
+  empty: { flex: 1, backgroundColor: "#FFFFFF", justifyContent: "center", alignItems: "center", padding: 40 },
+  emptyTitle: { color: "#111827", fontSize: 20, fontWeight: "700", marginTop: 16, marginBottom: 8 },
   emptyText: { color: "#6B7280", fontSize: 14, textAlign: "center", lineHeight: 22 },
-  card: { flexDirection: "row", alignItems: "center", backgroundColor: "#1A2E22", borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#2D4A38" },
+  card: { flexDirection: "row", alignItems: "center", backgroundColor: "#FFFFFF", borderRadius: 14, overflow: "hidden", borderWidth: 1, borderColor: "#D1E8D8" },
   strip: { width: 5, alignSelf: "stretch" },
   cardBody: { flex: 1, padding: 14 },
-  cardDisease: { color: "#F0FDF4", fontWeight: "700", fontSize: 15, marginBottom: 3 },
-  cardMeta: { color: "#9CA3AF", fontSize: 12 },
+  cardDisease: { color: "#111827", fontWeight: "700", fontSize: 15, marginBottom: 3 },
+  cardMeta: { color: "#504c4c", fontSize: 12 },
   cardDate: { color: "#6B7280", fontSize: 12, marginTop: 4 },
   cardRight: { paddingRight: 14, alignItems: "center", gap: 4 },
-  confidence: { color: "#4ADE80", fontWeight: "700", fontSize: 14 },
+  confidence: { color: "#1B4A2F", fontWeight: "700", fontSize: 14 },
 });

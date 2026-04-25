@@ -102,7 +102,7 @@ export default function ResultScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color="#4ADE80" />
+          <Ionicons name="arrow-back" size={22} color="#1B4A2F" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {isFromHistory ? "Past Scan" : "Scan Result"}
@@ -250,10 +250,10 @@ export default function ResultScreen() {
           disabled={resolving}
         >
           {resolving ? (
-            <ActivityIndicator color="#0F2419" size="small" />
+            <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <>
-              <Ionicons name="checkmark-circle-outline" size={20} color="#0F2419" />
+              <Ionicons name="checkmark-circle-outline" size={20} color="#FFFFFF" />
               <Text style={styles.curedBtnText}>✓ Mark as Cured / Treated</Text>
             </>
           )}
@@ -278,54 +278,54 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#0F2419" },
+  root: { flex: 1, backgroundColor: "#FFFFFF" },
   content: { padding: 16, paddingBottom: 48 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 },
   backBtn: { padding: 6 },
-  headerTitle: { color: "#F0FDF4", fontWeight: "700", fontSize: 17 },
+  headerTitle: { color: "#111827", fontWeight: "700", fontSize: 17 },
 
   // Resolved state banner
-  resolvedBanner: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#14532D", borderRadius: 10, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: "#4ADE80" },
-  resolvedText: { color: "#4ADE80", fontSize: 13, fontWeight: "600" },
+  resolvedBanner: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#E8F5E9", borderRadius: 10, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: "#D1E8D8" },
+  resolvedText: { color: "#1B4A2F", fontSize: 13, fontWeight: "600" },
 
   // Disease card
-  diseaseCard: { backgroundColor: "#1A2E22", borderRadius: 18, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: "#2D4A38", alignItems: "center" },
-  plantBadge: { backgroundColor: "#243B2F", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginBottom: 10 },
-  plantText: { color: "#4ADE80", fontSize: 12, fontWeight: "600" },
-  diseaseName: { color: "#F0FDF4", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 8 },
+  diseaseCard: { backgroundColor: "#FFFFFF", borderRadius: 18, padding: 20, marginBottom: 12, borderWidth: 1, borderColor: "#D1E8D8", alignItems: "center", shadowColor: "#1B4A2F", shadowOpacity: 0.06, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4, elevation: 2 },
+  plantBadge: { backgroundColor: "#E8F5E9", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginBottom: 10 },
+  plantText: { color: "#1B4A2F", fontSize: 12, fontWeight: "600" },
+  diseaseName: { color: "#111827", fontSize: 22, fontWeight: "700", textAlign: "center", marginBottom: 8 },
   confidenceRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  confidenceText: { color: "#9CA3AF", fontSize: 13 },
+  confidenceText: { color: "#6B7280", fontSize: 13 },
 
   // Risk card
-  riskCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#1A2E22", borderRadius: 14, padding: 16, gap: 14, marginBottom: 12, borderWidth: 1 },
+  riskCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#FFFFFF", borderRadius: 14, padding: 16, gap: 14, marginBottom: 12, borderWidth: 1 },
   riskInfo: { flex: 1 },
   riskLevel: { fontSize: 16, fontWeight: "700" },
-  riskRadius: { color: "#9CA3AF", fontSize: 12, marginTop: 3 },
+  riskRadius: { color: "#6B7280", fontSize: 12, marginTop: 3 },
 
   // Weather
   weatherRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
-  weatherItem: { flex: 1, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#1A2E22", borderRadius: 12, padding: 12, borderWidth: 1, borderColor: "#2D4A38" },
-  weatherText: { color: "#D1FAE5", fontSize: 13 },
+  weatherItem: { flex: 1, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#F9FAFB", borderRadius: 12, padding: 12, borderWidth: 1, borderColor: "#D1E8D8" },
+  weatherText: { color: "#374151", fontSize: 13 },
 
   // Mini-map
-  miniMapCard: { backgroundColor: "#1A2E22", borderRadius: 14, overflow: "hidden", marginBottom: 12, borderWidth: 1, borderColor: "#2D4A38" },
+  miniMapCard: { backgroundColor: "#FFFFFF", borderRadius: 14, overflow: "hidden", marginBottom: 12, borderWidth: 1, borderColor: "#D1E8D8" },
   miniMap: { width: "100%", height: 200 },
   miniMapCaption: { color: "#6B7280", fontSize: 11, textAlign: "center", paddingVertical: 8 },
 
   // AI sections
-  section: { backgroundColor: "#1A2E22", borderRadius: 14, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: "#2D4A38" },
-  sectionTitle: { color: "#4ADE80", fontWeight: "700", fontSize: 13, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 },
-  bodyText: { color: "#D1FAE5", fontSize: 14, lineHeight: 22 },
+  section: { backgroundColor: "#FFFFFF", borderRadius: 14, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: "#D1E8D8" },
+  sectionTitle: { color: "#1B4A2F", fontWeight: "700", fontSize: 13, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 },
+  bodyText: { color: "#374151", fontSize: 14, lineHeight: 22 },
   bulletRow: { flexDirection: "row", gap: 8, marginBottom: 6, alignItems: "flex-start" },
-  bullet: { color: "#4ADE80", fontSize: 16, lineHeight: 22 },
-  bulletText: { flex: 1, color: "#D1FAE5", fontSize: 14, lineHeight: 22 },
-  stepNum: { width: 22, height: 22, borderRadius: 11, backgroundColor: "#1B3A2D", justifyContent: "center", alignItems: "center" },
-  stepNumText: { color: "#4ADE80", fontSize: 11, fontWeight: "700" },
+  bullet: { color: "#1B4A2F", fontSize: 16, lineHeight: 22 },
+  bulletText: { flex: 1, color: "#374151", fontSize: 14, lineHeight: 22 },
+  stepNum: { width: 22, height: 22, borderRadius: 11, backgroundColor: "#E8F5E9", borderWidth: 1, borderColor: "#D1E8D8", justifyContent: "center", alignItems: "center" },
+  stepNumText: { color: "#1B4A2F", fontSize: 11, fontWeight: "700" },
 
   // Timestamp
-  timestamp: { color: "#4B5563", fontSize: 12, textAlign: "center", marginTop: 12, marginBottom: 16 },
+  timestamp: { color: "#9CA3AF", fontSize: 12, textAlign: "center", marginTop: 12, marginBottom: 16 },
 
-  // Mark as Cured button
-  curedBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#4ADE80", borderRadius: 14, paddingVertical: 16, paddingHorizontal: 24, marginTop: 8 },
-  curedBtnText: { color: "#0F2419", fontWeight: "700", fontSize: 15 },
+  // Mark as Cured button — dark forest green, white text
+  curedBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 16, paddingHorizontal: 24, marginTop: 8 },
+  curedBtnText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
 });
