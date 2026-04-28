@@ -11,11 +11,12 @@ import type { User } from "@/types";
 /**
  * Floating profile avatar shown in the header of every tab screen.
  * Tap → opens a slide-up modal panel with user info, settings, and logout.
+ * Styled to match the white-primary / dark-green-accent scheme.
  */
 export default function ProfileAvatar() {
-  const router = useRouter();
+  const router   = useRouter();
   const [visible, setVisible] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser]       = useState<User | null>(null);
   const slideAnim = useRef(new Animated.Value(300)).current;
 
   async function handleOpen() {
@@ -76,7 +77,7 @@ export default function ProfileAvatar() {
         <Animated.View
           style={[styles.panel, { transform: [{ translateY: slideAnim }] }]}
         >
-          <View style={{ paddingBottom: 24 }}>
+          <View style={{ paddingBottom: 28 }}>
             {/* Drag handle */}
             <View style={styles.handle} />
 
@@ -87,16 +88,16 @@ export default function ProfileAvatar() {
               </View>
               <View style={styles.userInfo}>
                 <Text style={styles.userName}>{user?.name ?? "—"}</Text>
-                <Text style={styles.userSub}>{user?.location ?? "—"}</Text>
+                <Text style={styles.userSub}>{user?.email ?? "—"}</Text>
               </View>
             </View>
 
             <View style={styles.divider} />
 
             {/* Menu items */}
-            <MenuItem icon="notifications-outline" label="Notifications" onPress={handleClose} />
-            <MenuItem icon="lock-closed-outline" label="Privacy & Security" onPress={handleClose} />
-            <MenuItem icon="help-circle-outline" label="Support Center" onPress={handleClose} />
+            <MenuItem icon="notifications-outline"  label="Notifications"    onPress={handleClose} />
+            <MenuItem icon="lock-closed-outline"    label="Privacy & Security" onPress={handleClose} />
+            <MenuItem icon="help-circle-outline"    label="Support Center"   onPress={handleClose} />
 
             <View style={styles.divider} />
 
@@ -124,34 +125,36 @@ function MenuItem({
 }) {
   return (
     <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
-      <Ionicons name={icon} size={20} color="#9CA3AF" />
+      <Ionicons name={icon} size={20} color="#1B4A2F" />
       <Text style={styles.rowLabel}>{label}</Text>
-      <Ionicons name="chevron-forward" size={16} color="#4B5563" />
+      <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
     </TouchableOpacity>
   );
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  // Avatar in header
-  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: "#1B3A2D", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#4ADE80" },
-  initials: { color: "#4ADE80", fontWeight: "700", fontSize: 14 },
+  // Avatar in header — dark green circle, white initials
+  avatar:      { width: 36, height: 36, borderRadius: 18, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center" },
+  initials:    { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
 
-  // Modal
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.55)" },
-  panel: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "#1A2E22", borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
-  handle: { width: 40, height: 4, backgroundColor: "#4ADE80", borderRadius: 2, alignSelf: "center", marginBottom: 18 },
+  // Modal overlay
+  overlay:     { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.35)" },
+
+  // White slide-up panel
+  panel:       { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20, shadowColor: "#000", shadowOpacity: 0.12, shadowOffset: { width: 0, height: -3 }, shadowRadius: 12, elevation: 12 },
+  handle:      { width: 40, height: 4, backgroundColor: "#E5E7EB", borderRadius: 2, alignSelf: "center", marginBottom: 20 },
 
   // User info
-  userRow: { flexDirection: "row", alignItems: "center", marginBottom: 18 },
-  bigAvatar: { width: 54, height: 54, borderRadius: 27, backgroundColor: "#243B2F", justifyContent: "center", alignItems: "center", marginRight: 14 },
-  bigInitials: { color: "#4ADE80", fontWeight: "700", fontSize: 20 },
-  userInfo: { flex: 1 },
-  userName: { color: "#F0FDF4", fontWeight: "700", fontSize: 16 },
-  userSub: { color: "#9CA3AF", fontSize: 13, marginTop: 2 },
+  userRow:     { flexDirection: "row", alignItems: "center", marginBottom: 18 },
+  bigAvatar:   { width: 54, height: 54, borderRadius: 27, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center", marginRight: 14 },
+  bigInitials: { color: "#FFFFFF", fontWeight: "700", fontSize: 20 },
+  userInfo:    { flex: 1 },
+  userName:    { color: "#111827", fontWeight: "700", fontSize: 16 },
+  userSub:     { color: "#6B7280", fontSize: 13, marginTop: 2 },
 
-  // Common
-  divider: { height: 1, backgroundColor: "#243B2F", marginVertical: 10 },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
-  rowLabel: { flex: 1, color: "#D1FAE5", fontSize: 15 },
+  // Rows
+  divider:     { height: 1, backgroundColor: "#F3F4F6", marginVertical: 8 },
+  row:         { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 13 },
+  rowLabel:    { flex: 1, color: "#111827", fontSize: 15 },
 });
