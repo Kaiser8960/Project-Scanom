@@ -101,17 +101,17 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   root:  { flex: 1, backgroundColor: "#FFFFFF" },
-  scroll: { flexGrow: 1, justifyContent: "center", padding: 28, paddingTop: 48 },
+  scroll: { flexGrow: 1, justifyContent: "center", padding: 28, paddingTop: 16 },
 
   // ── Brand area ────────────────────────────────────────────────
   brand: {
     alignItems: "center",
-    marginBottom: 36,
+    marginBottom: 8,
   },
   tagline: {
     fontSize: 13,
     color: "#9CA3AF",
-    marginTop: 6,
+    marginTop: 2,
   },
 
   // ── Form card (matches image 4 — white card, subtle shadow/border) ─────────

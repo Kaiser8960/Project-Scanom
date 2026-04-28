@@ -140,13 +140,13 @@ export default function SignUpScreen() {
 
 const styles = StyleSheet.create({
   root:        { flex: 1, backgroundColor: "#FFFFFF" },
-  scroll:      { flexGrow: 1, padding: 24, paddingTop: 16 },
+  scroll:      { flexGrow: 1, padding: 24, paddingTop: 4 },
 
-  backBtn:     { marginBottom: 8 },
+  backBtn:     { marginBottom: 8, marginTop: 36 },
   backText:    { color: "#1B4A2F", fontSize: 15 },
 
-  logoArea:    { alignItems: "center", marginBottom: 28, marginTop: 8 },
-  subtitle:    { fontSize: 14, color: "#6B7280", marginTop: 10 },
+  logoArea:    { alignItems: "center", marginBottom: 8, marginTop: 4 },
+  subtitle:    { fontSize: 14, color: "#6B7280", marginTop: 2 },
 
   card:        { backgroundColor: "#FFFFFF", borderRadius: 20, padding: 24, marginBottom: 24, borderWidth: 1, borderColor: "#E5E7EB" },
   cardTitle:   { fontSize: 22, fontWeight: "700", color: "#111827", marginBottom: 4 },
