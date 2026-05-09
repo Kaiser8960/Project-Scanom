@@ -100,11 +100,14 @@ for i, cname in enumerate(class_names):
     print(f"  [{i}] {cname:35s}: {class_weights[i]:.4f}")
 
 # ── DATA PIPELINE ───────────────────────────────────────────
-# NO .cache() -- with 16k images at 224x224, in-memory cache pins ~4GB of
-# host RAM which saturates CUDA pinned memory and causes OOM.
-# Data lives on Linux SSD so per-epoch reads are fast enough without caching.
+# .cache("/tmp/scanom_train_cache") persists decoded image tensors to the
+# Linux /tmp filesystem after epoch 1. Epochs 2-N read cached tensors
+# instead of re-decoding JPEGs, fixing the data-loading bottleneck that
+# causes epoch 2+ to be 3-5x slower than epoch 1 on large datasets.
+# Note: requires ~8GB free in /tmp. If space is low, remove .cache().
 train_ds = (
     train_ds
+    .cache("/tmp/scanom_train_cache")
     .map(lambda x, y: (augmentation(x, training=True), y),
          num_parallel_calls=tf.data.AUTOTUNE)
     .prefetch(tf.data.AUTOTUNE)
