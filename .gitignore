@@ -1,6 +1,7 @@
 # Datasets
 *Dataset*
 dataset/
+manual_shots/
 
 # Model Output
 model_output/
