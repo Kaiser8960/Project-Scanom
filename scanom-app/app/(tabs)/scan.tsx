@@ -22,6 +22,9 @@ export default function ScanScreen() {
   const [facing, setFacing] = useState<"front" | "back">("back");
   const [capturedUri, setCapturedUri] = useState<string | null>(null);
 
+  // Full photo info stored at capture time — used for crop-on-confirm
+  const [photoInfo, setPhotoInfo] = useState<{ uri: string; width: number; height: number } | null>(null);
+
   // Measured on-device camera view dimensions — set by onLayout
   const [cameraLayout, setCameraLayout] = useState<{ width: number; height: number } | null>(null);
 
@@ -34,54 +37,55 @@ export default function ScanScreen() {
     try {
       const photo = await cameraRef.current.takePictureAsync({ base64: false, quality: 0.9 });
       if (!photo?.uri) return;
-
-      if (cameraLayout) {
-        // ── Calculate how many photo pixels correspond to each display pixel ──
-        const scaleX = photo.width  / cameraLayout.width;
-        const scaleY = photo.height / cameraLayout.height;
-
-        // ── The frame box is centered in the camera view ──────────────────────
-        const frameCenterX = cameraLayout.width  / 2;
-        const frameCenterY = cameraLayout.height / 2;
-
-        // ── Map frame bounds from display pixels → photo pixels ───────────────
-        const cropX = Math.round((frameCenterX - FRAME_SIZE / 2) * scaleX);
-        const cropY = Math.round((frameCenterY - FRAME_SIZE / 2) * scaleY);
-        const cropW = Math.round(FRAME_SIZE * scaleX);
-        const cropH = Math.round(FRAME_SIZE * scaleY);
-
-        // ── Clamp to actual photo bounds (safety) ─────────────────────────────
-        const safeX = Math.max(0, cropX);
-        const safeY = Math.max(0, cropY);
-        const safeW = Math.min(cropW, photo.width  - safeX);
-        const safeH = Math.min(cropH, photo.height - safeY);
-
-        // ── Crop to frame area only ───────────────────────────────────────────
-        const cropped = await ImageManipulator.manipulateAsync(
-          photo.uri,
-          [{ crop: { originX: safeX, originY: safeY, width: safeW, height: safeH } }],
-          { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
-        );
-        setCapturedUri(cropped.uri);
-      } else {
-        // Fallback: layout not measured yet — use the full photo
-        setCapturedUri(photo.uri);
-      }
+      // Store full photo for a sharp preview — cropping happens on confirm, not here
+      setPhotoInfo({ uri: photo.uri, width: photo.width, height: photo.height });
+      setCapturedUri(photo.uri);
     } catch (e) {
       Alert.alert("Camera error", "Failed to capture photo.");
     }
   }
 
   async function handleUsePhoto() {
-    if (!capturedUri) return;
+    if (!capturedUri || !photoInfo) return;
     setProcessing(true);
-    await processImage(capturedUri);
+
+    let uriToProcess = photoInfo.uri;
+
+    // ── Crop to frame region just before sending to backend ──────────────────
+    if (cameraLayout) {
+      const scaleX = photoInfo.width  / cameraLayout.width;
+      const scaleY = photoInfo.height / cameraLayout.height;
+
+      const frameCenterX = cameraLayout.width  / 2;
+      const frameCenterY = cameraLayout.height / 2;
+
+      const cropX = Math.round((frameCenterX - FRAME_SIZE / 2) * scaleX);
+      const cropY = Math.round((frameCenterY - FRAME_SIZE / 2) * scaleY);
+      const cropW = Math.round(FRAME_SIZE * scaleX);
+      const cropH = Math.round(FRAME_SIZE * scaleY);
+
+      const safeX = Math.max(0, cropX);
+      const safeY = Math.max(0, cropY);
+      const safeW = Math.min(cropW, photoInfo.width  - safeX);
+      const safeH = Math.min(cropH, photoInfo.height - safeY);
+
+      const cropped = await ImageManipulator.manipulateAsync(
+        photoInfo.uri,
+        [{ crop: { originX: safeX, originY: safeY, width: safeW, height: safeH } }],
+        { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
+      );
+      uriToProcess = cropped.uri;
+    }
+
+    await processImage(uriToProcess);
     setCapturedUri(null);
+    setPhotoInfo(null);
     setProcessing(false);
   }
 
   function handleRetake() {
     setCapturedUri(null);
+    setPhotoInfo(null);
   }
 
   async function pickFromGallery() {
