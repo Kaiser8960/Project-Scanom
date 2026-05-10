@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert, Platform, Image,
+  ActivityIndicator, Alert, Platform, Image, Dimensions,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -49,35 +49,21 @@ export default function ScanScreen() {
     if (!capturedUri || !photoInfo) return;
     setProcessing(true);
 
-    let uriToProcess = photoInfo.uri;
+    // ── Center-square crop: geometrically correct for resizeAspectFill ────────
+    // The camera displays the photo with fill-crop (resizeAspectFill), preserving
+    // the center. Taking the largest centered square from the photo correctly
+    // captures the region the user sees in the center of the viewfinder.
+    const squareSize = Math.min(photoInfo.width, photoInfo.height);
+    const cropX = Math.round((photoInfo.width  - squareSize) / 2);
+    const cropY = Math.round((photoInfo.height - squareSize) / 2);
 
-    // ── Crop to frame region just before sending to backend ──────────────────
-    if (cameraLayout) {
-      const scaleX = photoInfo.width  / cameraLayout.width;
-      const scaleY = photoInfo.height / cameraLayout.height;
+    const cropped = await ImageManipulator.manipulateAsync(
+      photoInfo.uri,
+      [{ crop: { originX: cropX, originY: cropY, width: squareSize, height: squareSize } }],
+      { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
+    );
 
-      const frameCenterX = cameraLayout.width  / 2;
-      const frameCenterY = cameraLayout.height / 2;
-
-      const cropX = Math.round((frameCenterX - FRAME_SIZE / 2) * scaleX);
-      const cropY = Math.round((frameCenterY - FRAME_SIZE / 2) * scaleY);
-      const cropW = Math.round(FRAME_SIZE * scaleX);
-      const cropH = Math.round(FRAME_SIZE * scaleY);
-
-      const safeX = Math.max(0, cropX);
-      const safeY = Math.max(0, cropY);
-      const safeW = Math.min(cropW, photoInfo.width  - safeX);
-      const safeH = Math.min(cropH, photoInfo.height - safeY);
-
-      const cropped = await ImageManipulator.manipulateAsync(
-        photoInfo.uri,
-        [{ crop: { originX: safeX, originY: safeY, width: safeW, height: safeH } }],
-        { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
-      );
-      uriToProcess = cropped.uri;
-    }
-
-    await processImage(uriToProcess);
+    await processImage(cropped.uri);
     setCapturedUri(null);
     setPhotoInfo(null);
     setProcessing(false);
@@ -140,15 +126,41 @@ export default function ScanScreen() {
     );
   }
 
-  // ── Preview: shows the cropped frame area — exactly what the model will see ─
+  // ── Preview: full photo + crop indicator overlay ─────────────────────────
   if (capturedUri) {
+    // Calculate the crop overlay size/position to match the center-square crop.
+    // The image is displayed with resizeMode="cover":
+    //   - landscape photo → scaled to container height → overlay = full height square, centered horizontally
+    //   - portrait photo  → scaled to container width  → overlay = full width square, centered vertically
+    const screenW  = Dimensions.get("window").width;
+    const screenH  = Dimensions.get("window").height;
+    const CTRL_H   = 112; // approx control bar height
+    const imgAreaH = screenH - CTRL_H;
+
+    let overlaySize = screenW;
+    let overlayLeft = 0;
+    let overlayTop  = (imgAreaH - screenW) / 2;
+
+    if (photoInfo && photoInfo.width > photoInfo.height) {
+      // landscape photo
+      overlaySize = imgAreaH;
+      overlayLeft = (screenW - overlaySize) / 2;
+      overlayTop  = 0;
+    }
+
     return (
       <View style={styles.container}>
         <Image source={{ uri: capturedUri }} style={styles.preview} resizeMode="cover" />
 
+        {/* Crop region indicator */}
+        <View style={[
+          styles.cropOverlay,
+          { width: overlaySize, height: overlaySize, left: overlayLeft, top: overlayTop },
+        ]} />
+
         <View style={styles.previewLabelWrap}>
           <Text style={styles.previewLabel}>Review your photo</Text>
-          <Text style={styles.previewSub}>Make sure the leaf is clear and fills the frame.</Text>
+          <Text style={styles.previewSub}>Green box = area sent to model. Leaf should fill it.</Text>
         </View>
 
         <View style={styles.previewBar}>
@@ -243,6 +255,7 @@ const styles = StyleSheet.create({
   permissionBtnText:   { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
 
   preview:             { flex: 1 },
+  cropOverlay:         { position: "absolute", borderWidth: 3, borderColor: "#4CAF50", borderRadius: 12, backgroundColor: "transparent" },
   previewLabelWrap:    { position: "absolute", top: 60, left: 0, right: 0, alignItems: "center" },
   previewLabel:        { color: "#FFFFFF", fontSize: 18, fontWeight: "700", backgroundColor: "rgba(0,0,0,0.55)", paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, overflow: "hidden" },
   previewSub:          { color: "#FFFFFF", fontSize: 12, marginTop: 6, backgroundColor: "rgba(0,0,0,0.45)", paddingHorizontal: 14, paddingVertical: 5, borderRadius: 16, overflow: "hidden" },

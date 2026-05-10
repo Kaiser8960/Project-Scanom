@@ -25,8 +25,8 @@ DISEASE_SPREAD_MULTIPLIER = {
 }
 
 
-def _build_fuzzy_system() -> ctrl.ControlSystemSimulation:
-    """Build and return a Mamdani FIS simulation. Called once at startup."""
+def _build_fuzzy_system() -> ctrl.ControlSystem:
+    """Build and return the Mamdani FIS rule system. Called once at startup."""
 
     # ── INPUT UNIVERSES ──────────────────────────────────────────────────────
     density     = ctrl.Antecedent(np.arange(0, 11, 1),   "density")
@@ -78,9 +78,7 @@ def _build_fuzzy_system() -> ctrl.ControlSystemSimulation:
         ctrl.Rule(density["moderate"] & humidity["low"]    & days["early"],          risk["low"]),
     ]
 
-    system     = ctrl.ControlSystem(rules)
-    simulation = ctrl.ControlSystemSimulation(system)
-    return simulation
+    return ctrl.ControlSystem(rules)
 
 
 def _compute_spread_radius(risk_score: float, disease_class: str) -> int:
@@ -96,8 +94,8 @@ def _compute_spread_radius(risk_score: float, disease_class: str) -> int:
     return max(0, int(base * multiplier))
 
 
-# ── GLOBAL SINGLETON — built once at module import ───────────────────────────
-_FUZZY_SIM = _build_fuzzy_system()
+# ── GLOBAL SINGLETON — rule system built once, simulation created per-request ──
+_FUZZY_SYSTEM = _build_fuzzy_system()
 
 
 def compute_risk(
@@ -110,23 +108,28 @@ def compute_risk(
     """
     Run the Mamdani fuzzy inference system and return risk output.
 
-    Args:
-        density_val:   Number of detections within 5km (capped at 10)
-        humidity_val:  Relative humidity 0–100%
-        temp_val:      Temperature in Celsius 0–40
-        days_val:      Days since first detection in the area 0–30
-        disease_class: Class name string (e.g. 'tomato_early_blight')
-
-    Returns:
-        { risk_score, risk_level, spread_radius }
+    A fresh ControlSystemSimulation is created per call to prevent state
+    accumulation from corrupting subsequent requests (skfuzzy singleton bug).
+    Inputs are clipped slightly inside universe bounds to prevent boundary
+    defuzzification failures that produce an empty output dict.
     """
-    _FUZZY_SIM.input["density"]     = min(float(density_val),  10.0)
-    _FUZZY_SIM.input["humidity"]    = min(float(humidity_val), 100.0)
-    _FUZZY_SIM.input["temperature"] = min(float(temp_val),      40.0)
-    _FUZZY_SIM.input["days"]        = min(float(days_val),      30.0)
-    _FUZZY_SIM.compute()
+    # Create a fresh simulation per call — avoids singleton state corruption
+    sim = ctrl.ControlSystemSimulation(_FUZZY_SYSTEM)
 
-    risk_score = float(_FUZZY_SIM.output["risk"])
+    # Clip inputs inside universe bounds (avoids boundary defuzzification failure)
+    sim.input["density"]     = float(np.clip(density_val,  0.01,  9.99))
+    sim.input["humidity"]    = float(np.clip(humidity_val, 0.01, 99.99))
+    sim.input["temperature"] = float(np.clip(temp_val,     0.01, 39.99))
+    sim.input["days"]        = float(np.clip(days_val,     0.01, 29.99))
+
+    try:
+        sim.compute()
+        risk_score = float(sim.output["risk"])
+    except (KeyError, Exception) as e:
+        # Fallback: no rules fired for this input combination.
+        # Default to low-moderate risk so the endpoint never crashes.
+        print(f"  [Fuzzy] WARNING: compute() failed ({e}) — using fallback risk_score=35")
+        risk_score = 35.0
 
     if risk_score < 35:
         risk_level = "low"

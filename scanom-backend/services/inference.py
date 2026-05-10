@@ -103,6 +103,15 @@ class InferenceService:
         max_idx    = int(np.argmax(predictions))
         confidence = float(predictions[max_idx])
 
+        # ── Debug: print top 3 predictions to terminal ──────────────────────
+        sorted_preds = sorted(enumerate(predictions), key=lambda x: x[1], reverse=True)[:3]
+        print("\n  [Inference] Top 3 predictions:")
+        for idx, score in sorted_preds:
+            name = self.class_names[idx] if self.class_names else f"class_{idx}"
+            marker = " ← TOP" if idx == max_idx else ""
+            print(f"    {name:<35} {score*100:6.2f}%{marker}")
+        print(f"  Threshold: {self.threshold:.2f} | Result: {'PASS' if confidence >= self.threshold else 'REJECTED'}\n")
+
         if confidence < self.threshold:
             return {
                 "valid":      False,
