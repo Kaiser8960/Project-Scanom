@@ -51,7 +51,7 @@ Plant type is automatically extracted from the class name prefix:
 | Weather Data | Open-Meteo API (free, no key) | Humidity + temperature inputs |
 | Database | Supabase (PostgreSQL + PostGIS) | Detection records + geo queries |
 | Auth | Supabase Auth | User sessions — no custom JWT needed |
-| AI Explanation | Gemini 1.5 Flash (Google AI Studio) | Disease overview + recommendations |
+| AI Explanation | Gemini 2.5 Flash (Google AI Studio) | Disease overview + recommendations |
 | Hosting | Railway | FastAPI backend deployment |
 
 ---
@@ -1140,7 +1140,7 @@ SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_ANON_KEY=your-anon-public-key
 SUPABASE_SERVICE_KEY=your-service-role-secret-key
 GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-2.5-flash
 MODEL_PATH=model/efficientnetv2b0.tflite
 CLASS_NAMES_PATH=model/class_names.json
 HOST=0.0.0.0
@@ -1201,7 +1201,7 @@ Include this sentence in Chapter 3 Methodology under Data Collection:
 [x] Implemented fuzzy_engine.py (risk level + spread radius)
 [x] Implemented inference.py with confidence threshold (0.70)
 [x] Implemented weather.py (Open-Meteo integration)
-[x] Implemented ai_explainer.py (Gemini 1.5 Flash)
+[x] Implemented ai_explainer.py (Gemini 2.5 Flash)
 [x] Tested all endpoints in Postman
 [x] Deployed to Railway
 [x] Confirmed /detect returns correct JSON structure
