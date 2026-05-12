@@ -95,9 +95,9 @@ export default function ProfileAvatar() {
             <View style={styles.divider} />
 
             {/* Menu items */}
-            <MenuItem icon="notifications-outline"  label="Notifications"    onPress={handleClose} />
-            <MenuItem icon="lock-closed-outline"    label="Privacy & Security" onPress={handleClose} />
-            <MenuItem icon="help-circle-outline"    label="Support Center"   onPress={handleClose} />
+            <MenuItem icon="notifications-outline"  label="Notifications"    onPress={() => { handleClose(); setTimeout(() => router.push("/settings/notifications"), 240); }} />
+            <MenuItem icon="lock-closed-outline"    label="Privacy & Security" onPress={() => { handleClose(); setTimeout(() => router.push("/settings/privacy"), 240); }} />
+            <MenuItem icon="help-circle-outline"    label="Support Center"   onPress={() => { handleClose(); setTimeout(() => router.push("/settings/support"), 240); }} />
 
             <View style={styles.divider} />
 

@@ -138,15 +138,21 @@ export default function MapScreen() {
       {/* ── Risk banner ── */}
       <View style={[styles.banner, { backgroundColor: badge.bg }]}>
         <Text style={[styles.bannerLevel, { color: badge.text }]}>{badge.label}</Text>
-        {riskSummary && riskSummary.total_cases_nearby > 0 && (
-          <Text style={styles.bannerSub}>
-            {riskSummary.total_cases_nearby} detection
-            {riskSummary.total_cases_nearby !== 1 ? "s" : ""} within 5km
-            {riskSummary.dominant_disease_display
-              ? ` · ${riskSummary.dominant_disease_display}`
-              : ""}
-          </Text>
-        )}
+        {riskSummary && riskSummary.total_cases_nearby > 0 && (() => {
+          // Derive unique disease names from detections we already have
+          const uniqueDiseases = Array.from(
+            new Set(detections.map((d) => d.disease_display).filter(Boolean))
+          );
+          return (
+            <Text style={styles.bannerSub}>
+              {riskSummary.total_cases_nearby} detection
+              {riskSummary.total_cases_nearby !== 1 ? "s" : ""} within 5km
+              {uniqueDiseases.length > 0
+                ? ` · ${uniqueDiseases.join(", ")}`
+                : ""}
+            </Text>
+          );
+        })()}
       </View>
 
       {/* ── Filter button row ── */}

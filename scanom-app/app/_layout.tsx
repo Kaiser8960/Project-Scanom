@@ -22,10 +22,16 @@ export default function RootLayout() {
   async function checkAuth() {
     const loggedIn = await isLoggedIn();
     const inAuth   = segments[0] === "(auth)";
+    const inTabs   = segments[0] === "(tabs)";
 
     if (!loggedIn && !inAuth) {
+      // Not authenticated — send to sign-in
       router.replace("/(auth)/sign-in");
     } else if (loggedIn && inAuth) {
+      // Already logged in but on auth screen — send to app
+      router.replace("/(tabs)/map");
+    } else if (loggedIn && !inTabs) {
+      // Logged in but cold-start landed on no known route (e.g. not-found) — redirect to map
       router.replace("/(tabs)/map");
     }
     setChecking(false);
@@ -33,8 +39,8 @@ export default function RootLayout() {
 
   if (checking) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0F2419" }}>
-        <ActivityIndicator color="#4ADE80" size="large" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFFFFF" }}>
+        <ActivityIndicator color="#1B4A2F" size="large" />
       </View>
     );
   }

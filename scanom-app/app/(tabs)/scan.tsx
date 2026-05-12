@@ -182,19 +182,30 @@ export default function ScanScreen() {
             ))}
           </View>
         </View>
+
+        {/* ── Gallery processing overlay ── */}
+        {processing && (
+          <View style={styles.processingOverlay}>
+            <View style={styles.processingCard}>
+              <ActivityIndicator size="large" color="#1B4A2F" />
+              <Text style={styles.processingTitle}>Analyzing image…</Text>
+              <Text style={styles.processingSubtitle}>Running disease detection</Text>
+            </View>
+          </View>
+        )}
       </View>
 
       <View style={styles.controls}>
         <TouchableOpacity style={styles.sideBtn} onPress={pickFromGallery} disabled={processing}>
-          <Ionicons name="images-outline" size={28} color="#1B4A2F" />
-          <Text style={styles.sideBtnLabel}>Gallery</Text>
+          <Ionicons name="images-outline" size={28} color={processing ? "#9CA3AF" : "#1B4A2F"} />
+          <Text style={[styles.sideBtnLabel, processing && { color: "#9CA3AF" }]}>Gallery</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.shutter} onPress={takePicture} disabled={processing} activeOpacity={0.85}>
           <View style={styles.shutterInner} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.sideBtn} onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))} disabled={processing}>
-          <Ionicons name="camera-reverse-outline" size={28} color="#1B4A2F" />
-          <Text style={styles.sideBtnLabel}>Flip</Text>
+          <Ionicons name="camera-reverse-outline" size={28} color={processing ? "#9CA3AF" : "#1B4A2F"} />
+          <Text style={[styles.sideBtnLabel, processing && { color: "#9CA3AF" }]}>Flip</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -251,4 +262,10 @@ const styles = StyleSheet.create({
   retakeBtnText:    { color: "#1B4A2F", fontWeight: "700", fontSize: 15 },
   usePhotoBtn:      { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14 },
   usePhotoBtnText:  { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
+
+  // Gallery processing overlay
+  processingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.65)", justifyContent: "center", alignItems: "center", zIndex: 99 },
+  processingCard:    { backgroundColor: "#FFFFFF", borderRadius: 20, paddingVertical: 32, paddingHorizontal: 40, alignItems: "center", gap: 12, shadowColor: "#000", shadowOpacity: 0.25, shadowOffset: { width: 0, height: 4 }, shadowRadius: 16, elevation: 10 },
+  processingTitle:   { color: "#111827", fontSize: 16, fontWeight: "700", marginTop: 4 },
+  processingSubtitle:{ color: "#6B7280", fontSize: 13 },
 });
