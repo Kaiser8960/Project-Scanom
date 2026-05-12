@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert, Platform, Image, Dimensions,
+  ActivityIndicator, Alert, Platform, Image,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -22,12 +22,6 @@ export default function ScanScreen() {
   const [facing, setFacing] = useState<"front" | "back">("back");
   const [capturedUri, setCapturedUri] = useState<string | null>(null);
 
-  // Full photo info stored at capture time — used for crop-on-confirm
-  const [photoInfo, setPhotoInfo] = useState<{ uri: string; width: number; height: number } | null>(null);
-
-  // Measured on-device camera view dimensions — set by onLayout
-  const [cameraLayout, setCameraLayout] = useState<{ width: number; height: number } | null>(null);
-
   useEffect(() => {
     if (!permission?.granted) requestPermission();
   }, []);
@@ -37,41 +31,31 @@ export default function ScanScreen() {
     try {
       const photo = await cameraRef.current.takePictureAsync({ base64: false, quality: 0.9 });
       if (!photo?.uri) return;
-      // Store full photo for a sharp preview — cropping happens on confirm, not here
-      setPhotoInfo({ uri: photo.uri, width: photo.width, height: photo.height });
-      setCapturedUri(photo.uri);
+      // Center-square crop at capture time — preview shows exactly what model receives
+      const squareSize = Math.min(photo.width, photo.height);
+      const cropX = Math.round((photo.width  - squareSize) / 2);
+      const cropY = Math.round((photo.height - squareSize) / 2);
+      const cropped = await ImageManipulator.manipulateAsync(
+        photo.uri,
+        [{ crop: { originX: cropX, originY: cropY, width: squareSize, height: squareSize } }],
+        { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
+      );
+      setCapturedUri(cropped.uri);
     } catch (e) {
       Alert.alert("Camera error", "Failed to capture photo.");
     }
   }
 
   async function handleUsePhoto() {
-    if (!capturedUri || !photoInfo) return;
+    if (!capturedUri) return;
     setProcessing(true);
-
-    // ── Center-square crop: geometrically correct for resizeAspectFill ────────
-    // The camera displays the photo with fill-crop (resizeAspectFill), preserving
-    // the center. Taking the largest centered square from the photo correctly
-    // captures the region the user sees in the center of the viewfinder.
-    const squareSize = Math.min(photoInfo.width, photoInfo.height);
-    const cropX = Math.round((photoInfo.width  - squareSize) / 2);
-    const cropY = Math.round((photoInfo.height - squareSize) / 2);
-
-    const cropped = await ImageManipulator.manipulateAsync(
-      photoInfo.uri,
-      [{ crop: { originX: cropX, originY: cropY, width: squareSize, height: squareSize } }],
-      { format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
-    );
-
-    await processImage(cropped.uri);
+    await processImage(capturedUri); // already cropped at capture time
     setCapturedUri(null);
-    setPhotoInfo(null);
     setProcessing(false);
   }
 
   function handleRetake() {
     setCapturedUri(null);
-    setPhotoInfo(null);
   }
 
   async function pickFromGallery() {
@@ -126,41 +110,15 @@ export default function ScanScreen() {
     );
   }
 
-  // ── Preview: full photo + crop indicator overlay ─────────────────────────
+  // ── Preview: shows the exact center-square crop the model will receive ──────
   if (capturedUri) {
-    // Calculate the crop overlay size/position to match the center-square crop.
-    // The image is displayed with resizeMode="cover":
-    //   - landscape photo → scaled to container height → overlay = full height square, centered horizontally
-    //   - portrait photo  → scaled to container width  → overlay = full width square, centered vertically
-    const screenW  = Dimensions.get("window").width;
-    const screenH  = Dimensions.get("window").height;
-    const CTRL_H   = 112; // approx control bar height
-    const imgAreaH = screenH - CTRL_H;
-
-    let overlaySize = screenW;
-    let overlayLeft = 0;
-    let overlayTop  = (imgAreaH - screenW) / 2;
-
-    if (photoInfo && photoInfo.width > photoInfo.height) {
-      // landscape photo
-      overlaySize = imgAreaH;
-      overlayLeft = (screenW - overlaySize) / 2;
-      overlayTop  = 0;
-    }
-
     return (
       <View style={styles.container}>
-        <Image source={{ uri: capturedUri }} style={styles.preview} resizeMode="cover" />
-
-        {/* Crop region indicator */}
-        <View style={[
-          styles.cropOverlay,
-          { width: overlaySize, height: overlaySize, left: overlayLeft, top: overlayTop },
-        ]} />
+        <Image source={{ uri: capturedUri }} style={styles.preview} resizeMode="contain" />
 
         <View style={styles.previewLabelWrap}>
           <Text style={styles.previewLabel}>Review your photo</Text>
-          <Text style={styles.previewSub}>Green box = area sent to model. Leaf should fill it.</Text>
+          <Text style={styles.previewSub}>Make sure the leaf is clear and fills the frame.</Text>
         </View>
 
         <View style={styles.previewBar}>
@@ -193,12 +151,6 @@ export default function ScanScreen() {
         zoom={Platform.OS === "ios" ? 0.06 : 0}
         autofocus="on"
         onBarcodeScanned={undefined}
-        onLayout={(e) =>
-          setCameraLayout({
-            width:  e.nativeEvent.layout.width,
-            height: e.nativeEvent.layout.height,
-          })
-        }
       >
         <View style={styles.overlay}>
           <View style={styles.frameOuter}>
@@ -255,7 +207,6 @@ const styles = StyleSheet.create({
   permissionBtnText:   { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
 
   preview:             { flex: 1 },
-  cropOverlay:         { position: "absolute", borderWidth: 3, borderColor: "#4CAF50", borderRadius: 12, backgroundColor: "transparent" },
   previewLabelWrap:    { position: "absolute", top: 60, left: 0, right: 0, alignItems: "center" },
   previewLabel:        { color: "#FFFFFF", fontSize: 18, fontWeight: "700", backgroundColor: "rgba(0,0,0,0.55)", paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, overflow: "hidden" },
   previewSub:          { color: "#FFFFFF", fontSize: 12, marginTop: 6, backgroundColor: "rgba(0,0,0,0.45)", paddingHorizontal: 14, paddingVertical: 5, borderRadius: 16, overflow: "hidden" },

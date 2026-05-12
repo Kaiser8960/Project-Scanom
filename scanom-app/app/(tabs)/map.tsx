@@ -29,6 +29,22 @@ const RISK_BADGE: Record<string, { bg: string; text: string; label: string }> = 
   high:     { bg: "#FEE2E2", text: "#B91C1C", label: "High Risk" },
 };
 
+// ── TTL Helper ───────────────────────────────────────────────────────────────
+const TTL_DAYS = 14;
+function getTTLInfo(createdAt: string): { daysLeft: number; color: string; label: string } {
+  const daysSince = Math.floor(
+    (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const daysLeft = Math.max(0, TTL_DAYS - daysSince);
+  let color: string;
+  let label: string;
+  if (daysLeft <= 0)       { color = "#9CA3AF"; label = "Expires today"; }
+  else if (daysLeft <= 7)  { color = "#EF4444"; label = `Expires soon · ${daysLeft}d left`; }
+  else if (daysLeft <= 14) { color = "#EAB308"; label = `Expires in ${daysLeft} days`; }
+  else                     { color = "#6B7280"; label = `Expires in ${daysLeft} days`; }
+  return { daysLeft, color, label };
+}
+
 type FilterKey = "all" | "tomato" | "banana" | "high" | "moderate" | "low";
 
 type FilterOption = {
@@ -248,14 +264,26 @@ export default function MapScreen() {
               onPress={() => setSelected(d)}
             />
           ))}
-          {filteredDetections.map((d) => (
-            <Marker
-              key={`m-${d.id}`}
-              coordinate={{ latitude: d.lat, longitude: d.lng }}
-              pinColor={RISK_BORDER[d.risk_level] ?? "#4ADE80"}
-              onPress={() => setSelected(d)}
-            />
-          ))}
+          {filteredDetections.map((d) => {
+            const ttl = getTTLInfo(d.created_at);
+            return (
+              <Marker
+                key={`m-${d.id}`}
+                coordinate={{ latitude: d.lat, longitude: d.lng }}
+                anchor={{ x: 0.5, y: 1.0 }}
+                onPress={() => setSelected(d)}
+              >
+                <View style={styles.markerWrap}>
+                  <View style={[styles.ttlBadge, { backgroundColor: ttl.color }]}>
+                    <Text style={styles.ttlBadgeText}>{ttl.daysLeft}d</Text>
+                  </View>
+                  <View style={[styles.markerPin, { backgroundColor: RISK_BORDER[d.risk_level] ?? "#4ADE80" }]}>
+                    <View style={styles.markerPinDot} />
+                  </View>
+                </View>
+              </Marker>
+            );
+          })}
         </MapView>
       )}
 
@@ -287,6 +315,15 @@ export default function MapScreen() {
               year: "numeric", month: "short", day: "numeric",
             })}
           </Text>
+          {(() => {
+            const ttl = getTTLInfo(selected.created_at);
+            return (
+              <View style={styles.ttlInfoRow}>
+                <Ionicons name="time-outline" size={12} color={ttl.color} />
+                <Text style={[styles.ttlInfoLabel, { color: ttl.color }]}>{ttl.label}</Text>
+              </View>
+            );
+          })()}
         </View>
       )}
 
@@ -351,6 +388,14 @@ const styles = StyleSheet.create({
   infoMeta:   { color: "#504c4c", fontSize: 13, marginBottom: 2 },
   infoRadius: { color: "#6B7280", fontSize: 12, marginTop: 2 },
   infoDate:   { color: "#6B7280", fontSize: 12, marginTop: 4 },
+  ttlInfoRow:  { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 6 },
+  ttlInfoLabel:{ fontSize: 12, fontWeight: "600" },
+  // Custom marker
+  markerWrap:    { alignItems: "center" },
+  ttlBadge:      { paddingHorizontal: 5, paddingVertical: 2, borderRadius: 8, marginBottom: 2 },
+  ttlBadgeText:  { color: "#FFFFFF", fontSize: 9, fontWeight: "700" },
+  markerPin:     { width: 30, height: 30, borderRadius: 15, justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#FFFFFF", shadowColor: "#000", shadowOpacity: 0.25, shadowOffset: { width: 0, height: 1 }, shadowRadius: 2, elevation: 3 },
+  markerPinDot:  { width: 8, height: 8, borderRadius: 4, backgroundColor: "#FFFFFF" },
 
   // Legend
   legend:     { position: "absolute", bottom: 24, right: 16, backgroundColor: "#FFFFFF", borderRadius: 12, padding: 10, borderWidth: 1, borderColor: "#D1E8D8", shadowColor: "#1B4A2F", shadowOpacity: 0.08, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4, elevation: 3 },
