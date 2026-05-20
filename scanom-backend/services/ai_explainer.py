@@ -51,7 +51,7 @@ Exact format required:
 }}
 
 severity must be exactly one of: mild | moderate | severe
-Keep language simple and practical for farmers in the Philippines."""
+Keep language simple English and practical for farmers in the Philippines."""
 
     try:
         response = _client.models.generate_content(
