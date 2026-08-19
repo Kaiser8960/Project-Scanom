@@ -47,11 +47,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Scanom uses your location to show nearby disease risk areas."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
     }
   }
 }
-
