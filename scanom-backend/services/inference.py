@@ -51,11 +51,50 @@ class InferenceService:
 
         if tflite_path.exists():
             self._load_tflite(str(tflite_path))
-        elif keras_path.exists():
-            self._load_keras(str(keras_path))
-        else:
-            print(f"  WARNING: No model found at {tflite_path} or {keras_path}")
-            print("  → Place efficientnetv2b0.tflite OR best_model.keras in scanom-backend/model/")
+
+        # If TFLite failed (Flex delegate not available on server), try Keras
+        if not self.model_loaded:
+            if keras_path.exists():
+                self._load_keras(str(keras_path))
+            else:
+                # Try downloading from Supabase Storage
+                downloaded = self._download_keras_from_supabase(str(keras_path))
+                if downloaded:
+                    self._load_keras(downloaded)
+                else:
+                    print(f"  WARNING: No model found at {tflite_path} or {keras_path}")
+                    print("  → Upload best_model.keras to Supabase Storage bucket 'models'")
+
+    def _download_keras_from_supabase(self, local_path: str) -> str | None:
+        """Download best_model.keras from Supabase Storage at startup."""
+        try:
+            import os
+            from supabase import create_client
+
+            sb_url = os.getenv("SUPABASE_URL", "")
+            sb_key = os.getenv("SUPABASE_SERVICE_KEY", "")
+            bucket  = os.getenv("SUPABASE_MODEL_BUCKET", "models")
+            remote  = os.getenv("SUPABASE_KERAS_PATH",   "best_model.keras")
+
+            if not sb_url or not sb_key:
+                print("  Supabase credentials not set — cannot download model.")
+                return None
+
+            print(f"  Downloading Keras model from Supabase Storage ({bucket}/{remote})...")
+            sb   = create_client(sb_url, sb_key)
+            data = sb.storage.from_(bucket).download(remote)
+
+            Path(local_path).parent.mkdir(parents=True, exist_ok=True)
+            with open(local_path, "wb") as f:
+                f.write(data)
+
+            size_mb = len(data) / 1024 / 1024
+            print(f"  Downloaded: {local_path} ({size_mb:.1f} MB)")
+            return local_path
+        except Exception as e:
+            print(f"  Supabase model download failed: {e}")
+            return None
+
 
     def _load_tflite(self, path: str):
         try:
