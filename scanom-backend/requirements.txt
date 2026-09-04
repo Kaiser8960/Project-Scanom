@@ -10,4 +10,4 @@ scipy
 scikit-fuzzy
 networkx
 google-genai
-tensorflow
+tensorflow-cpu
