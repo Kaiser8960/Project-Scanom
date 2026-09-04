@@ -57,42 +57,44 @@ class InferenceService:
             if keras_path.exists():
                 self._load_keras(str(keras_path))
             else:
-                # Try downloading from Supabase Storage
-                downloaded = self._download_keras_from_supabase(str(keras_path))
+                # Try downloading from configured URL (e.g. GitHub Release)
+                downloaded = self._download_keras_from_url(str(keras_path))
                 if downloaded:
                     self._load_keras(downloaded)
                 else:
                     print(f"  WARNING: No model found at {tflite_path} or {keras_path}")
                     print("  → Upload best_model.keras to Supabase Storage bucket 'models'")
 
-    def _download_keras_from_supabase(self, local_path: str) -> str | None:
-        """Download best_model.keras from Supabase Storage at startup."""
+    def _download_keras_from_url(self, local_path: str) -> str | None:
+        """Download best_model.keras from a configured URL (e.g. GitHub Release asset)."""
         try:
-            import os
-            from supabase import create_client
+            import httpx
 
-            sb_url = os.getenv("SUPABASE_URL", "")
-            sb_key = os.getenv("SUPABASE_SERVICE_KEY", "")
-            bucket  = os.getenv("SUPABASE_MODEL_BUCKET", "models")
-            remote  = os.getenv("SUPABASE_KERAS_PATH",   "best_model.keras")
-
-            if not sb_url or not sb_key:
-                print("  Supabase credentials not set — cannot download model.")
+            url = os.getenv("KERAS_MODEL_URL", "")
+            if not url:
+                print("  KERAS_MODEL_URL not set — cannot download model.")
                 return None
 
-            print(f"  Downloading Keras model from Supabase Storage ({bucket}/{remote})...")
-            sb   = create_client(sb_url, sb_key)
-            data = sb.storage.from_(bucket).download(remote)
-
+            print(f"  Downloading Keras model from: {url}")
             Path(local_path).parent.mkdir(parents=True, exist_ok=True)
-            with open(local_path, "wb") as f:
-                f.write(data)
 
-            size_mb = len(data) / 1024 / 1024
+            with httpx.stream("GET", url, follow_redirects=True, timeout=300) as r:
+                r.raise_for_status()
+                total = int(r.headers.get("content-length", 0))
+                downloaded = 0
+                with open(local_path, "wb") as f:
+                    for chunk in r.iter_bytes(chunk_size=1024 * 1024):
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        if total:
+                            pct = downloaded / total * 100
+                            print(f"  ... {pct:.0f}%", end="\r")
+
+            size_mb = Path(local_path).stat().st_size / 1024 / 1024
             print(f"  Downloaded: {local_path} ({size_mb:.1f} MB)")
             return local_path
         except Exception as e:
-            print(f"  Supabase model download failed: {e}")
+            print(f"  Model download failed: {e}")
             return None
 
 
