@@ -13,6 +13,14 @@ import numpy as np
 import tensorflow as tf
 from pathlib import Path
 
+# Use ai_edge_litert (Google's official TFLite successor with Flex delegate support)
+# Falls back to tf.lite.Interpreter if not available
+try:
+    from ai_edge_litert.interpreter import Interpreter as LiteInterpreter
+    _USE_LITERT = True
+except ImportError:
+    _USE_LITERT = False
+
 MODEL_PATH      = os.getenv("MODEL_PATH",       "model/efficientnetv2b0.tflite")
 CLASS_NAMES_PATH = os.getenv("CLASS_NAMES_PATH", "model/class_names.json")
 CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.70"))
@@ -51,13 +59,17 @@ class InferenceService:
 
     def _load_tflite(self, path: str):
         try:
-            self.interpreter    = tf.lite.Interpreter(model_path=path)
+            if _USE_LITERT:
+                self.interpreter = LiteInterpreter(model_path=path)
+            else:
+                self.interpreter = tf.lite.Interpreter(model_path=path)
             self.interpreter.allocate_tensors()
             self.input_details  = self.interpreter.get_input_details()
             self.output_details = self.interpreter.get_output_details()
             self.model_type     = "tflite"
             self.model_loaded   = True
-            print(f"  TFLite model loaded: {path}")
+            backend = "ai_edge_litert" if _USE_LITERT else "tf.lite"
+            print(f"  TFLite model loaded via {backend}: {path}")
         except Exception as e:
             print(f"  TFLite load failed: {e} — trying Keras fallback")
             keras_path = str(Path(path).parent / "best_model.keras")

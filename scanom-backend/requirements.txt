@@ -11,3 +11,4 @@ scikit-fuzzy
 networkx
 google-genai
 tensorflow-cpu
+ai-edge-litert
