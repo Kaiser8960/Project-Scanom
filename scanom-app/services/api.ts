@@ -128,3 +128,21 @@ export async function resolveDetection(detectionId: string): Promise<void> {
     throw new Error(err.detail ?? "Failed to resolve detection");
   }
 }
+
+// ── PROFILE ──────────────────────────────────────────────────────────────────
+
+export async function updateProfile(
+  fields: { name?: string; location?: string }
+): Promise<{ user: import("@/types").User }> {
+  const headers = await authHeaders();
+  const res = await fetch(`${BASE}/auth/profile`, {
+    method:  "PUT",
+    headers,
+    body:    JSON.stringify(fields),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Failed to update profile");
+  }
+  return res.json();
+}

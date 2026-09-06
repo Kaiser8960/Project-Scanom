@@ -3,9 +3,10 @@ Auth router — register and login using Supabase Auth.
 No custom JWT: Supabase issues, signs, and verifies all tokens.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
-from database.supabase_client import get_supabase
+from typing import Optional
+from database.supabase_client import get_supabase, verify_token
 
 router = APIRouter()
 
@@ -98,3 +99,50 @@ async def login(req: LoginRequest):
         raise
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid email or password.")
+
+
+class UpdateProfileRequest(BaseModel):
+    name:     Optional[str] = None
+    location: Optional[str] = None
+
+
+@router.put("/profile")
+async def update_profile(
+    req:           UpdateProfileRequest,
+    authorization: Optional[str] = Header(None),
+):
+    """
+    Update the authenticated user's display name and location.
+    Requires a valid Supabase JWT in the Authorization header.
+    Returns the updated user profile.
+    """
+    user_id = verify_token(authorization)
+    sb = get_supabase()
+
+    updates = {}
+    if req.name     is not None: updates["name"]     = req.name
+    if req.location is not None: updates["location"]  = req.location
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update.")
+
+    try:
+        sb.table("users").update(updates).eq("id", user_id).execute()
+
+        # Return the current full profile
+        profile_resp = sb.table("users").select("id,email,name,location,avatar_url").eq("id", user_id).maybe_single().execute()
+        profile = profile_resp.data or {}
+
+        return {
+            "user": {
+                "id":         user_id,
+                "email":      profile.get("email",      ""),
+                "name":       profile.get("name",       ""),
+                "location":   profile.get("location",   ""),
+                "avatar_url": profile.get("avatar_url", None),
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
