@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ActivityIndicator,
   TouchableOpacity, Animated, Modal, Pressable,
 } from "react-native";
-import MapView, { Circle, Marker } from "react-native-maps";
+import MapView, { Circle, Marker, UrlTile } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { getCurrentLocation, DEFAULT_LOCATION } from "@/services/location";
@@ -249,6 +249,7 @@ export default function MapScreen() {
       ) : (
         <MapView
           style={styles.map}
+          mapType="none"
           initialRegion={{
             latitude:      location.lat,
             longitude:     location.lng,
@@ -259,6 +260,13 @@ export default function MapScreen() {
           showsMyLocationButton
           onPress={() => setSelected(null)}
         >
+          {/* Carto Voyager tiles — OSM data, mobile-friendly CDN, no API key */}
+          <UrlTile
+            urlTemplate="https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+            maximumZ={19}
+            flipY={false}
+            tileSize={256}
+          />
           {filteredDetections.map((d) => (
             <Circle
               key={d.id}
