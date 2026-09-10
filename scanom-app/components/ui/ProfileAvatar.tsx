@@ -70,45 +70,48 @@ export default function ProfileAvatar() {
         statusBarTranslucent
         onRequestClose={handleClose}
       >
-        {/* Dim overlay */}
-        <Pressable style={styles.overlay} onPress={handleClose} />
+        {/* flex: 1 container — backdrop fills all space ABOVE the panel */}
+        <View style={styles.modalContainer}>
+          {/* Tapping this dim area closes the modal */}
+          <Pressable style={styles.overlay} onPress={handleClose} />
 
-        {/* Slide-up panel */}
-        <Animated.View
-          style={[styles.panel, { transform: [{ translateY: slideAnim }] }]}
-        >
-          <View style={{ paddingBottom: 28 }}>
-            {/* Drag handle */}
-            <View style={styles.handle} />
+          {/* Slide-up panel — sits BELOW the backdrop in the flex column */}
+          <Animated.View
+            style={[styles.panel, { transform: [{ translateY: slideAnim }] }]}
+          >
+            <View style={{ paddingBottom: 28 }}>
+              {/* Drag handle */}
+              <View style={styles.handle} />
 
-            {/* User info */}
-            <View style={styles.userRow}>
-              <View style={styles.bigAvatar}>
-                <Text style={styles.bigInitials}>{initials}</Text>
+              {/* User info */}
+              <View style={styles.userRow}>
+                <View style={styles.bigAvatar}>
+                  <Text style={styles.bigInitials}>{initials}</Text>
+                </View>
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>{user?.name ?? "—"}</Text>
+                  <Text style={styles.userSub}>{user?.email ?? "—"}</Text>
+                </View>
               </View>
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user?.name ?? "—"}</Text>
-                <Text style={styles.userSub}>{user?.email ?? "—"}</Text>
-              </View>
+
+              <View style={styles.divider} />
+
+              {/* Menu items */}
+              <MenuItem icon="create-outline"        label="Edit Profile"       onPress={() => { handleClose(); setTimeout(() => router.push("/settings/profile"), 240); }} />
+              <MenuItem icon="notifications-outline"  label="Notifications"      onPress={() => { handleClose(); setTimeout(() => router.push("/settings/notifications"), 240); }} />
+              <MenuItem icon="lock-closed-outline"    label="Privacy & Security" onPress={() => { handleClose(); setTimeout(() => router.push("/settings/privacy"), 240); }} />
+              <MenuItem icon="help-circle-outline"    label="Support Center"     onPress={() => { handleClose(); setTimeout(() => router.push("/settings/support"), 240); }} />
+
+              <View style={styles.divider} />
+
+              {/* Logout */}
+              <TouchableOpacity style={styles.row} onPress={handleLogout} activeOpacity={0.7}>
+                <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+                <Text style={[styles.rowLabel, { color: "#EF4444" }]}>Logout</Text>
+              </TouchableOpacity>
             </View>
-
-            <View style={styles.divider} />
-
-            {/* Menu items */}
-            <MenuItem icon="create-outline"        label="Edit Profile"       onPress={() => { handleClose(); setTimeout(() => router.push("/settings/profile"), 240); }} />
-            <MenuItem icon="notifications-outline"  label="Notifications"      onPress={() => { handleClose(); setTimeout(() => router.push("/settings/notifications"), 240); }} />
-            <MenuItem icon="lock-closed-outline"    label="Privacy & Security" onPress={() => { handleClose(); setTimeout(() => router.push("/settings/privacy"), 240); }} />
-            <MenuItem icon="help-circle-outline"    label="Support Center"     onPress={() => { handleClose(); setTimeout(() => router.push("/settings/support"), 240); }} />
-
-            <View style={styles.divider} />
-
-            {/* Logout */}
-            <TouchableOpacity style={styles.row} onPress={handleLogout} activeOpacity={0.7}>
-              <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-              <Text style={[styles.rowLabel, { color: "#EF4444" }]}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+          </Animated.View>
+        </View>
       </Modal>
     </>
   );
@@ -139,11 +142,14 @@ const styles = StyleSheet.create({
   avatar:      { width: 36, height: 36, borderRadius: 18, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center" },
   initials:    { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
 
-  // Modal overlay
-  overlay:     { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.35)" },
+  // Modal container — flex column so backdrop + panel stack vertically
+  modalContainer: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.35)" },
 
-  // White slide-up panel
-  panel:       { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20, shadowColor: "#000", shadowOpacity: 0.12, shadowOffset: { width: 0, height: -3 }, shadowRadius: 12, elevation: 12 },
+  // Dim overlay — fills all space above the panel (flex: 1)
+  overlay:     { flex: 1 },
+
+  // White slide-up panel — no longer absolute; sits at bottom of flex column
+  panel:       { backgroundColor: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20, shadowColor: "#000", shadowOpacity: 0.12, shadowOffset: { width: 0, height: -3 }, shadowRadius: 12, elevation: 12 },
   handle:      { width: 40, height: 4, backgroundColor: "#E5E7EB", borderRadius: 2, alignSelf: "center", marginBottom: 20 },
 
   // User info
