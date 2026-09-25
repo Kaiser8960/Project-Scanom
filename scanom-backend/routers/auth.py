@@ -41,7 +41,11 @@ async def register(req: RegisterRequest):
 
         user_id = auth_resp.user.id
 
-        # 2. Store display profile in users table
+        # 2. Clean up any orphaned profile row with this email
+        #    (can happen if auth account was deleted but profile row was not)
+        sb.table("users").delete().eq("email", req.email).execute()
+
+        # 3. Insert fresh profile row
         sb.table("users").insert({
             "id":       user_id,
             "email":    req.email,
@@ -61,7 +65,11 @@ async def register(req: RegisterRequest):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        err = str(e)
+        # Friendly message for duplicate auth email
+        if "already registered" in err or "23505" in err or "users_email_key" in err:
+            raise HTTPException(status_code=400, detail="An account with this email already exists. Please sign in instead.")
+        raise HTTPException(status_code=400, detail="Registration failed. Please try again.")
 
 
 @router.post("/login")
