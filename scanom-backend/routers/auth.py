@@ -6,6 +6,8 @@ No custom JWT: Supabase issues, signs, and verifies all tokens.
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
 from typing import Optional
+import os
+import httpx
 from database.supabase_client import get_supabase, verify_token
 
 router = APIRouter()
@@ -164,8 +166,10 @@ async def delete_account(
     Removes: all detections, the profile row, and the Supabase Auth account.
     Returns 204 No Content on success.
     """
-    user_id = verify_token(authorization)   # raises 401 if invalid
-    sb      = get_supabase()
+    user_id      = verify_token(authorization)   # raises 401 if invalid
+    sb           = get_supabase()
+    supabase_url = os.getenv("SUPABASE_URL", "")
+    service_key  = os.getenv("SUPABASE_SERVICE_KEY", "")
 
     try:
         # 1. Delete all detection records for this user
@@ -174,8 +178,18 @@ async def delete_account(
         # 2. Delete the profile row from the users table
         sb.table("users").delete().eq("id", user_id).execute()
 
-        # 3. Delete the Supabase Auth account (requires service role key)
-        sb.auth.admin.delete_user(user_id)
+        # 3. Delete the Supabase Auth account via Admin REST API
+        #    (more reliable than sb.auth.admin.delete_user() across SDK versions)
+        resp = httpx.delete(
+            f"{supabase_url}/auth/v1/admin/users/{user_id}",
+            headers={
+                "apikey":        service_key,
+                "Authorization": f"Bearer {service_key}",
+            },
+            timeout=10.0,
+        )
+        if resp.status_code not in (200, 204):
+            raise Exception(f"Auth deletion failed: {resp.text}")
 
         # 204 — no body returned
         return
