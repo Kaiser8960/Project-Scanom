@@ -65,11 +65,8 @@ async def register(req: RegisterRequest):
     except HTTPException:
         raise
     except Exception as e:
-        err = str(e)
-        # Friendly message for duplicate auth email
-        if "already registered" in err or "23505" in err or "users_email_key" in err:
-            raise HTTPException(status_code=400, detail="An account with this email already exists. Please sign in instead.")
-        raise HTTPException(status_code=400, detail="Registration failed. Please try again.")
+        # DEBUG — expose real error so we can see what Supabase is returning
+        raise HTTPException(status_code=400, detail=f"[DEBUG] {type(e).__name__}: {str(e)}")
 
 
 @router.post("/login")
