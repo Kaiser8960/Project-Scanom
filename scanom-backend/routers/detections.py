@@ -99,7 +99,7 @@ async def user_detections(
         raise HTTPException(status_code=401, detail="Invalid or expired token.")
 
     try:
-        raw        = get_user_detections(user["id"], limit=limit, offset=offset)
+        raw        = get_user_detections(user, limit=limit, offset=offset)
         detections = [_reconstruct_for_frontend(d) for d in raw]
         return {
             "detections": detections,
@@ -131,7 +131,7 @@ async def resolve_detection(
         raise HTTPException(status_code=401, detail="Invalid or expired token.")
 
     try:
-        success = resolve_detection_query(detection_id, user["id"])
+        success = resolve_detection_query(detection_id, user)
         if not success:
             raise HTTPException(
                 status_code=404,

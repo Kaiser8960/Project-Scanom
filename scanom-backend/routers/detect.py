@@ -48,7 +48,10 @@ async def detect(
     user = None
     if authorization and authorization.startswith("Bearer "):
         token = authorization.split(" ", 1)[1]
-        user  = verify_token(token)
+        try:
+            user = verify_token(f"Bearer {token}")  # returns str UUID or raises 401
+        except Exception:
+            user = None  # treat as unauthenticated scan
     # Allow unauthenticated scans but won't save to history
 
     # ── 2. INFERENCE ──────────────────────────────────────────────────────────
@@ -139,7 +142,7 @@ async def detect(
     detection_id = None
     if user:
         record = {
-            "user_id":        user["id"],
+            "user_id":        user,
             "lat":            req.lat,
             "lng":            req.lng,
             "plant":          plant,
@@ -162,7 +165,7 @@ async def detect(
         detection_id = saved.get("id")
 
         # ── 8. RETENTION ──────────────────────────────────────────────────────
-        enforce_retention(user["id"], max_records=50)
+        enforce_retention(user, max_records=50)
 
     # ── 9. RETURN RESULT ──────────────────────────────────────────────────────
     return {
