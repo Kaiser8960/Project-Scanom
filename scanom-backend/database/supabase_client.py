@@ -4,6 +4,7 @@ Uses the service role key so backend queries bypass Row Level Security.
 """
 
 import os
+from fastapi import HTTPException
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
@@ -24,15 +25,26 @@ def get_supabase() -> Client:
     return supabase
 
 
-def verify_token(token: str) -> dict | None:
+def verify_token(authorization: str | None) -> str:
     """
-    Verify a Supabase Auth JWT and return the user dict, or None if invalid.
-    Called as a FastAPI dependency on protected endpoints.
+    Verify a Supabase Auth JWT from the Authorization header.
+    Strips the 'Bearer ' prefix automatically.
+    Returns the user_id (UUID string) on success.
+    Raises HTTP 401 on missing or invalid token.
     """
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header missing.")
+
+    token = authorization.removeprefix("Bearer ").strip()
+    if not token:
+        raise HTTPException(status_code=401, detail="Token is empty.")
+
     try:
         resp = supabase.auth.get_user(token)
         if resp and resp.user:
-            return {"id": resp.user.id, "email": resp.user.email}
-        return None
+            return resp.user.id   # return UUID string directly
+        raise HTTPException(status_code=401, detail="Invalid or expired token.")
+    except HTTPException:
+        raise
     except Exception:
-        return None
+        raise HTTPException(status_code=401, detail="Invalid or expired token.")

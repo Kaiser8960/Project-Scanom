@@ -116,7 +116,7 @@ async def update_profile(
     Requires a valid Supabase JWT in the Authorization header.
     Returns the updated user profile.
     """
-    user_id = verify_token(authorization)
+    user_id = verify_token(authorization)   # now returns str, raises 401 on failure
     sb = get_supabase()
 
     updates = {}
@@ -142,6 +142,36 @@ async def update_profile(
                 "avatar_url": profile.get("avatar_url", None),
             }
         }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/me", status_code=204)
+async def delete_account(
+    authorization: Optional[str] = Header(None),
+):
+    """
+    Permanently delete the authenticated user's account.
+    Removes: all detections, the profile row, and the Supabase Auth account.
+    Returns 204 No Content on success.
+    """
+    user_id = verify_token(authorization)   # raises 401 if invalid
+    sb      = get_supabase()
+
+    try:
+        # 1. Delete all detection records for this user
+        sb.table("detections").delete().eq("user_id", user_id).execute()
+
+        # 2. Delete the profile row from the users table
+        sb.table("users").delete().eq("id", user_id).execute()
+
+        # 3. Delete the Supabase Auth account (requires service role key)
+        sb.auth.admin.delete_user(user_id)
+
+        # 204 — no body returned
+        return
     except HTTPException:
         raise
     except Exception as e:

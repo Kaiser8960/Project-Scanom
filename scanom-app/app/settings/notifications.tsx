@@ -1,15 +1,41 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const KEYS = {
+  scanAlerts:    "scanom_notif_scan_alerts",
+  riskAlerts:    "scanom_notif_risk_alerts",
+  weeklyReport:  "scanom_notif_weekly_report",
+};
+
+async function loadPref(key: string, defaultVal: boolean): Promise<boolean> {
+  const val = await AsyncStorage.getItem(key);
+  return val === null ? defaultVal : val === "true";
+}
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [scanAlerts, setScanAlerts]     = useState(true);
-  const [riskAlerts, setRiskAlerts]     = useState(true);
-  const [weeklyReport, setWeeklyReport] = useState(false);
+  const [scanAlerts,    setScanAlertsRaw]    = useState(true);
+  const [riskAlerts,    setRiskAlertsRaw]    = useState(true);
+  const [weeklyReport,  setWeeklyReportRaw]  = useState(false);
+
+  // Load saved preferences on mount
+  useEffect(() => {
+    (async () => {
+      setScanAlertsRaw(  await loadPref(KEYS.scanAlerts,   true));
+      setRiskAlertsRaw(  await loadPref(KEYS.riskAlerts,   true));
+      setWeeklyReportRaw(await loadPref(KEYS.weeklyReport, false));
+    })();
+  }, []);
+
+  // Wrapped setters that also persist to AsyncStorage
+  function setScanAlerts(v: boolean)   { setScanAlertsRaw(v);   AsyncStorage.setItem(KEYS.scanAlerts,   String(v)); }
+  function setRiskAlerts(v: boolean)   { setRiskAlertsRaw(v);   AsyncStorage.setItem(KEYS.riskAlerts,   String(v)); }
+  function setWeeklyReport(v: boolean) { setWeeklyReportRaw(v); AsyncStorage.setItem(KEYS.weeklyReport, String(v)); }
 
   return (
     <View style={styles.container}>

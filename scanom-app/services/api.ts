@@ -146,3 +146,17 @@ export async function updateProfile(
   }
   return res.json();
 }
+
+// ── ACCOUNT DELETION ──────────────────────────────────────────────────────────
+
+export async function deleteAccount(): Promise<void> {
+  const headers = await authHeaders();
+  const res = await fetch(`${BASE}/auth/me`, {
+    method:  "DELETE",
+    headers,
+  });
+  if (!res.ok && res.status !== 204) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? "Failed to delete account");
+  }
+}

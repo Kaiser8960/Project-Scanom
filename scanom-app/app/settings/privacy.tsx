@@ -1,24 +1,44 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { deleteAccount } from "@/services/api";
+import { clearSession } from "@/services/auth";
 
 export default function PrivacyScreen() {
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const insets  = useSafeAreaInsets();
+  const router  = useRouter();
   const [locationSharing, setLocationSharing] = useState(true);
   const [anonymousData,   setAnonymousData]   = useState(true);
+  const [deleting,        setDeleting]        = useState(false);
 
-  function handleDeleteData() {
+  function handleDeleteAccount() {
     Alert.alert(
-      "Delete My Data",
-      "This will permanently remove all your scans and detection history. This action cannot be undone.",
+      "Delete Account",
+      "This will permanently delete your account, all your scan history, and remove you from the risk map. This cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => Alert.alert("Request Submitted", "Your data deletion request has been submitted.") },
+        {
+          text: "Delete My Account",
+          style: "destructive",
+          onPress: confirmDelete,
+        },
       ]
     );
+  }
+
+  async function confirmDelete() {
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      await clearSession();
+      router.replace("/(auth)/sign-in");
+    } catch (e: any) {
+      Alert.alert("Error", e.message ?? "Could not delete account. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -90,15 +110,20 @@ export default function PrivacyScreen() {
         {/* ── Danger zone ── */}
         <Text style={styles.sectionLabel}>ACCOUNT DATA</Text>
         <View style={styles.card}>
-          <TouchableOpacity style={styles.dangerRow} onPress={handleDeleteData} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.dangerRow} onPress={handleDeleteAccount} activeOpacity={0.7} disabled={deleting}>
             <View style={[styles.toggleIcon, { backgroundColor: "#FEE2E2" }]}>
-              <Ionicons name="trash-outline" size={20} color="#EF4444" />
+              {deleting
+                ? <ActivityIndicator size="small" color="#EF4444" />
+                : <Ionicons name="trash-outline" size={20} color="#EF4444" />
+              }
             </View>
             <View style={styles.toggleText}>
-              <Text style={[styles.toggleLabel, { color: "#EF4444" }]}>Delete All My Data</Text>
-              <Text style={styles.toggleSub}>Permanently remove all your scans and history</Text>
+              <Text style={[styles.toggleLabel, { color: "#EF4444" }]}>
+                {deleting ? "Deleting account…" : "Delete Account"}
+              </Text>
+              <Text style={styles.toggleSub}>Permanently remove your account and all scan data</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+            {!deleting && <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />}
           </TouchableOpacity>
         </View>
 
