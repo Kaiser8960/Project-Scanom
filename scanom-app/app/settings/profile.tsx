@@ -103,6 +103,7 @@ export default function EditProfileScreen() {
               placeholder="Your full name"
               placeholderTextColor="#9CA3AF"
               autoCapitalize="words"
+              maxLength={50}
               returnKeyType="next"
             />
           </View>
@@ -120,6 +121,7 @@ export default function EditProfileScreen() {
               placeholder="e.g. Cebu City, Philippines"
               placeholderTextColor="#9CA3AF"
               autoCapitalize="words"
+              maxLength={100}
               returnKeyType="done"
               onSubmitEditing={handleSave}
             />

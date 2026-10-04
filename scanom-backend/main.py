@@ -3,8 +3,12 @@ Scanom FastAPI Backend — Entry Point
 Handles CORS, router registration, and startup events.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
@@ -15,6 +19,7 @@ load_dotenv()
 from routers import auth, detect, detections, risk
 # Import inference service to load model at startup
 from services.inference import inference_service
+from utils.rate_limit import limiter
 
 
 @asynccontextmanager
@@ -34,6 +39,28 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# ── RATE LIMITING ────────────────────────────────────────────────────────────
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please wait a moment and try again."},
+        headers={"Retry-After": "60"},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    """Return the first validation problem as a plain, user-readable string."""
+    errors = exc.errors()
+    msg = str(errors[0].get("msg", "Invalid input.")) if errors else "Invalid input."
+    msg = msg.removeprefix("Value error, ")
+    return JSONResponse(status_code=422, content={"detail": msg})
 
 # ── CORS ─────────────────────────────────────────────────────────────────────
 # During development: allow all origins so Expo Go can connect from any device.

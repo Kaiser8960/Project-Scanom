@@ -3,8 +3,8 @@ Detect router — POST /detect
 Main endpoint: image → inference → weather → fuzzy logic → AI → save → return result.
 """
 
-from fastapi import APIRouter, HTTPException, Header
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Header, Request
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime, timezone
 
@@ -16,18 +16,22 @@ from services.weather import get_weather
 from services.ai_explainer import get_disease_explanation
 from utils.image_processing import decode_and_preprocess
 from utils.class_utils import extract_plant_and_disease, get_display_name, is_healthy
+from utils.rate_limit import limiter, LIMIT_DETECT
+from utils.validation import IMAGE_B64_MAX
 
 router = APIRouter()
 
 
 class DetectRequest(BaseModel):
-    image_base64: str           # Base64-encoded leaf image (or data URI)
-    lat:          float         # User's current latitude
-    lng:          float         # User's current longitude
+    image_base64: str = Field(max_length=IMAGE_B64_MAX)  # Base64 leaf image (or data URI)
+    lat:          float = Field(ge=-90,  le=90)          # User's current latitude
+    lng:          float = Field(ge=-180, le=180)         # User's current longitude
 
 
 @router.post("/detect")
+@limiter.limit(LIMIT_DETECT)
 async def detect(
+    request:       Request,
     req:           DetectRequest,
     authorization: Optional[str] = Header(None),
 ):

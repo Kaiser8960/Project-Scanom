@@ -58,6 +58,7 @@ export default function SignInScreen() {
               autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
+              maxLength={100}
             />
           </View>
 
@@ -70,6 +71,7 @@ export default function SignInScreen() {
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              maxLength={72}
             />
           </View>
 

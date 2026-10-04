@@ -21,12 +21,28 @@ export default function SignUpScreen() {
       Alert.alert("Missing fields", "Please fill in all fields.");
       return;
     }
+    if (name.trim().length < 2) {
+      Alert.alert("Invalid name", "Name must be at least 2 characters.");
+      return;
+    }
+    if (!/^[A-Za-z\u00C0-\u024F][A-Za-z\u00C0-\u024F .'\-]*$/.test(name.trim())) {
+      Alert.alert("Invalid name", "Name may only contain letters, spaces, apostrophes, hyphens, and periods.");
+      return;
+    }
+    if (/(.)\1{3,}/i.test(name)) {
+      Alert.alert("Invalid name", "Name contains too many repeated characters.");
+      return;
+    }
+    if (!/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(email.trim())) {
+      Alert.alert("Invalid email", "Please enter a valid email address.");
+      return;
+    }
     if (password !== confirm) {
       Alert.alert("Password mismatch", "Passwords do not match.");
       return;
     }
-    if (password.length < 6) {
-      Alert.alert("Weak password", "Password must be at least 6 characters.");
+    if (password.length < 8) {
+      Alert.alert("Weak password", "Password must be at least 8 characters.");
       return;
     }
     try {
@@ -72,6 +88,7 @@ export default function SignUpScreen() {
               placeholderTextColor="#6B7280"
               value={name}
               onChangeText={setName}
+              maxLength={50}
             />
           </View>
 
@@ -85,6 +102,7 @@ export default function SignUpScreen() {
               autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
+              maxLength={50}
             />
           </View>
 
@@ -92,11 +110,12 @@ export default function SignUpScreen() {
             <Text style={styles.label}>Password</Text>
             <TextInput
               style={styles.input}
-              placeholder="Min. 6 characters"
+              placeholder="Min. 8 characters"
               placeholderTextColor="#6B7280"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              maxLength={72}
             />
           </View>
 
@@ -109,6 +128,7 @@ export default function SignUpScreen() {
               secureTextEntry
               value={confirm}
               onChangeText={setConfirm}
+              maxLength={72}
             />
           </View>
 

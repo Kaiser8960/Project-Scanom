@@ -3,12 +3,17 @@ Auth router — register and login using Supabase Auth.
 No custom JWT: Supabase issues, signs, and verifies all tokens.
 """
 
-from fastapi import APIRouter, HTTPException, Header
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Header, Request
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 import os
 import httpx
 from database.supabase_client import get_supabase, verify_token
+from utils.rate_limit import limiter, LIMIT_REGISTER, LIMIT_LOGIN, LIMIT_WRITE
+from utils.validation import (
+    clean_name, clean_email, clean_location,
+    PASSWORD_MIN, PASSWORD_MAX,
+)
 
 router = APIRouter()
 
@@ -17,16 +22,34 @@ class RegisterRequest(BaseModel):
     name:     str
     location: str
     email:    str
-    password: str
+    password: str = Field(min_length=PASSWORD_MIN, max_length=PASSWORD_MAX)
+
+    @field_validator("name")
+    @classmethod
+    def _name(cls, v: str) -> str:
+        return clean_name(v)
+
+    @field_validator("location")
+    @classmethod
+    def _location(cls, v: str) -> str:
+        return clean_location(v)
+
+    @field_validator("email")
+    @classmethod
+    def _email(cls, v: str) -> str:
+        return clean_email(v)
 
 
 class LoginRequest(BaseModel):
-    email:    str
-    password: str
+    # Lenient on purpose: only guard against oversized input so existing
+    # accounts can always sign in.
+    email:    str = Field(max_length=254)
+    password: str = Field(max_length=PASSWORD_MAX)
 
 
 @router.post("/register")
-async def register(req: RegisterRequest):
+@limiter.limit(LIMIT_REGISTER)
+async def register(request: Request, req: RegisterRequest):
     """
     Create a new Supabase Auth user + insert profile row in users table.
     Returns: { token, user }
@@ -74,7 +97,8 @@ async def register(req: RegisterRequest):
 
 
 @router.post("/login")
-async def login(req: LoginRequest):
+@limiter.limit(LIMIT_LOGIN)
+async def login(request: Request, req: LoginRequest):
     """
     Sign in with email + password via Supabase Auth.
     Returns: { token, user }
@@ -114,9 +138,21 @@ class UpdateProfileRequest(BaseModel):
     name:     Optional[str] = None
     location: Optional[str] = None
 
+    @field_validator("name")
+    @classmethod
+    def _name(cls, v: Optional[str]) -> Optional[str]:
+        return clean_name(v) if v is not None else v
+
+    @field_validator("location")
+    @classmethod
+    def _location(cls, v: Optional[str]) -> Optional[str]:
+        return clean_location(v) if v is not None else v
+
 
 @router.put("/profile")
+@limiter.limit(LIMIT_WRITE)
 async def update_profile(
+    request:       Request,
     req:           UpdateProfileRequest,
     authorization: Optional[str] = Header(None),
 ):
@@ -158,7 +194,9 @@ async def update_profile(
 
 
 @router.delete("/me", status_code=204)
+@limiter.limit(LIMIT_WRITE)
 async def delete_account(
+    request:       Request,
     authorization: Optional[str] = Header(None),
 ):
     """
