@@ -182,17 +182,6 @@ export default function ScanScreen() {
             ))}
           </View>
         </View>
-
-        {/* ── Gallery processing overlay ── */}
-        {processing && (
-          <View style={styles.processingOverlay}>
-            <View style={styles.processingCard}>
-              <ActivityIndicator size="large" color="#1B4A2F" />
-              <Text style={styles.processingTitle}>Analyzing image…</Text>
-              <Text style={styles.processingSubtitle}>Running disease detection</Text>
-            </View>
-          </View>
-        )}
       </View>
 
       <View style={styles.controls}>
@@ -208,6 +197,17 @@ export default function ScanScreen() {
           <Text style={[styles.sideBtnLabel, processing && { color: "#9CA3AF" }]}>Flip</Text>
         </TouchableOpacity>
       </View>
+
+      {/* ── Processing overlay — outside cameraArea for clean cross-platform rendering ── */}
+      {processing && (
+        <View style={styles.processingOverlay}>
+          <View style={styles.processingCard}>
+            <ActivityIndicator size="large" color="#1B4A2F" />
+            <Text style={styles.processingTitle}>Analyzing image…</Text>
+            <Text style={styles.processingSubtitle}>Running disease detection</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 
