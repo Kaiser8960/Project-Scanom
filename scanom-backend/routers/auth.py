@@ -11,8 +11,8 @@ import httpx
 from database.supabase_client import get_supabase, verify_token
 from utils.rate_limit import limiter, LIMIT_REGISTER, LIMIT_LOGIN, LIMIT_WRITE
 from utils.validation import (
-    clean_name, clean_email, clean_location,
-    PASSWORD_MIN, PASSWORD_MAX,
+    clean_name, clean_email, clean_location, check_password,
+    PASSWORD_MAX,
 )
 
 router = APIRouter()
@@ -22,7 +22,12 @@ class RegisterRequest(BaseModel):
     name:     str
     location: str
     email:    str
-    password: str = Field(min_length=PASSWORD_MIN, max_length=PASSWORD_MAX)
+    password: str = Field(max_length=PASSWORD_MAX)
+
+    @field_validator("password")
+    @classmethod
+    def _password(cls, v: str) -> str:
+        return check_password(v)
 
     @field_validator("name")
     @classmethod
