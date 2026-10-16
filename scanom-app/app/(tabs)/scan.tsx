@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getCurrentLocation, DEFAULT_LOCATION } from "@/services/location";
 import { detect } from "@/services/api";
+import ProcessingModal from "@/components/ui/ProcessingModal";
 
 const ZOOM_LEVELS = [
   { label: "1×", value: 0.0  },
@@ -141,6 +142,8 @@ export default function ScanScreen() {
             }
           </TouchableOpacity>
         </View>
+
+        <ProcessingModal visible={processing} />
       </View>
     );
   }
@@ -198,16 +201,8 @@ export default function ScanScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* ── Processing overlay — outside cameraArea for clean cross-platform rendering ── */}
-      {processing && (
-        <View style={styles.processingOverlay}>
-          <View style={styles.processingCard}>
-            <ActivityIndicator size="large" color="#1B4A2F" />
-            <Text style={styles.processingTitle}>Analyzing image…</Text>
-            <Text style={styles.processingSubtitle}>Running disease detection</Text>
-          </View>
-        </View>
-      )}
+      {/* Centered popup (native Modal) — floats above camera, controls and tab bar */}
+      <ProcessingModal visible={processing} />
     </View>
   );
 
@@ -263,9 +258,4 @@ const styles = StyleSheet.create({
   usePhotoBtn:      { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14 },
   usePhotoBtnText:  { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
 
-  // Gallery processing overlay
-  processingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.65)", justifyContent: "center", alignItems: "center", zIndex: 99 },
-  processingCard:    { backgroundColor: "#FFFFFF", borderRadius: 20, paddingVertical: 32, paddingHorizontal: 40, alignItems: "center", gap: 12, shadowColor: "#000", shadowOpacity: 0.25, shadowOffset: { width: 0, height: 4 }, shadowRadius: 16, elevation: 10 },
-  processingTitle:   { color: "#111827", fontSize: 16, fontWeight: "700", marginTop: 4 },
-  processingSubtitle:{ color: "#6B7280", fontSize: 13 },
 });

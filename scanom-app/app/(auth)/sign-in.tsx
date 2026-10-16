@@ -7,6 +7,7 @@ import {
 import { useRouter } from "expo-router";
 import { signIn } from "@/services/auth";
 import ScanomLogo from "@/components/ui/ScanomLogo";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -38,13 +39,13 @@ export default function SignInScreen() {
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
         {/* ── Logo / Branding ────────────────────────────────────── */}
-        <View style={styles.brand}>
+        <Animated.View entering={FadeInDown.duration(450)} style={styles.brand}>
           <ScanomLogo size="md" />
           <Text style={styles.tagline}>Plant Disease Detection</Text>
-        </View>
+        </Animated.View>
 
         {/* ── Form Card ─────────────────────────────────────────── */}
-        <View style={styles.card}>
+        <Animated.View entering={FadeInDown.delay(120).duration(450)} style={styles.card}>
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
 
@@ -86,15 +87,15 @@ export default function SignInScreen() {
               : <Text style={styles.btnText}>Sign In</Text>
             }
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
         {/* ── Footer ────────────────────────────────────────────── */}
-        <View style={styles.footer}>
+        <Animated.View entering={FadeInDown.delay(240).duration(450)} style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
             <Text style={styles.footerLink}>Sign Up</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
       </ScrollView>
     </KeyboardAvoidingView>
