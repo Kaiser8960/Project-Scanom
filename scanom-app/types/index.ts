@@ -44,6 +44,7 @@ export interface DetectionResult {
   timestamp:       string;
   lat:             number;
   lng:             number;
+  duplicate?:      boolean;
 }
 
 export interface RejectionResult {

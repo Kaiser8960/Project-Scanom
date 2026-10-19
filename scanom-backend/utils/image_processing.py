@@ -7,11 +7,19 @@ We only need to: decode → resize to 224×224 → float32 array.
 """
 
 import base64
+import hashlib
 import io
 import numpy as np
 from PIL import Image
 
 TARGET_SIZE = (224, 224)
+
+
+def compute_image_hash(base64_image: str) -> str:
+    """SHA-256 of the raw image bytes (data URI prefix stripped). Used for duplicate detection."""
+    if "," in base64_image:
+        base64_image = base64_image.split(",", 1)[1]
+    return hashlib.sha256(base64.b64decode(base64_image)).hexdigest()
 
 
 def decode_and_preprocess(base64_image: str) -> np.ndarray:

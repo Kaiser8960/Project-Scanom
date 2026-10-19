@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { getCurrentLocation, DEFAULT_LOCATION } from "@/services/location";
 import { getDetectionsNearby, getRiskSummary } from "@/services/api";
+import { sendRiskWarning } from "@/services/notifications";
 import type { NearbyDetection, RiskSummary, Coordinates } from "@/types";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -96,6 +97,12 @@ export default function MapScreen() {
       ]);
       setDetections(nearbyResp.detections ?? []);
       setRiskSummary(summary);
+      if (summary.area_risk_level === "high") {
+        sendRiskWarning(
+          summary.dominant_disease_display ?? "disease",
+          summary.total_cases_nearby
+        );
+      }
     } catch (e) {
       console.warn("Map load error:", e);
     } finally {

@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { isLoggedIn } from "@/services/auth";
+import { requestNotificationPermission } from "@/services/notifications";
 
 /**
  * Root layout — auth gate.
@@ -34,6 +35,7 @@ export default function RootLayout() {
       // Logged in but cold-start landed on no known route (e.g. not-found) — redirect to map
       router.replace("/(tabs)/map");
     }
+    if (loggedIn) requestNotificationPermission();
     setChecking(false);
   }
 

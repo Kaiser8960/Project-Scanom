@@ -17,6 +17,26 @@ def save_detection(detection: dict) -> dict:
     return resp.data[0] if resp.data else {}
 
 
+def find_duplicate_detection(user_id: str, image_hash: str) -> dict | None:
+    """Return this user's existing detection with the same image hash, if any."""
+    try:
+        sb   = get_supabase()
+        resp = (
+            sb.table("detections")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("image_hash", image_hash)
+            .limit(1)
+            .execute()
+        )
+        return resp.data[0] if resp.data else None
+    except Exception as e:
+        # e.g. image_hash column not yet migrated — never block a scan
+        print(f"Duplicate check skipped: {e}")
+        return None
+
+
+
 def get_detections_nearby(
     lat: float,
     lng: float,

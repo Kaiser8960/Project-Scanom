@@ -9,12 +9,12 @@ from typing import Optional
 from datetime import datetime, timezone
 
 from database.supabase_client import verify_token
-from database.queries import save_detection, get_detections_nearby, enforce_retention
+from database.queries import save_detection, get_detections_nearby, enforce_retention, find_duplicate_detection
 from services.inference import inference_service
 from services.fuzzy_engine import compute_risk
 from services.weather import get_weather
 from services.ai_explainer import get_disease_explanation
-from utils.image_processing import decode_and_preprocess
+from utils.image_processing import decode_and_preprocess, compute_image_hash
 from utils.class_utils import extract_plant_and_disease, get_display_name, is_healthy
 from utils.rate_limit import limiter, LIMIT_DETECT
 from utils.validation import IMAGE_B64_MAX
@@ -57,6 +57,42 @@ async def detect(
         except Exception:
             user = None  # treat as unauthenticated scan
     # Allow unauthenticated scans but won't save to history
+
+    # ── 1.5 DUPLICATE CHECK ───────────────────────────────────────────────────
+    # Same image already scanned by this user → return previous result,
+    # no new record and therefore no new risk circle.
+    image_hash = None
+    try:
+        image_hash = compute_image_hash(req.image_base64)
+    except Exception:
+        image_hash = None
+    if user and image_hash:
+        existing = find_duplicate_detection(user, image_hash)
+        if existing:
+            return {
+                "valid":           True,
+                "duplicate":       True,
+                "disease":         existing.get("disease"),
+                "disease_display": existing.get("disease_display"),
+                "plant":           existing.get("plant"),
+                "confidence":      existing.get("confidence"),
+                "is_healthy":      existing.get("is_healthy", False),
+                "risk_level":      existing.get("risk_level"),
+                "risk_score":      existing.get("risk_score"),
+                "spread_radius":   existing.get("spread_radius"),
+                "weather":         {"humidity": existing.get("humidity"), "temperature": existing.get("temperature")},
+                "explanation": {
+                    "overview":   existing.get("ai_overview"),
+                    "causes":     existing.get("ai_causes"),
+                    "prevention": existing.get("ai_prevention"),
+                    "treatment":  existing.get("ai_treatment"),
+                    "severity":   existing.get("ai_severity"),
+                },
+                "detection_id":    existing.get("id"),
+                "timestamp":       existing.get("created_at"),
+                "lat":             existing.get("lat"),
+                "lng":             existing.get("lng"),
+            }
 
     # ── 2. INFERENCE ──────────────────────────────────────────────────────────
     try:
@@ -164,6 +200,7 @@ async def detect(
             "ai_prevention":  explanation.get("prevention"),
             "ai_treatment":   explanation.get("treatment"),
             "ai_severity":    explanation.get("severity"),
+            "image_hash":     image_hash,
         }
         saved        = save_detection(record)
         detection_id = saved.get("id")

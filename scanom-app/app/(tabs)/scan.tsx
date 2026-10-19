@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert, Platform, Image,
+  ActivityIndicator, Alert, Platform, Image, Pressable,
 } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -11,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getCurrentLocation, DEFAULT_LOCATION } from "@/services/location";
 import { detect } from "@/services/api";
 import ProcessingModal from "@/components/ui/ProcessingModal";
+import { sendScanNotification } from "@/services/notifications";
 
 const ZOOM_LEVELS = [
   { label: "1×", value: 0.0  },
@@ -26,6 +28,19 @@ export default function ScanScreen() {
   const [facing, setFacing] = useState<"front" | "back">("back");
   const [capturedUri, setCapturedUri] = useState<string | null>(null);
   const [zoomIndex, setZoomIndex]     = useState(0);
+  const [focusPoint, setFocusPoint]   = useState<{ x: number; y: number } | null>(null);
+  const [autofocus, setAutofocus]     = useState<"on" | "off">("on");
+  const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Tap-to-focus: show a focus ring and re-trigger the camera's autofocus cycle.
+  function handleFocusTap(e: any) {
+    const { locationX, locationY } = e.nativeEvent;
+    setFocusPoint({ x: locationX, y: locationY });
+    setAutofocus("off");
+    setTimeout(() => setAutofocus("on"), 80);
+    if (focusTimer.current) clearTimeout(focusTimer.current);
+    focusTimer.current = setTimeout(() => setFocusPoint(null), 1200);
+  }
 
   useEffect(() => {
     if (!permission?.granted) requestPermission();
@@ -90,7 +105,20 @@ export default function ScanScreen() {
 
       if (!result.valid) {
         router.push({ pathname: "/rejection", params: { confidence: String(result.confidence) } });
+      } else if (result.duplicate) {
+        Alert.alert(
+          "Already scanned",
+          "This image was scanned before. Showing your previous result — no new risk circle was added."
+        );
+        router.push({ pathname: "/result", params: { data: JSON.stringify(result) } });
       } else {
+        if (!result.is_healthy) {
+          sendScanNotification(
+            result.disease_display ?? result.disease,
+            result.risk_level ?? "low",
+            result.plant ?? "plant"
+          );
+        }
         router.push({ pathname: "/result", params: { data: JSON.stringify(result) } });
       }
     } catch (err: any) {
@@ -158,9 +186,19 @@ export default function ScanScreen() {
           style={StyleSheet.absoluteFill}
           facing={facing}
           zoom={ZOOM_LEVELS[zoomIndex].value}
-          autofocus="on"
+          autofocus={autofocus}
           onBarcodeScanned={undefined}
         />
+        {/* Tap layer sits above camera, below overlay controls */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={handleFocusTap} />
+        {focusPoint && (
+          <Animated.View
+            pointerEvents="none"
+            entering={FadeIn.duration(150)}
+            exiting={FadeOut.duration(300)}
+            style={[styles.focusRing, { top: focusPoint.y - 34, left: focusPoint.x - 34 }]}
+          />
+        )}
         <View style={styles.overlay} pointerEvents="box-none">
           {/* Corner-bracket frame — 88% width matches center-square crop area */}
           <View style={styles.scanFrame}>
@@ -210,6 +248,7 @@ export default function ScanScreen() {
 
 const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: "#000000" },
+  focusRing:    { position: "absolute", width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: "#FACC15", backgroundColor: "transparent" },
 
   // ── Camera area
   cameraArea:   { flex: 1, position: "relative" },
