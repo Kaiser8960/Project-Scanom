@@ -39,7 +39,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ── Header ── */}
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
           <Ionicons name="chevron-back" size={22} color="#1B4A2F" />
@@ -50,7 +50,7 @@ export default function NotificationsScreen() {
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
 
-        {/* ── Section: Alerts ── */}
+        {/* Scan alert toggles */}
         <Text style={styles.sectionLabel}>SCAN ALERTS</Text>
         <View style={styles.card}>
           <ToggleRow
@@ -70,7 +70,7 @@ export default function NotificationsScreen() {
           />
         </View>
 
-        {/* ── Section: Reports ── */}
+        {/* Weekly report toggle */}
         <Text style={styles.sectionLabel}>REPORTS</Text>
         <View style={styles.card}>
           <ToggleRow
@@ -82,7 +82,7 @@ export default function NotificationsScreen() {
           />
         </View>
 
-        {/* ── Info notice ── */}
+        {/* System permission notice */}
         <View style={styles.notice}>
           <Ionicons name="information-circle-outline" size={16} color="#1B4A2F" />
           <Text style={styles.noticeText}>
@@ -95,7 +95,7 @@ export default function NotificationsScreen() {
   );
 }
 
-// ── Toggle row sub-component ────────────────────────────────────────────────
+// Reusable toggle row component
 function ToggleRow({
   icon,
   label,
@@ -129,7 +129,6 @@ function ToggleRow({
   );
 }
 
-// ── Styles ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9FAFB" },
 

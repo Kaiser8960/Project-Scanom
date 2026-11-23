@@ -1,9 +1,5 @@
 /**
- * RuleChecklist — shows live validation rules under a form field, like a
- * password guide. Each rule has an icon AND text (never color alone):
- *   ✓ green  = met
- *   ✗ red    = not met (shown once the field was left, or the problem is live)
- *   •  gray  = not met yet / nothing typed yet
+ * Live validation checklist displayed under form inputs.
  */
 
 import { View, Text, StyleSheet } from "react-native";

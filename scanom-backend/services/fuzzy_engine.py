@@ -1,7 +1,7 @@
 """
-Fuzzy Logic Engine — Mamdani FIS for disease risk computation.
-Inputs: detection density, humidity, temperature, days since first detection.
-Output: risk_score (0-100), risk_level (low/moderate/high), spread_radius (meters).
+Mamdani Fuzzy Logic Engine for calculating disease spread risk and radius.
+Inputs: nearby case density, humidity, temperature, and days since oldest detection.
+Outputs: risk_score (0-100), risk_level (low/moderate/high), and spread_radius (meters).
 """
 
 import numpy as np
@@ -9,33 +9,32 @@ import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 
 
-# ── DISEASE SPREAD MULTIPLIERS ───────────────────────────────────────────────
-# Applied to the base fuzzy spread radius to make it disease-aware.
+# Multipliers that scale the base spread radius depending on how each disease spreads
 DISEASE_SPREAD_MULTIPLIER = {
-    "tomato_late_blight":    1.5,   # fast  — airborne spores, wind
-    "tomato_early_blight":   1.0,   # moderate — soil splash
-    "tomato_bacterial_spot": 0.7,   # slow  — contact / insects
-    "tomato_leaf_mold":      0.8,   # moderate — high humidity
-    "tomato_powdery_mildew": 1.2,   # moderate-fast — airborne
+    "tomato_late_blight":    1.5,   # fast: airborne spores
+    "tomato_early_blight":   1.0,   # moderate: soil splash
+    "tomato_bacterial_spot": 0.7,   # slow: contact or insects
+    "tomato_leaf_mold":      0.8,   # moderate: high humidity
+    "tomato_powdery_mildew": 1.2,   # moderate-fast: airborne
     "tomato_healthy":        0.0,
-    "banana_sigatoka":       1.4,   # fast  — wind-dispersed spores
-    "banana_panama_wilt":    0.5,   # very slow — soil / root contact
+    "banana_sigatoka":       1.4,   # fast: wind-borne spores
+    "banana_panama_wilt":    0.5,   # slow: soil and root contact
     "banana_cordana":        1.0,   # moderate
     "banana_healthy":        0.0,
 }
 
 
 def _build_fuzzy_system() -> ctrl.ControlSystem:
-    """Build and return the Mamdani FIS rule system. Called once at startup."""
+    """Define fuzzy variables, triangular membership functions, and 15 Mamdani rules."""
 
-    # ── INPUT UNIVERSES ──────────────────────────────────────────────────────
+    # Input and output ranges
     density     = ctrl.Antecedent(np.arange(0, 11, 1),   "density")
     humidity    = ctrl.Antecedent(np.arange(0, 101, 1),  "humidity")
     temperature = ctrl.Antecedent(np.arange(0, 41, 1),   "temperature")
     days        = ctrl.Antecedent(np.arange(0, 31, 1),   "days")
     risk        = ctrl.Consequent(np.arange(0, 101, 1),  "risk")
 
-    # ── MEMBERSHIP FUNCTIONS ─────────────────────────────────────────────────
+    # Membership functions
     density["sparse"]      = fuzz.trimf(density.universe,     [0,  0,  3])
     density["moderate"]    = fuzz.trimf(density.universe,     [2,  5,  7])
     density["dense"]       = fuzz.trimf(density.universe,     [5, 10, 10])
@@ -56,21 +55,21 @@ def _build_fuzzy_system() -> ctrl.ControlSystem:
     risk["moderate"]       = fuzz.trimf(risk.universe,        [25, 50, 75])
     risk["high"]           = fuzz.trimf(risk.universe,        [60, 100, 100])
 
-    # ── RULES (15) ───────────────────────────────────────────────────────────
+    # 15 fuzzy inference rules
     rules = [
-        # HIGH
+        # High risk rules
         ctrl.Rule(density["dense"]    & humidity["high"]   & temperature["optimal"], risk["high"]),
         ctrl.Rule(density["dense"]    & days["established"],                          risk["high"]),
         ctrl.Rule(density["dense"]    & humidity["high"],                             risk["high"]),
         ctrl.Rule(density["moderate"] & humidity["high"]   & days["established"],    risk["high"]),
         ctrl.Rule(density["dense"]    & temperature["optimal"] & days["progressing"], risk["high"]),
-        # MODERATE
+        # Moderate risk rules
         ctrl.Rule(density["moderate"] & humidity["medium"],                           risk["moderate"]),
         ctrl.Rule(density["moderate"] & days["progressing"],                          risk["moderate"]),
         ctrl.Rule(density["sparse"]   & humidity["high"]   & days["established"],    risk["moderate"]),
         ctrl.Rule(density["moderate"] & temperature["optimal"],                       risk["moderate"]),
         ctrl.Rule(density["dense"]    & humidity["low"],                              risk["moderate"]),
-        # LOW
+        # Low risk rules
         ctrl.Rule(density["sparse"]   & days["early"],                               risk["low"]),
         ctrl.Rule(density["sparse"]   & humidity["low"],                             risk["low"]),
         ctrl.Rule(density["sparse"]   & temperature["cool"],                         risk["low"]),
@@ -82,7 +81,7 @@ def _build_fuzzy_system() -> ctrl.ControlSystem:
 
 
 def _compute_spread_radius(risk_score: float, disease_class: str) -> int:
-    """Convert a risk score (0-100) to a spread radius in meters, disease-adjusted."""
+    """Calculate the map risk circle radius in meters from the risk score and disease multiplier."""
     if risk_score < 35:
         base = int(50  + (risk_score * 2))
     elif risk_score < 70:
@@ -94,7 +93,7 @@ def _compute_spread_radius(risk_score: float, disease_class: str) -> int:
     return max(0, int(base * multiplier))
 
 
-# ── GLOBAL SINGLETON — rule system built once, simulation created per-request ──
+# Build the fuzzy rule system once at import time
 _FUZZY_SYSTEM = _build_fuzzy_system()
 
 
@@ -105,18 +104,10 @@ def compute_risk(
     days_val:     float,
     disease_class: str,
 ) -> dict:
-    """
-    Run the Mamdani fuzzy inference system and return risk output.
-
-    A fresh ControlSystemSimulation is created per call to prevent state
-    accumulation from corrupting subsequent requests (skfuzzy singleton bug).
-    Inputs are clipped slightly inside universe bounds to prevent boundary
-    defuzzification failures that produce an empty output dict.
-    """
-    # Create a fresh simulation per call — avoids singleton state corruption
+    """Evaluate the fuzzy system for a scan and return risk score, level, and spread radius."""
     sim = ctrl.ControlSystemSimulation(_FUZZY_SYSTEM)
 
-    # Clip inputs inside universe bounds (avoids boundary defuzzification failure)
+    # Keep inputs inside valid bounds before running defuzzification
     sim.input["density"]     = float(np.clip(density_val,  0.01,  9.99))
     sim.input["humidity"]    = float(np.clip(humidity_val, 0.01, 99.99))
     sim.input["temperature"] = float(np.clip(temp_val,     0.01, 39.99))
@@ -126,8 +117,7 @@ def compute_risk(
         sim.compute()
         risk_score = float(sim.output["risk"])
     except (KeyError, Exception) as e:
-        # Fallback: no rules fired for this input combination.
-        # Default to low-moderate risk so the endpoint never crashes.
+        # Default to score 35 if no fuzzy rule fires
         print(f"  [Fuzzy] WARNING: compute() failed ({e}) — using fallback risk_score=35")
         risk_score = 35.0
 

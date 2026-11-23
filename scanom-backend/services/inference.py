@@ -1,10 +1,6 @@
 """
-Inference service — loads the trained EfficientNetV2B0 model.
-
-Server-side inference loads best_model.keras directly via TensorFlow.
-TFLite is preserved for potential future on-device deployment.
-The model was trained with include_preprocessing=True so raw [0–255]
-pixel values are passed directly — no normalization needed here.
+Model inference service for EfficientNetV2B0.
+Loads the TFLite or Keras model at startup and runs predictions on 224x224 leaf images.
 """
 
 import os
@@ -13,8 +9,7 @@ import numpy as np
 import tensorflow as tf
 from pathlib import Path
 
-# Use ai_edge_litert (Google's official TFLite successor with Flex delegate support)
-# Falls back to tf.lite.Interpreter if not available
+# Use ai_edge_litert if installed, otherwise use tf.lite.Interpreter
 try:
     from ai_edge_litert.interpreter import Interpreter as LiteInterpreter
     _USE_LITERT = True
@@ -52,12 +47,11 @@ class InferenceService:
         if tflite_path.exists():
             self._load_tflite(str(tflite_path))
 
-        # If TFLite failed (Flex delegate not available on server), try Keras
+        # Fall back to Keras model if TFLite could not be loaded
         if not self.model_loaded:
             if keras_path.exists():
                 self._load_keras(str(keras_path))
             else:
-                # Try downloading from configured URL (e.g. GitHub Release)
                 downloaded = self._download_keras_from_url(str(keras_path))
                 if downloaded:
                     self._load_keras(downloaded)
@@ -66,7 +60,7 @@ class InferenceService:
                     print("  → Upload best_model.keras to Supabase Storage bucket 'models'")
 
     def _download_keras_from_url(self, local_path: str) -> str | None:
-        """Download best_model.keras from a configured URL (e.g. GitHub Release asset)."""
+        """Download best_model.keras from KERAS_MODEL_URL if not present locally."""
         try:
             import httpx
 
@@ -126,14 +120,8 @@ class InferenceService:
         except Exception as e:
             print(f"  Keras load failed: {e}")
 
-    # ── PREDICTION ────────────────────────────────────────────────────────────
-
     def predict(self, image_array: np.ndarray) -> dict:
-        """
-        Run inference on a preprocessed image.
-        image_array: shape (1, 224, 224, 3), float32, pixels [0.0, 255.0]
-        Returns: dict with valid, class_name, confidence
-        """
+        """Run inference on a (1, 224, 224, 3) float32 image array."""
         if not self.model_loaded:
             raise RuntimeError(
                 "Model not loaded. Place model files in scanom-backend/model/"
@@ -156,7 +144,7 @@ class InferenceService:
         max_idx    = int(np.argmax(predictions))
         confidence = float(predictions[max_idx])
 
-        # ── Debug: print top 3 predictions to terminal ──────────────────────
+        # Log the top 3 predictions to the console
         sorted_preds = sorted(enumerate(predictions), key=lambda x: x[1], reverse=True)[:3]
         print("\n  [Inference] Top 3 predictions:")
         for idx, score in sorted_preds:
@@ -185,5 +173,5 @@ class InferenceService:
         }
 
 
-# ── SINGLETON — loaded once at FastAPI startup ─────────────────────────────
+# Load model once when the server starts
 inference_service = InferenceService()

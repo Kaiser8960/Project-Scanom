@@ -1,6 +1,5 @@
 """
-Supabase client — single shared connection for all database operations.
-Uses the service role key so backend queries bypass Row Level Security.
+Shared Supabase client and JWT token verification helper.
 """
 
 import os
@@ -16,7 +15,7 @@ SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
     print("WARNING: SUPABASE_URL or SUPABASE_SERVICE_KEY missing from .env")
 
-# Module-level singleton — one client reused across all requests
+# Create one shared Supabase client for the app
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 
@@ -26,12 +25,7 @@ def get_supabase() -> Client:
 
 
 def verify_token(authorization: str | None) -> str:
-    """
-    Verify a Supabase Auth JWT from the Authorization header.
-    Strips the 'Bearer ' prefix automatically.
-    Returns the user_id (UUID string) on success.
-    Raises HTTP 401 on missing or invalid token.
-    """
+    """Verify the Bearer token from the Authorization header and return the user ID."""
     if not authorization:
         raise HTTPException(status_code=401, detail="Authorization header missing.")
 
@@ -42,7 +36,7 @@ def verify_token(authorization: str | None) -> str:
     try:
         resp = supabase.auth.get_user(token)
         if resp and resp.user:
-            return resp.user.id   # return UUID string directly
+            return resp.user.id
         raise HTTPException(status_code=401, detail="Invalid or expired token.")
     except HTTPException:
         raise

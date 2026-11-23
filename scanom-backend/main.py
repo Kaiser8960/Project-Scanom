@@ -1,6 +1,6 @@
 """
-Scanom FastAPI Backend — Entry Point
-Handles CORS, router registration, and startup events.
+Main entry point for the Scanom FastAPI backend.
+Loads the ML model at startup, sets up CORS and rate limiting, and registers API routers.
 """
 
 from fastapi import FastAPI, Request
@@ -15,16 +15,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Import routers
 from routers import auth, detect, detections, risk
-# Import inference service to load model at startup
 from services.inference import inference_service
 from utils.rate_limit import limiter
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load the ML model once at startup instead of per-request."""
+    """Print model status when the server starts."""
     print("=== Scanom API starting ===")
     print(f"  Model loaded: {inference_service.model_loaded}")
     print(f"  Classes: {inference_service.num_classes} classes")
@@ -40,7 +38,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ── RATE LIMITING ────────────────────────────────────────────────────────────
+# Rate limiting setup
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
@@ -56,15 +54,13 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request: Request, exc: RequestValidationError):
-    """Return the first validation problem as a plain, user-readable string."""
+    """Return the first validation error as a readable string."""
     errors = exc.errors()
     msg = str(errors[0].get("msg", "Invalid input.")) if errors else "Invalid input."
     msg = msg.removeprefix("Value error, ")
     return JSONResponse(status_code=422, content={"detail": msg})
 
-# ── CORS ─────────────────────────────────────────────────────────────────────
-# During development: allow all origins so Expo Go can connect from any device.
-# In production: set ALLOWED_ORIGINS in .env to your deployed frontend URL.
+# CORS setup so the mobile app can connect
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
@@ -74,14 +70,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── ROUTERS ───────────────────────────────────────────────────────────────────
+# Register API routes
 app.include_router(auth.router,       prefix="/auth",       tags=["auth"])
 app.include_router(detect.router,     prefix="",            tags=["detect"])
 app.include_router(detections.router, prefix="/detections", tags=["detections"])
 app.include_router(risk.router,       prefix="/risk",       tags=["risk"])
 
 
-# ── HEALTH CHECK ──────────────────────────────────────────────────────────────
+# Health check endpoint
 @app.get("/", tags=["health"])
 def health_check():
     return {

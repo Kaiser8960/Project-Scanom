@@ -7,9 +7,8 @@ import { isLoggedIn } from "@/services/auth";
 import { requestNotificationPermission } from "@/services/notifications";
 
 /**
- * Root layout — auth gate.
- * Checks SecureStore for a saved token. If none, redirects to sign-in.
- * Uses <Slot /> so all child routes render inside this context.
+ * Root layout and authentication guard.
+ * Redirects unauthenticated users to sign-in and authenticated users to the map tab.
  */
 export default function RootLayout() {
   const router   = useRouter();
@@ -26,13 +25,13 @@ export default function RootLayout() {
     const inTabs   = segments[0] === "(tabs)";
 
     if (!loggedIn && !inAuth) {
-      // Not authenticated — send to sign-in
+      // Redirect unauthenticated users to sign-in
       router.replace("/(auth)/sign-in");
     } else if (loggedIn && inAuth) {
-      // Already logged in but on auth screen — send to app
+      // Redirect logged-in users to the main map tab
       router.replace("/(tabs)/map");
     } else if (loggedIn && !inTabs) {
-      // Logged in but cold-start landed on no known route (e.g. not-found) — redirect to map
+      // Default route for logged-in users on cold start
       router.replace("/(tabs)/map");
     }
     if (loggedIn) requestNotificationPermission();

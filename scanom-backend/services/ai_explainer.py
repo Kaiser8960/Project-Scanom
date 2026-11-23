@@ -1,6 +1,5 @@
 """
-AI Explanation service — calls Gemini 2.5 Flash to generate disease explanations.
-Returns structured JSON: overview, causes, prevention tips, treatment steps, severity.
+Gemini AI service that generates disease overview, causes, prevention, and treatment steps.
 """
 
 import json
@@ -26,10 +25,7 @@ async def get_disease_explanation(
     humidity:      float,
     temperature:   float,
 ) -> dict:
-    """
-    Generate a structured disease explanation using Gemini.
-    Falls back to generic text if Gemini is unreachable or API key is missing.
-    """
+    """Ask Gemini for a JSON disease explanation, or use fallback text if offline."""
     if not _client:
         return _fallback_explanation(disease_class, plant, risk_level)
 
@@ -60,7 +56,7 @@ Keep language simple English and practical for farmers in the Philippines."""
         )
         text = response.text.strip()
 
-        # Strip markdown code fences if present
+        # Remove markdown code fences if Gemini includes them
         if "```" in text:
             parts = text.split("```")
             for part in parts:
@@ -73,7 +69,6 @@ Keep language simple English and practical for farmers in the Philippines."""
                     break
 
         data = json.loads(text)
-        # Validate required keys
         required = {"overview", "causes", "prevention", "treatment", "severity"}
         if not required.issubset(data.keys()):
             raise ValueError("Missing keys in Gemini response")
@@ -88,7 +83,7 @@ Keep language simple English and practical for farmers in the Philippines."""
 
 
 def _fallback_explanation(disease_class: str, plant: str, risk_level: str) -> dict:
-    """Returns generic explanation when Gemini is unavailable."""
+    """Return default guidance when the Gemini API is unavailable."""
     name = disease_class.replace("_", " ").title()
     severity_map = {"low": "mild", "moderate": "moderate", "high": "severe"}
     return {

@@ -11,7 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { resolveDetection } from "@/services/api";
 import type { DetectionResult } from "@/types";
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// Risk and severity badge styling
 
 const RISK_CONFIG: Record<string, { color: string; label: string; icon: string }> = {
   none: { color: "#4ADE80", label: "No Risk", icon: "checkmark-circle-outline" },
@@ -34,14 +34,12 @@ const SEVERITY_CONFIG: Record<string, { color: string; label: string }> = {
   severe: { color: "#DC2626", label: "Severe" },
 };
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 export default function ResultScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { data, fromHistory } = useLocalSearchParams<{ data: string; fromHistory?: string }>();
 
-  // Parse the result — works for both fresh DetectionResult and HistoryDetection
+  // Parse scan result JSON passed via route params
   const result = JSON.parse(data ?? "{}") as DetectionResult & {
     id?: string;
     created_at?: string;
@@ -57,22 +55,21 @@ export default function ResultScreen() {
   const confidencePct = Math.max(0, Math.min(100, (result.confidence ?? 0) * 100));
   const severity = SEVERITY_CONFIG[String((result.explanation as any)?.severity ?? "").toLowerCase()];
 
-  // The detection's DB id — present for history items and fresh scans that were saved
   const detectionId = result.id ?? result.detection_id ?? null;
 
-  // Action bar: "Mark as Cured" for any saved, active, diseased scan; "Scan Again" for fresh scans
+  // Show "Mark as Cured" for saved active disease scans, and "Scan Again" for fresh scans
   const showCure = !isGood && !isResolved && !!detectionId;
   const showScanAgain = !isFromHistory;
   const showBar = showCure || showScanAgain;
 
-  // ── Mini-map visibility ────────────────────────────────────────────────────
+  // Show spread forecast mini-map for diseased scans with GPS coordinates
   const showMiniMap =
     !isGood &&
     result.lat != null &&
     result.lng != null &&
     result.spread_radius > 0;
 
-  // ── Mark as Cured handler ──────────────────────────────────────────────────
+  // Mark detection as resolved and remove its risk circle from the public map
   async function handleMarkCured() {
     if (!detectionId) return;
 
@@ -105,8 +102,7 @@ export default function ResultScreen() {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-  let step = 0; // reveal order counter
+  let step = 0;
 
   return (
     <View style={styles.root}>
@@ -129,7 +125,7 @@ export default function ResultScreen() {
           <View style={{ width: 36 }} />
         </View>
 
-        {/* Resolved banner (only shown after marking cured or if already resolved) */}
+        {/* Resolved status banner */}
         {isResolved && (
           <Reveal i={step++}>
             <View style={styles.resolvedBanner}>
@@ -139,7 +135,7 @@ export default function ResultScreen() {
           </Reveal>
         )}
 
-        {/* Disease name card — tinted by risk level */}
+        {/* Disease summary card */}
         <Reveal i={step++}>
           <View style={[styles.diseaseCard, { backgroundColor: risk.color + "14", borderColor: risk.color + "55" }]}>
             <View style={styles.badgeRow}>
@@ -165,7 +161,7 @@ export default function ResultScreen() {
           </View>
         </Reveal>
 
-        {/* Risk badge */}
+        {/* Risk level and spread radius card */}
         <Reveal i={step++}>
           <View style={[styles.riskCard, { borderColor: risk.color + "40" }]}>
             <Ionicons name={risk.icon as any} size={28} color={risk.color} />
@@ -180,7 +176,7 @@ export default function ResultScreen() {
           </View>
         </Reveal>
 
-        {/* Weather context */}
+        {/* Weather conditions row */}
         {result.weather && (
           <Reveal i={step++}>
             <View style={styles.weatherRow}>
@@ -196,7 +192,7 @@ export default function ResultScreen() {
           </Reveal>
         )}
 
-        {/* ── Treatment first: what the farmer should DO ── */}
+        {/* Recommended treatment steps */}
         {result.explanation && !isGood && result.explanation.treatment?.length > 0 && (
           <Reveal i={step++}>
             <Section title="Treatment" icon="medkit-outline">
@@ -212,7 +208,7 @@ export default function ResultScreen() {
           </Reveal>
         )}
 
-        {/* ── Mini-map: Spread Forecast Card ── */}
+        {/* Spread forecast mini-map */}
         {showMiniMap && (
           <Reveal i={step++}>
             <View style={styles.miniMapCard}>
@@ -250,7 +246,7 @@ export default function ResultScreen() {
           </Reveal>
         )}
 
-        {/* AI Explanation */}
+        {/* AI overview, causes, and prevention sections */}
         {result.explanation && (
           <>
             <Reveal i={step++}>
@@ -280,7 +276,7 @@ export default function ResultScreen() {
           </>
         )}
 
-        {/* Timestamp */}
+        {/* Scan timestamp */}
         {(result.timestamp || result.created_at) && (
           <Text style={styles.timestamp}>
             Scanned {new Date(result.timestamp ?? result.created_at!).toLocaleString("en-PH")}
@@ -288,7 +284,7 @@ export default function ResultScreen() {
         )}
       </ScrollView>
 
-      {/* ── Sticky action bar (no scrolling needed to mark as cured) ── */}
+      {/* Bottom action bar */}
       {showBar && (
         <Animated.View
           entering={FadeInDown.delay(250).duration(350)}
@@ -327,7 +323,7 @@ export default function ResultScreen() {
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helper components
 
 function Reveal({ i, children }: { i: number; children: React.ReactNode }) {
   return (
@@ -350,8 +346,6 @@ function Section({
     </View>
   );
 }
-
-// ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#FFFFFF" },

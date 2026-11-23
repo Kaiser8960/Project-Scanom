@@ -1,6 +1,5 @@
 /**
- * Edit Profile screen — lets the user update their display name and location.
- * Accessible by tapping the avatar in the header → "Edit Profile" menu item.
+ * Edit Profile screen for updating the user's display name and location.
  */
 
 import { useState, useEffect } from "react";
@@ -43,13 +42,11 @@ export default function EditProfileScreen() {
     ? name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : "?";
 
-  // Live validation (mirrors server rules)
+  // Live field validation
   const normName      = name.replace(/\s+/g, " ").trim();
   const nameChanged   = normName !== (user?.name ?? "");
   const nameR         = nameRules(name);
   const locationR     = locationRules(location);
-  // Only insist on a valid name if the user actually changed it, so older
-  // accounts can still update just their location.
   const nameBlocking  = nameChanged && !allOk(nameR);
   const formValid     = !nameBlocking && allOk(locationR);
 
@@ -66,7 +63,7 @@ export default function EditProfileScreen() {
       };
       if (nameChanged) payload.name = normName;
       const result = await updateProfile(payload);
-      // Update stored user so the header avatar reflects the change immediately
+      // Save updated profile to device storage
       const token = await getStoredToken();
       if (token) await saveSession(token, result.user);
       Alert.alert("Saved", "Your profile has been updated.", [
@@ -87,7 +84,7 @@ export default function EditProfileScreen() {
       >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-        {/* ── Header ── */}
+        {/* Header */}
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={22} color="#1B4A2F" />
           <Text style={styles.backLabel}>Back</Text>
@@ -96,14 +93,14 @@ export default function EditProfileScreen() {
         <Text style={styles.title}>Edit Profile</Text>
         <Text style={styles.subtitle}>Update your display name and region.</Text>
 
-        {/* ── Avatar ── */}
+        {/* Avatar */}
         <View style={styles.avatarWrap}>
           <View style={styles.avatar}>
             <Text style={styles.avatarInitials}>{initials}</Text>
           </View>
         </View>
 
-        {/* ── Email (read-only) ── */}
+        {/* Read-only email field */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Email</Text>
           <View style={[styles.input, styles.inputDisabled]}>
@@ -113,7 +110,7 @@ export default function EditProfileScreen() {
           <Text style={styles.hint}>Email cannot be changed.</Text>
         </View>
 
-        {/* ── Name ── */}
+        {/* Display name field */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Display Name</Text>
           <View style={[styles.input, nameBlocking && (touched.name || nameR.some((r) => !r.ok && r.live)) && styles.inputError]}>
@@ -142,7 +139,7 @@ export default function EditProfileScreen() {
           )}
         </View>
 
-        {/* ── Location ── */}
+        {/* Location field */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Region / Location</Text>
           <View style={[styles.input, !allOk(locationR) && styles.inputError]}>
@@ -174,7 +171,7 @@ export default function EditProfileScreen() {
           </View>
         ) : null}
 
-        {/* ── Save button ── */}
+        {/* Save button */}
         <TouchableOpacity
           style={[styles.saveBtn, (saving || !formValid) && styles.saveBtnDisabled]}
           onPress={handleSave}
@@ -193,7 +190,6 @@ export default function EditProfileScreen() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root:             { flex: 1, backgroundColor: "#F5F7F5" },
   scroll:           { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 48 },

@@ -43,7 +43,7 @@ export default function PrivacyScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ── Header ── */}
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
           <Ionicons name="chevron-back" size={22} color="#1B4A2F" />
@@ -54,7 +54,7 @@ export default function PrivacyScreen() {
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
 
-        {/* ── Location ── */}
+        {/* Location sharing section */}
         <Text style={styles.sectionLabel}>LOCATION DATA</Text>
         <View style={styles.card}>
           <View style={styles.toggleRow}>
@@ -75,7 +75,7 @@ export default function PrivacyScreen() {
           </View>
         </View>
 
-        {/* ── Data ── */}
+        {/* Data and retention section */}
         <Text style={styles.sectionLabel}>DATA & ANALYTICS</Text>
         <View style={styles.card}>
           <View style={styles.toggleRow}>
@@ -95,7 +95,7 @@ export default function PrivacyScreen() {
             />
           </View>
           <View style={styles.divider} />
-          {/* Data retention info */}
+          {/* 14-day map TTL notice */}
           <View style={styles.infoRow}>
             <View style={styles.toggleIcon}>
               <Ionicons name="time-outline" size={20} color="#1B4A2F" />
@@ -107,7 +107,7 @@ export default function PrivacyScreen() {
           </View>
         </View>
 
-        {/* ── Danger zone ── */}
+        {/* Account deletion section */}
         <Text style={styles.sectionLabel}>ACCOUNT DATA</Text>
         <View style={styles.card}>
           <TouchableOpacity style={styles.dangerRow} onPress={handleDeleteAccount} activeOpacity={0.7} disabled={deleting}>

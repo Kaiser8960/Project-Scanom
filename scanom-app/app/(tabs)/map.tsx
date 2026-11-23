@@ -11,7 +11,7 @@ import { getDetectionsNearby, getRiskSummary } from "@/services/api";
 import { sendRiskWarning } from "@/services/notifications";
 import type { NearbyDetection, RiskSummary, Coordinates } from "@/types";
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// Risk circle and badge colors
 
 const RISK_COLORS: Record<string, string> = {
   high:     "rgba(239, 68,  68,  0.25)",
@@ -30,7 +30,7 @@ const RISK_BADGE: Record<string, { bg: string; text: string; label: string }> = 
   high:     { bg: "#FEE2E2", text: "#B91C1C", label: "High Risk" },
 };
 
-// ── TTL Helper ───────────────────────────────────────────────────────────────
+// Calculate remaining days before a 14-day map marker expires
 const TTL_DAYS = 14;
 function getTTLInfo(createdAt: string): { daysLeft: number; color: string; label: string } {
   const daysSince = Math.floor(
@@ -51,7 +51,7 @@ type FilterKey = "all" | "tomato" | "banana" | "high" | "moderate" | "low";
 type FilterOption = {
   key: FilterKey;
   label: string;
-  dot?: string; // colour for risk dot
+  dot?: string;
 };
 
 const PLANT_FILTERS: FilterOption[] = [
@@ -69,8 +69,6 @@ function filterLabel(key: FilterKey): string {
   const all = [...PLANT_FILTERS, ...RISK_FILTERS];
   return all.find((f) => f.key === key)?.label ?? "Filter";
 }
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function MapScreen() {
   const [location, setLocation]         = useState<Coordinates>(DEFAULT_LOCATION);
@@ -142,11 +140,10 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
 
-      {/* ── Risk banner ── */}
+      {/* Area risk banner */}
       <View style={[styles.banner, { backgroundColor: badge.bg }]}>
         <Text style={[styles.bannerLevel, { color: badge.text }]}>{badge.label}</Text>
         {riskSummary && riskSummary.total_cases_nearby > 0 && (() => {
-          // Derive unique disease names from detections we already have
           const uniqueDiseases = Array.from(
             new Set(detections.map((d) => d.disease_display).filter(Boolean))
           );
@@ -162,7 +159,7 @@ export default function MapScreen() {
         })()}
       </View>
 
-      {/* ── Filter button row ── */}
+      {/* Filter button row */}
       <View style={styles.filterRow}>
         <TouchableOpacity
           style={[styles.filterBtn, isFiltered && styles.filterBtnActive]}
@@ -186,7 +183,7 @@ export default function MapScreen() {
           />
         </TouchableOpacity>
 
-        {/* Clear filter pill — only when active */}
+        {/* Clear filter button */}
         {isFiltered && (
           <TouchableOpacity
             style={styles.clearBtn}
@@ -198,10 +195,10 @@ export default function MapScreen() {
         )}
       </View>
 
-      {/* ── Dropdown panel ── */}
+      {/* Filter dropdown menu */}
       {dropOpen && (
         <Animated.View style={[styles.dropdown, { opacity: fadeAnim }]}>
-          {/* Plant group */}
+          {/* Plant filter options */}
           <Text style={styles.dropGroupLabel}>PLANT</Text>
           {PLANT_FILTERS.map(({ key, label }) => (
             <TouchableOpacity
@@ -221,7 +218,7 @@ export default function MapScreen() {
 
           <View style={styles.dropDivider} />
 
-          {/* Risk group */}
+          {/* Risk level filter options */}
           <Text style={styles.dropGroupLabel}>RISK LEVEL</Text>
           {RISK_FILTERS.map(({ key, label, dot }) => (
             <TouchableOpacity
@@ -242,12 +239,12 @@ export default function MapScreen() {
         </Animated.View>
       )}
 
-      {/* Tap outside dropdown to close */}
+      {/* Close dropdown when tapping outside */}
       {dropOpen && (
         <Pressable style={StyleSheet.absoluteFill} onPress={closeDrop} />
       )}
 
-      {/* ── Map ── */}
+      {/* Map view with risk circles and markers */}
       {loading ? (
         <View style={styles.loader}>
           <ActivityIndicator size="large" color="#025f00" />
@@ -302,7 +299,7 @@ export default function MapScreen() {
         </MapView>
       )}
 
-      {/* ── Selected detection callout card ── */}
+      {/* Selected detection details card */}
       {selected && (
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
@@ -342,7 +339,7 @@ export default function MapScreen() {
         </View>
       )}
 
-      {/* ── Legend (only when no card selected) ── */}
+      {/* Risk level legend */}
       {!selected && (
         <View style={styles.legend}>
           {(["high", "Moderate", "low"] as const).map((key) => {
@@ -361,8 +358,6 @@ export default function MapScreen() {
     </View>
   );
 }
-
-// ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container:  { flex: 1, backgroundColor: "#FFFFFF" },

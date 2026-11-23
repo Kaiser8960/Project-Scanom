@@ -4,23 +4,15 @@ import { Ionicons } from "@expo/vector-icons";
 import ProfileAvatar from "@/components/ui/ProfileAvatar";
 
 /**
- * Tab navigator — White-primary color scheme.
- *
- * Design philosophy (aligned with image 2 reference):
- *   - White is the PRIMARY color (header, nav bar, all screens)
- *   - Dark forest green (#1B4A2F) is the ACCENT color
- *     (active icons, borders, buttons, section titles)
- *   - Gray (#9CA3AF) for inactive/secondary elements
- *
- * This makes green feel intentional and premium rather than dominant.
+ * Bottom tab bar layout for Risk Map, Scanner, and Scan History.
  */
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: "#1B4A2F",      // Dark forest green — active
-        tabBarInactiveTintColor: "#9CA3AF",    // Gray — inactive
+        tabBarActiveTintColor: "#1B4A2F",
+        tabBarInactiveTintColor: "#9CA3AF",
         tabBarShowLabel: true,
         tabBarLabelStyle: styles.label,
         headerStyle: styles.header,
@@ -30,7 +22,7 @@ export default function TabLayout() {
         headerRightContainerStyle: styles.headerRightContainer,
       }}
     >
-      {/* ── MAP ─────────────────────────────────────────── */}
+      {/* Map tab */}
       <Tabs.Screen
         name="map"
         options={{
@@ -42,7 +34,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── SCAN (center circle button) ──────────────────── */}
+      {/* Scanner tab (center button) */}
       <Tabs.Screen
         name="scan"
         options={{
@@ -59,7 +51,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* ── HISTORY ─────────────────────────────────────── */}
+      {/* History tab */}
       <Tabs.Screen
         name="history"
         options={{
@@ -75,7 +67,6 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  // ── Header — white surface ─────────────────────────────────────────────────
   header: {
     backgroundColor: "#FFFFFF",
     borderBottomColor: "#E5E7EB",
@@ -87,7 +78,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   headerTitle: {
-    color: "#111827",          // Dark text on white header
+    color: "#111827",
     fontWeight: "700",
     fontSize: 18,
   },
@@ -95,7 +86,6 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
 
-  // ── Tab bar — white surface ────────────────────────────────────────────────
   tabBar: {
     backgroundColor: "#FFFFFF",
     borderTopColor: "#E5E7EB",
@@ -103,7 +93,6 @@ const styles = StyleSheet.create({
     height: Platform.select({ ios: 84, android: 68 }),
     paddingBottom: Platform.select({ ios: 28, android: 8 }),
     paddingTop: 6,
-    // Subtle lift shadow
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowOffset: { width: 0, height: -2 },
@@ -115,7 +104,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // ── Scan FAB (dark green circle, no big elevation) ─────────────────────────
   fabWrap: {
     alignItems: "center",
     justifyContent: "center",
@@ -125,7 +113,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#1B4A2F",     // Dark forest green
+    backgroundColor: "#1B4A2F",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -137,7 +125,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   fabCircleActive: {
-    backgroundColor: "#0F2419",     // Deeper green when focused
+    backgroundColor: "#0F2419",
     borderColor: "#D1FAE5",
     shadowOpacity: 0.55,
     shadowRadius: 12,

@@ -1,6 +1,5 @@
 /**
- * Auth service — login, register, session management.
- * Stores the Supabase JWT in SecureStore (encrypted on-device storage).
+ * Authentication and device session management using SecureStore.
  */
 
 import * as SecureStore from "expo-secure-store";
@@ -10,7 +9,7 @@ import type { User } from "@/types";
 const TOKEN_KEY = "scanom_token";
 const USER_KEY  = "scanom_user";
 
-// ── TOKEN STORAGE ────────────────────────────────────────────────────────────
+// Session storage helpers
 
 export async function saveSession(token: string, user: User): Promise<void> {
   await SecureStore.setItemAsync(TOKEN_KEY, token);
@@ -40,7 +39,7 @@ export function isLoggedIn(): Promise<boolean> {
   return getStoredToken().then((t) => !!t);
 }
 
-// ── AUTH ACTIONS ─────────────────────────────────────────────────────────────
+// Sign in, sign up, and sign out actions
 
 export async function signIn(
   email: string,

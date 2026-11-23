@@ -32,7 +32,7 @@ export default function ScanScreen() {
   const [autofocus, setAutofocus]     = useState<"on" | "off">("on");
   const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Tap-to-focus: show a focus ring and re-trigger the camera's autofocus cycle.
+  // Show a focus ring and trigger camera autofocus on tap
   function handleFocusTap(e: any) {
     const { locationX, locationY } = e.nativeEvent;
     setFocusPoint({ x: locationX, y: locationY });
@@ -51,7 +51,7 @@ export default function ScanScreen() {
     try {
       const photo = await cameraRef.current.takePictureAsync({ base64: false, quality: 0.9 });
       if (!photo?.uri) return;
-      // Center-square crop at capture time — preview shows exactly what model receives
+      // Crop the captured photo to a centered square
       const squareSize = Math.min(photo.width, photo.height);
       const cropX = Math.round((photo.width  - squareSize) / 2);
       const cropY = Math.round((photo.height - squareSize) / 2);
@@ -69,7 +69,7 @@ export default function ScanScreen() {
   async function handleUsePhoto() {
     if (!capturedUri) return;
     setProcessing(true);
-    await processImage(capturedUri); // already cropped at capture time
+    await processImage(capturedUri);
     setCapturedUri(null);
     setProcessing(false);
   }
@@ -92,8 +92,7 @@ export default function ScanScreen() {
 
   async function processImage(uri: string) {
     try {
-      // Camera flow: uri is already cropped to the frame — just resize.
-      // Gallery flow: uri is the full image — resize the whole thing.
+      // Resize image to 224x224 and encode as base64 for the backend
       const resized = await ImageManipulator.manipulateAsync(
         uri,
         [{ resize: { width: 224, height: 224 } }],
@@ -143,7 +142,7 @@ export default function ScanScreen() {
     );
   }
 
-  // ── Preview: bordered square showing exactly what the model will analyze ──────
+  // Photo review screen before sending to backend
   if (capturedUri) {
     return (
       <View style={styles.container}>
@@ -176,10 +175,9 @@ export default function ScanScreen() {
     );
   }
 
-  // ── Live camera ───────────────────────────────────────────────────────────────
+  // Live camera view
   return (
     <View style={styles.container}>
-      {/* CameraView + overlay as siblings inside cameraArea to avoid children warning */}
       <View style={styles.cameraArea}>
         <CameraView
           ref={cameraRef}
@@ -189,7 +187,6 @@ export default function ScanScreen() {
           autofocus={autofocus}
           onBarcodeScanned={undefined}
         />
-        {/* Tap layer sits above camera, below overlay controls */}
         <Pressable style={StyleSheet.absoluteFill} onPress={handleFocusTap} />
         {focusPoint && (
           <Animated.View
@@ -200,7 +197,7 @@ export default function ScanScreen() {
           />
         )}
         <View style={styles.overlay} pointerEvents="box-none">
-          {/* Corner-bracket frame — 88% width matches center-square crop area */}
+          {/* Square alignment guide */}
           <View style={styles.scanFrame}>
             <View style={[styles.corner, styles.cornerTL]} />
             <View style={[styles.corner, styles.cornerTR]} />
@@ -239,7 +236,6 @@ export default function ScanScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Centered popup (native Modal) — floats above camera, controls and tab bar */}
       <ProcessingModal visible={processing} />
     </View>
   );
@@ -250,7 +246,7 @@ const styles = StyleSheet.create({
   container:    { flex: 1, backgroundColor: "#000000" },
   focusRing:    { position: "absolute", width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: "#FACC15", backgroundColor: "transparent" },
 
-  // ── Camera area
+  // Camera area
   cameraArea:   { flex: 1, position: "relative" },
   overlay:      { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
 

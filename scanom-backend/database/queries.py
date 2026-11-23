@@ -1,6 +1,5 @@
 """
-Database queries — all Supabase/PostGIS query functions.
-Centralises data access so routers stay clean.
+Database query functions for detections, risk summaries, and user profiles.
 """
 
 from database.supabase_client import get_supabase
@@ -8,17 +7,17 @@ from services.geo import haversine_distance
 from datetime import datetime, timezone, timedelta
 
 
-# ── DETECTIONS ───────────────────────────────────────────────────────────────
+# Detection queries
 
 def save_detection(detection: dict) -> dict:
-    """Insert a new detection record. Returns the saved record with its UUID."""
+    """Insert a new detection record and return the saved row."""
     sb   = get_supabase()
     resp = sb.table("detections").insert(detection).execute()
     return resp.data[0] if resp.data else {}
 
 
 def find_duplicate_detection(user_id: str, image_hash: str) -> dict | None:
-    """Return this user's existing detection with the same image hash, if any."""
+    """Check if this user already scanned the exact same image."""
     try:
         sb   = get_supabase()
         resp = (
@@ -31,10 +30,8 @@ def find_duplicate_detection(user_id: str, image_hash: str) -> dict | None:
         )
         return resp.data[0] if resp.data else None
     except Exception as e:
-        # e.g. image_hash column not yet migrated — never block a scan
         print(f"Duplicate check skipped: {e}")
         return None
-
 
 
 def get_detections_nearby(
@@ -45,10 +42,8 @@ def get_detections_nearby(
     active_only: bool = True,
 ) -> list:
     """
-    Fetch all active detections within radius_km of (lat, lng),
-    limited to the last max_age_days days (default 14).
-    Uses PostGIS ST_DWithin for efficient spatial query.
-    Falls back to in-memory Haversine if PostGIS query fails.
+    Get active detections within radius_km of (lat, lng) from the last 14 days.
+    Uses PostGIS RPC first, or falls back to Haversine distance in Python.
     """
     sb            = get_supabase()
     radius_meters = radius_km * 1000
@@ -56,14 +51,14 @@ def get_detections_nearby(
     cutoff_iso    = cutoff_dt.isoformat()
 
     try:
-        # PostGIS spatial query — most efficient
+        # Query nearby detections via PostGIS function
         resp    = sb.rpc(
             "get_nearby_detections",
             {"user_lat": lat, "user_lng": lng, "radius_m": radius_meters},
         ).execute()
         results = resp.data or []
     except Exception:
-        # Fallback: fetch recent detections and filter in-memory via Haversine
+        # Fallback: fetch recent rows and filter by distance in Python
         resp    = (
             sb.table("detections")
             .select(
@@ -81,12 +76,9 @@ def get_detections_nearby(
             if dist <= radius_km:
                 results.append({**d, "distance_km": round(dist, 2)})
 
-    # ── Apply TTL and status filters in Python ────────────────────────────────
-    # This handles both PostGIS (which may not know about new columns) and
-    # the fallback path, ensuring consistent behaviour.
+    # Filter out expired (>14 days) or resolved detections
     filtered = []
     for d in results:
-        # 1. TTL filter — skip detections older than max_age_days
         created = d.get("created_at", "")
         if created:
             try:
@@ -96,7 +88,6 @@ def get_detections_nearby(
             except Exception:
                 pass
 
-        # 2. Status filter — treat missing/null as 'active' for backward compat
         if active_only:
             status = d.get("status", "active")
             if status not in ("active", None):
@@ -108,7 +99,7 @@ def get_detections_nearby(
 
 
 def get_user_detections(user_id: str, limit: int = 20, offset: int = 0) -> list:
-    """Fetch a user's own detection history, newest first."""
+    """Get a user's scan history ordered from newest to oldest."""
     sb   = get_supabase()
     resp = (
         sb.table("detections")
@@ -122,18 +113,14 @@ def get_user_detections(user_id: str, limit: int = 20, offset: int = 0) -> list:
 
 
 def get_detection_by_id(detection_id: str) -> dict | None:
-    """Fetch a single detection record by UUID."""
+    """Get a single detection record by ID."""
     sb   = get_supabase()
     resp = sb.table("detections").select("*").eq("id", detection_id).single().execute()
     return resp.data
 
 
 def resolve_detection(detection_id: str, user_id: str) -> bool:
-    """
-    Mark a detection as resolved (plant treated / cured).
-    Only the owner of the detection can resolve it.
-    Returns True if a record was updated, False if not found / unauthorized.
-    """
+    """Mark a detection as resolved if it belongs to the current user."""
     sb   = get_supabase()
     resp = (
         sb.table("detections")
@@ -145,13 +132,10 @@ def resolve_detection(detection_id: str, user_id: str) -> bool:
     return len(resp.data) > 0
 
 
-# ── RISK SUMMARY ──────────────────────────────────────────────────────────────
+# Area risk summary
 
 def get_risk_summary(lat: float, lng: float, radius_km: float = 5.0) -> dict:
-    """
-    Summarise disease risk in an area: count, dominant disease, overall level.
-    Only considers active detections within the TTL window.
-    """
+    """Compute overall risk level, case count, and top disease within 5 km."""
     detections = get_detections_nearby(lat, lng, radius_km)
     active      = [d for d in detections if not d.get("is_healthy", False)]
 
@@ -164,7 +148,7 @@ def get_risk_summary(lat: float, lng: float, radius_km: float = 5.0) -> dict:
             "dominant_disease_display": None,
         }
 
-    # Tally risk levels
+    # Average the risk scores of nearby active detections
     level_scores = {"low": 20, "moderate": 55, "high": 85}
     avg_score = sum(level_scores.get(d.get("risk_level", "low"), 20) for d in active) / len(active)
 
@@ -175,7 +159,7 @@ def get_risk_summary(lat: float, lng: float, radius_km: float = 5.0) -> dict:
     else:
         area_risk = "high"
 
-    # Most common disease
+    # Find the most frequent disease in the area
     disease_counts: dict[str, int] = {}
     for d in active:
         disease_counts[d["disease"]] = disease_counts.get(d["disease"], 0) + 1
@@ -193,7 +177,7 @@ def get_risk_summary(lat: float, lng: float, radius_km: float = 5.0) -> dict:
     }
 
 
-# ── USERS ────────────────────────────────────────────────────────────────────
+# User profile queries
 
 def get_user_profile(user_id: str) -> dict | None:
     sb   = get_supabase()
@@ -207,13 +191,10 @@ def upsert_user_profile(user_id: str, data: dict) -> dict:
     return resp.data[0] if resp.data else {}
 
 
-# ── RETENTION ────────────────────────────────────────────────────────────────
+# History limit cleanup
 
 def enforce_retention(user_id: str, max_records: int = 50):
-    """
-    Keep only the most recent `max_records` scans per user.
-    Called after every successful detection save.
-    """
+    """Keep only the latest 50 scans per user and delete older records."""
     sb = get_supabase()
     try:
         resp = (

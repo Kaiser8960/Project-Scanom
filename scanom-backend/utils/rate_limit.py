@@ -1,6 +1,5 @@
 """
-Rate limiting (slowapi). Counters are in-memory, per instance — fine for a
-single Railway instance.
+In-memory request rate limiting using slowapi.
 """
 
 from fastapi import Request
@@ -8,11 +7,7 @@ from slowapi import Limiter
 
 
 def client_ip(request: Request) -> str:
-    """
-    Real client IP behind Railway's proxy. Prefer X-Real-IP; otherwise take the
-    right-most X-Forwarded-For entry (the one added by the trusted proxy, not
-    client-supplied); otherwise the socket peer.
-    """
+    """Get the client's IP address from proxy headers or socket connection."""
     real = request.headers.get("x-real-ip")
     if real:
         return real.strip()
@@ -24,8 +19,8 @@ def client_ip(request: Request) -> str:
 
 limiter = Limiter(key_func=client_ip, default_limits=["120/minute"])
 
-# Named limits so they're easy to tune in one place
+# Rate limits per endpoint type
 LIMIT_REGISTER = "5/minute"
 LIMIT_LOGIN    = "10/minute"
 LIMIT_DETECT   = "10/minute"
-LIMIT_WRITE    = "30/minute"   # profile update, delete, resolve
+LIMIT_WRITE    = "30/minute"

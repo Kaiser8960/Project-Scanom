@@ -1,8 +1,7 @@
 import { Stack } from "expo-router";
 
 /**
- * Auth stack — gives sign-in ↔ sign-up a native slide transition.
- * (The root layout uses <Slot />, which has no navigator and therefore no transitions.)
+ * Stack navigator for the Sign In and Sign Up screens.
  */
 export default function AuthLayout() {
   return (

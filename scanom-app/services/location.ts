@@ -1,6 +1,5 @@
 /**
- * Location service — expo-location wrapper.
- * Requests permissions and returns current GPS coordinates.
+ * GPS location service using expo-location.
  */
 
 import * as Location from "expo-location";
@@ -32,7 +31,7 @@ export async function getCurrentLocation(): Promise<Coordinates | null> {
   }
 }
 
-// Default coordinates (Cebu City) — used as fallback when GPS is unavailable
+// Default coordinates (Cebu City) used when GPS is unavailable
 export const DEFAULT_LOCATION: Coordinates = {
   lat: 10.3157,
   lng: 123.8854,

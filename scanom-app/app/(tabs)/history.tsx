@@ -40,7 +40,7 @@ export default function HistoryScreen() {
       }
       setHasMore(resp.detections.length === 20);
     } catch {
-      // Not logged in or network error — show empty state
+      // Show empty state if not logged in or offline
     } finally {
       setLoading(false);
     }

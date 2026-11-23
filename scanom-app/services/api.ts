@@ -1,6 +1,5 @@
 /**
- * API service — all calls to the FastAPI backend.
- * Single source of truth for every endpoint.
+ * API service for all HTTP calls to the FastAPI backend.
  */
 
 import * as SecureStore from "expo-secure-store";
@@ -9,7 +8,7 @@ import type { ScanResult, NearbyDetection, RiskSummary, HistoryDetection } from 
 
 const BASE = CONFIG.API_BASE_URL;
 
-// ── AUTH TOKEN ───────────────────────────────────────────────────────────────
+// Token helpers
 
 async function getToken(): Promise<string | null> {
   return SecureStore.getItemAsync("scanom_token");
@@ -22,7 +21,7 @@ async function authHeaders(): Promise<Record<string, string>> {
     : { "Content-Type": "application/json" };
 }
 
-// ── AUTH ─────────────────────────────────────────────────────────────────────
+// Authentication endpoints
 
 export async function register(
   name: string,
@@ -55,7 +54,7 @@ export async function login(email: string, password: string) {
   return res.json();
 }
 
-// ── SCAN ─────────────────────────────────────────────────────────────────────
+// Leaf scan endpoint
 
 export async function detect(
   imageBase64: string,
@@ -75,7 +74,7 @@ export async function detect(
   return res.json();
 }
 
-// ── DETECTIONS ───────────────────────────────────────────────────────────────
+// Detection query endpoints
 
 export async function getDetectionsNearby(
   lat: number,
@@ -99,7 +98,7 @@ export async function getUserDetections(
   return res.json();
 }
 
-// ── RISK ─────────────────────────────────────────────────────────────────────
+// Area risk summary endpoint
 
 export async function getRiskSummary(
   lat: number,
@@ -111,12 +110,8 @@ export async function getRiskSummary(
   return res.json();
 }
 
-// ── RESOLVE ───────────────────────────────────────────────────────────────────
+// Resolve detection endpoint
 
-/**
- * Mark a detection as resolved / cured.
- * Hides the risk circle from the public map while keeping the historical record.
- */
 export async function resolveDetection(detectionId: string): Promise<void> {
   const headers = await authHeaders();
   const res = await fetch(`${BASE}/detections/${detectionId}/resolve`, {
@@ -129,7 +124,7 @@ export async function resolveDetection(detectionId: string): Promise<void> {
   }
 }
 
-// ── PROFILE ──────────────────────────────────────────────────────────────────
+// Profile update endpoint
 
 export async function updateProfile(
   fields: { name?: string; location?: string }
@@ -147,7 +142,7 @@ export async function updateProfile(
   return res.json();
 }
 
-// ── ACCOUNT DELETION ──────────────────────────────────────────────────────────
+// Account deletion endpoint
 
 export async function deleteAccount(): Promise<void> {
   const headers = await authHeaders();

@@ -1,10 +1,5 @@
 /**
- * Live form validation rules.
- *
- * IMPORTANT: these rules MIRROR the server rules in
- * scanom-backend/utils/validation.py. The server is authoritative; this file
- * exists only so the app can guide the user while typing. If you change a rule
- * here, change it there too (and vice versa).
+ * Client-side form validation rules matching the backend validation in scanom-backend/utils/validation.py.
  */
 
 export const LIMITS = {
@@ -23,22 +18,18 @@ export interface Rule {
   id: string;
   label: string;
   ok: boolean;
-  /**
-   * live = the problem can't be fixed by typing more (e.g. an illegal character),
-   * so flag it red immediately. Non-live rules stay neutral until the field is
-   * left (blur) or the user taps the submit button.
-   */
+  // True if the rule should show an error immediately while typing
   live: boolean;
   children?: RuleChild[];
 }
 
 const NAME_RE   = /^[A-Za-z\u00C0-\u024F][A-Za-z\u00C0-\u024F .'\-]*$/;
 const EMAIL_RE  = /^([A-Za-z0-9._%+\-]+)@([A-Za-z0-9.\-]+)\.([A-Za-z]{2,})$/;
-const REPEAT_RE = /(.)\1{3,}/i; // same character 4+ times in a row
+const REPEAT_RE = /(.)\1{3,}/i; // 4 or more identical characters in a row
 
 export const allOk = (rules: Rule[]) => rules.every((r) => r.ok);
 
-// ── NAME ─────────────────────────────────────────────────────────────────────
+// Name rules
 export function nameRules(raw: string): Rule[] {
   const v = raw.replace(/\s+/g, " ").trim();
   return [
@@ -63,7 +54,7 @@ export function nameRules(raw: string): Rule[] {
   ];
 }
 
-// ── LOCATION ─────────────────────────────────────────────────────────────────
+// Location rules
 export function locationRules(raw: string): Rule[] {
   const v = raw.replace(/\s+/g, " ").trim();
   return [
@@ -76,7 +67,7 @@ export function locationRules(raw: string): Rule[] {
   ];
 }
 
-// ── EMAIL ────────────────────────────────────────────────────────────────────
+// Email rules
 export function isValidEmailFormat(raw: string): boolean {
   const v = raw.trim().toLowerCase();
   if (v.length > LIMITS.EMAIL_MAX) return false;
@@ -107,7 +98,7 @@ export function emailRules(raw: string): Rule[] {
   ];
 }
 
-// ── PASSWORD ─────────────────────────────────────────────────────────────────
+// Password rules
 export function passwordTypeFlags(pw: string) {
   return {
     lower:   /[a-z]/.test(pw),

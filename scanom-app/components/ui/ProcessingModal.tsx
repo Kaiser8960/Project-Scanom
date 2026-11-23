@@ -2,11 +2,7 @@ import { Modal, View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import Animated, { ZoomIn } from "react-native-reanimated";
 
 /**
- * Centered "Analyzing image…" popup.
- *
- * Rendered with a native <Modal> so it floats above everything (camera preview,
- * controls and the tab bar) and is always centered, independent of the screen's
- * flex layout. It also blocks taps while a scan is in progress.
+ * Centered loading popup shown while a leaf image is being analyzed.
  */
 export default function ProcessingModal({
   visible,

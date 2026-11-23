@@ -1,7 +1,5 @@
 """
-Risk router — GET /risk/summary
-Returns disease risk level and dominant disease for a location.
-Used by the Map screen header to show area risk context.
+Endpoint for fetching the 5 km area risk summary (GET /risk/summary).
 """
 
 from fastapi import APIRouter, HTTPException, Query
@@ -15,11 +13,7 @@ async def risk_summary(
     lat: float = Query(..., description="Latitude"),
     lng: float = Query(..., description="Longitude"),
 ):
-    """
-    Summarise the disease risk in a 5km area around (lat, lng).
-    Returns: area_risk_level, total_cases_nearby, dominant_disease.
-    Public endpoint — no auth required (data is aggregated, not user-specific).
-    """
+    """Return the overall risk level, active case count, and top disease within 5 km."""
     try:
         summary = get_risk_summary(lat, lng)
         return summary

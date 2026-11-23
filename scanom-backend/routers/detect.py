@@ -1,6 +1,6 @@
 """
-Detect router — POST /detect
-Main endpoint: image → inference → weather → fuzzy logic → AI → save → return result.
+Main detection endpoint (POST /detect).
+Runs image classification, weather lookup, fuzzy risk calculation, and Gemini AI guidance.
 """
 
 from fastapi import APIRouter, HTTPException, Header, Request
@@ -23,9 +23,9 @@ router = APIRouter()
 
 
 class DetectRequest(BaseModel):
-    image_base64: str = Field(max_length=IMAGE_B64_MAX)  # Base64 leaf image (or data URI)
-    lat:          float = Field(ge=-90,  le=90)          # User's current latitude
-    lng:          float = Field(ge=-180, le=180)         # User's current longitude
+    image_base64: str = Field(max_length=IMAGE_B64_MAX)
+    lat:          float = Field(ge=-90,  le=90)
+    lng:          float = Field(ge=-180, le=180)
 
 
 @router.post("/detect")
@@ -35,32 +35,18 @@ async def detect(
     req:           DetectRequest,
     authorization: Optional[str] = Header(None),
 ):
-    """
-    Full detection pipeline:
-    1. Verify auth token
-    2. Preprocess image → TFLite/Keras inference
-    3. Fetch Open-Meteo weather
-    4. Query nearby detections (for density)
-    5. Run Mamdani fuzzy logic → risk score + spread radius
-    6. Call Gemini for AI disease explanation
-    7. Save record to Supabase
-    8. Enforce 50-scan retention window
-    9. Return full result JSON
-    """
+    """Run the full leaf detection and spatial risk pipeline."""
 
-    # ── 1. AUTH ───────────────────────────────────────────────────────────────
+    # Step 1: Check user token if provided
     user = None
     if authorization and authorization.startswith("Bearer "):
         token = authorization.split(" ", 1)[1]
         try:
-            user = verify_token(f"Bearer {token}")  # returns str UUID or raises 401
+            user = verify_token(f"Bearer {token}")
         except Exception:
-            user = None  # treat as unauthenticated scan
-    # Allow unauthenticated scans but won't save to history
+            user = None
 
-    # ── 1.5 DUPLICATE CHECK ───────────────────────────────────────────────────
-    # Same image already scanned by this user → return previous result,
-    # no new record and therefore no new risk circle.
+    # Step 2: Check if this user already scanned the exact same image
     image_hash = None
     try:
         image_hash = compute_image_hash(req.image_base64)
@@ -94,14 +80,14 @@ async def detect(
                 "lng":             existing.get("lng"),
             }
 
-    # ── 2. INFERENCE ──────────────────────────────────────────────────────────
+    # Step 3: Preprocess image and run EfficientNetV2B0 model inference
     try:
         image_array = decode_and_preprocess(req.image_base64)
         prediction  = inference_service.predict(image_array)
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Image processing failed: {e}")
 
-    # Low confidence → return rejection immediately
+    # Return rejection if confidence is below the 0.70 threshold
     if not prediction["valid"]:
         return {
             "valid":      False,
@@ -115,7 +101,7 @@ async def detect(
     display_name   = get_display_name(class_name)
     healthy        = is_healthy(class_name)
 
-    # Healthy plants: return early with minimal risk info
+    # Return early if the leaf is healthy (no risk or weather lookup needed)
     if healthy:
         return {
             "valid":           True,
@@ -136,15 +122,15 @@ async def detect(
             },
         }
 
-    # ── 3. WEATHER ────────────────────────────────────────────────────────────
+    # Step 4: Get current weather at the scan coordinates
     weather = await get_weather(req.lat, req.lng)
 
-    # ── 4. NEARBY DETECTIONS (for density input) ───────────────────────────
+    # Step 5: Count nearby active disease cases within 5 km
     nearby      = get_detections_nearby(req.lat, req.lng, radius_km=5.0)
     active      = [d for d in nearby if not d.get("is_healthy", False)]
     density     = min(len(active), 10)
 
-    # Days since earliest nearby detection
+    # Find how many days ago the oldest nearby case was detected
     if active:
         dates = [d["created_at"] for d in active if d.get("created_at")]
         if dates:
@@ -159,7 +145,7 @@ async def detect(
     else:
         days_val = 0
 
-    # ── 5. FUZZY LOGIC ────────────────────────────────────────────────────────
+    # Step 6: Compute risk level and spread radius using Mamdani fuzzy logic
     fuzzy_result = compute_risk(
         density_val  = density,
         humidity_val = weather["humidity"],
@@ -168,7 +154,7 @@ async def detect(
         disease_class = class_name,
     )
 
-    # ── 6. AI EXPLANATION ─────────────────────────────────────────────────────
+    # Step 7: Generate treatment and prevention guidance using Gemini AI
     explanation = await get_disease_explanation(
         disease_class = class_name,
         plant         = plant,
@@ -178,7 +164,7 @@ async def detect(
         temperature   = weather["temperature"],
     )
 
-    # ── 7. SAVE TO SUPABASE ───────────────────────────────────────────────────
+    # Step 8: Save the detection to Supabase and enforce the 50-scan limit
     detection_id = None
     if user:
         record = {
@@ -205,10 +191,9 @@ async def detect(
         saved        = save_detection(record)
         detection_id = saved.get("id")
 
-        # ── 8. RETENTION ──────────────────────────────────────────────────────
         enforce_retention(user, max_records=50)
 
-    # ── 9. RETURN RESULT ──────────────────────────────────────────────────────
+    # Step 9: Return complete scan response to the app
     return {
         "valid":           True,
         "disease":         class_name,

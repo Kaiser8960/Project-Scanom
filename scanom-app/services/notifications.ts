@@ -1,7 +1,5 @@
 /**
- * Local notification service.
- * Fires on-device notifications after a scan and when the area risk is High,
- * respecting the toggles saved in Settings → Notifications (AsyncStorage).
+ * Local push notification service for scan detections and high-risk area alerts.
  */
 
 import * as Notifications from "expo-notifications";

@@ -1,6 +1,5 @@
 """
-Weather service — fetches current conditions from Open-Meteo API.
-Free, no API key required, no rate limit for reasonable usage.
+Weather service that fetches real-time temperature and humidity from Open-Meteo.
 """
 
 import httpx
@@ -12,10 +11,7 @@ FALLBACK_TEMPERATURE = float(os.getenv("FALLBACK_TEMPERATURE", "29.0"))
 
 
 async def get_weather(lat: float, lng: float) -> dict:
-    """
-    Fetch current humidity, temperature, and wind speed for a location.
-    Falls back to Cebu averages if Open-Meteo is unreachable.
-    """
+    """Fetch current humidity and temperature for (lat, lng), or use Cebu default values."""
     params = {
         "latitude":  lat,
         "longitude": lng,

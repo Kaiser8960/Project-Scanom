@@ -1,6 +1,5 @@
 """
-Auth router — register and login using Supabase Auth.
-No custom JWT: Supabase issues, signs, and verifies all tokens.
+Authentication endpoints: register, login, profile update, and account deletion.
 """
 
 from fastapi import APIRouter, HTTPException, Header, Request
@@ -46,8 +45,6 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    # Lenient on purpose: only guard against oversized input so existing
-    # accounts can always sign in.
     email:    str = Field(max_length=254)
     password: str = Field(max_length=PASSWORD_MAX)
 
@@ -55,13 +52,10 @@ class LoginRequest(BaseModel):
 @router.post("/register")
 @limiter.limit(LIMIT_REGISTER)
 async def register(request: Request, req: RegisterRequest):
-    """
-    Create a new Supabase Auth user + insert profile row in users table.
-    Returns: { token, user }
-    """
+    """Create a new Supabase Auth user and save their profile in the users table."""
     sb = get_supabase()
     try:
-        # 1. Create Supabase Auth user
+        # Create Supabase Auth account
         auth_resp = sb.auth.sign_up({
             "email":    req.email,
             "password": req.password,
@@ -71,11 +65,10 @@ async def register(request: Request, req: RegisterRequest):
 
         user_id = auth_resp.user.id
 
-        # 2. Clean up any orphaned profile row with this email
-        #    (can happen if auth account was deleted but profile row was not)
+        # Remove any old profile row with the same email before inserting
         sb.table("users").delete().eq("email", req.email).execute()
 
-        # 3. Insert fresh profile row
+        # Save user profile
         sb.table("users").insert({
             "id":       user_id,
             "email":    req.email,
@@ -104,10 +97,7 @@ async def register(request: Request, req: RegisterRequest):
 @router.post("/login")
 @limiter.limit(LIMIT_LOGIN)
 async def login(request: Request, req: LoginRequest):
-    """
-    Sign in with email + password via Supabase Auth.
-    Returns: { token, user }
-    """
+    """Sign in with email and password and return the session token and user profile."""
     sb = get_supabase()
     try:
         auth_resp = sb.auth.sign_in_with_password({
@@ -119,7 +109,7 @@ async def login(request: Request, req: LoginRequest):
 
         user_id = auth_resp.user.id
 
-        # Fetch display profile
+        # Fetch user profile details
         profile_resp = sb.table("users").select("name,location,avatar_url").eq("id", user_id).maybe_single().execute()
         profile      = profile_resp.data or {}
 
@@ -161,12 +151,8 @@ async def update_profile(
     req:           UpdateProfileRequest,
     authorization: Optional[str] = Header(None),
 ):
-    """
-    Update the authenticated user's display name and location.
-    Requires a valid Supabase JWT in the Authorization header.
-    Returns the updated user profile.
-    """
-    user_id = verify_token(authorization)   # now returns str, raises 401 on failure
+    """Update the logged-in user's name and location."""
+    user_id = verify_token(authorization)
     sb = get_supabase()
 
     updates = {}
@@ -179,7 +165,7 @@ async def update_profile(
     try:
         sb.table("users").update(updates).eq("id", user_id).execute()
 
-        # Return the current full profile
+        # Fetch updated profile
         profile_resp = sb.table("users").select("id,email,name,location,avatar_url").eq("id", user_id).maybe_single().execute()
         profile = profile_resp.data or {}
 
@@ -204,25 +190,20 @@ async def delete_account(
     request:       Request,
     authorization: Optional[str] = Header(None),
 ):
-    """
-    Permanently delete the authenticated user's account.
-    Removes: all detections, the profile row, and the Supabase Auth account.
-    Returns 204 No Content on success.
-    """
-    user_id      = verify_token(authorization)   # raises 401 if invalid
+    """Delete the user's scans, profile record, and Supabase Auth account."""
+    user_id      = verify_token(authorization)
     sb           = get_supabase()
     supabase_url = os.getenv("SUPABASE_URL", "")
     service_key  = os.getenv("SUPABASE_SERVICE_KEY", "")
 
     try:
-        # 1. Delete all detection records for this user
+        # Delete user's scan history
         sb.table("detections").delete().eq("user_id", user_id).execute()
 
-        # 2. Delete the profile row from the users table
+        # Delete user's profile row
         sb.table("users").delete().eq("id", user_id).execute()
 
-        # 3. Delete the Supabase Auth account via Admin REST API
-        #    (more reliable than sb.auth.admin.delete_user() across SDK versions)
+        # Delete Supabase Auth user via Admin API
         resp = httpx.delete(
             f"{supabase_url}/auth/v1/admin/users/{user_id}",
             headers={
@@ -234,7 +215,6 @@ async def delete_account(
         if resp.status_code not in (200, 204):
             raise Exception(f"Auth deletion failed: {resp.text}")
 
-        # 204 — no body returned
         return
     except HTTPException:
         raise

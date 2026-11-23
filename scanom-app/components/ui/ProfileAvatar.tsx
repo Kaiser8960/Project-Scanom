@@ -9,9 +9,7 @@ import { getStoredUser, signOut } from "@/services/auth";
 import type { User } from "@/types";
 
 /**
- * Floating profile avatar shown in the header of every tab screen.
- * Tap → opens a slide-up modal panel with user info, settings, and logout.
- * Styled to match the white-primary / dark-green-accent scheme.
+ * Header avatar button that opens a slide-up menu with user settings and logout.
  */
 export default function ProfileAvatar() {
   const router   = useRouter();
@@ -53,7 +51,7 @@ export default function ProfileAvatar() {
 
   return (
     <>
-      {/* ── Avatar button in header ── */}
+      {/* Header avatar button */}
       <TouchableOpacity
         onPress={handleOpen}
         activeOpacity={0.75}
@@ -62,7 +60,7 @@ export default function ProfileAvatar() {
         <Text style={styles.initials}>{initials}</Text>
       </TouchableOpacity>
 
-      {/* ── Slide-up modal panel ── */}
+      {/* Slide-up profile modal */}
       <Modal
         visible={visible}
         transparent
@@ -70,20 +68,16 @@ export default function ProfileAvatar() {
         statusBarTranslucent
         onRequestClose={handleClose}
       >
-        {/* flex: 1 container — backdrop fills all space ABOVE the panel */}
         <View style={styles.modalContainer}>
-          {/* Tapping this dim area closes the modal */}
           <Pressable style={styles.overlay} onPress={handleClose} />
 
-          {/* Slide-up panel — sits BELOW the backdrop in the flex column */}
           <Animated.View
             style={[styles.panel, { transform: [{ translateY: slideAnim }] }]}
           >
             <View style={{ paddingBottom: 28 }}>
-              {/* Drag handle */}
               <View style={styles.handle} />
 
-              {/* User info */}
+              {/* User details */}
               <View style={styles.userRow}>
                 <View style={styles.bigAvatar}>
                   <Text style={styles.bigInitials}>{initials}</Text>
@@ -96,7 +90,7 @@ export default function ProfileAvatar() {
 
               <View style={styles.divider} />
 
-              {/* Menu items */}
+              {/* Settings links */}
               <MenuItem icon="create-outline"        label="Edit Profile"       onPress={() => { handleClose(); setTimeout(() => router.push("/settings/profile"), 240); }} />
               <MenuItem icon="notifications-outline"  label="Notifications"      onPress={() => { handleClose(); setTimeout(() => router.push("/settings/notifications"), 240); }} />
               <MenuItem icon="lock-closed-outline"    label="Privacy & Security" onPress={() => { handleClose(); setTimeout(() => router.push("/settings/privacy"), 240); }} />
@@ -104,7 +98,7 @@ export default function ProfileAvatar() {
 
               <View style={styles.divider} />
 
-              {/* Logout */}
+              {/* Logout button */}
               <TouchableOpacity style={styles.row} onPress={handleLogout} activeOpacity={0.7}>
                 <Ionicons name="log-out-outline" size={20} color="#EF4444" />
                 <Text style={[styles.rowLabel, { color: "#EF4444" }]}>Logout</Text>
@@ -117,7 +111,7 @@ export default function ProfileAvatar() {
   );
 }
 
-// ── Menu row component ────────────────────────────────────────────────────────
+// Single row in the profile menu
 function MenuItem({
   icon,
   label,
@@ -136,31 +130,19 @@ function MenuItem({
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  // Avatar in header — dark green circle, white initials
   avatar:      { width: 36, height: 36, borderRadius: 18, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center" },
   initials:    { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
-
-  // Modal container — flex column so backdrop + panel stack vertically
   modalContainer: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.35)" },
-
-  // Dim overlay — fills all space above the panel (flex: 1)
   overlay:     { flex: 1 },
-
-  // White slide-up panel — no longer absolute; sits at bottom of flex column
   panel:       { backgroundColor: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20, shadowColor: "#000", shadowOpacity: 0.12, shadowOffset: { width: 0, height: -3 }, shadowRadius: 12, elevation: 12 },
   handle:      { width: 40, height: 4, backgroundColor: "#E5E7EB", borderRadius: 2, alignSelf: "center", marginBottom: 20 },
-
-  // User info
   userRow:     { flexDirection: "row", alignItems: "center", marginBottom: 18 },
   bigAvatar:   { width: 54, height: 54, borderRadius: 27, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center", marginRight: 14 },
   bigInitials: { color: "#FFFFFF", fontWeight: "700", fontSize: 20 },
   userInfo:    { flex: 1 },
   userName:    { color: "#111827", fontWeight: "700", fontSize: 16 },
   userSub:     { color: "#6B7280", fontSize: 13, marginTop: 2 },
-
-  // Rows
   divider:     { height: 1, backgroundColor: "#F3F4F6", marginVertical: 8 },
   row:         { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 13 },
   rowLabel:    { flex: 1, color: "#111827", fontSize: 15 },

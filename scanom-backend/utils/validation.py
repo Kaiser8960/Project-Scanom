@@ -1,28 +1,26 @@
 """
-Input validation helpers shared by request models.
-Limits are enforced here on the server; the mobile app mirrors them for UX only.
+Input validation helpers for user registration and profile updates.
 """
 
 import re
 
-# ── Limits ───────────────────────────────────────────────────────────────────
+# Field length limits
 NAME_MIN, NAME_MAX         = 2, 50
 EMAIL_MAX                  = 50
-PASSWORD_MIN, PASSWORD_MAX = 8, 72   # 72 = bcrypt's effective byte limit
+PASSWORD_MIN, PASSWORD_MAX = 8, 72
 LOCATION_MAX               = 100
-IMAGE_B64_MAX              = 5_000_000  # ~3.7 MB decoded; app sends resized images
+IMAGE_B64_MAX              = 5_000_000
 
-# Letters (incl. accented), spaces, apostrophes, hyphens, periods. Must start with a letter.
+# Regex rules for names, emails, and repeated characters
 _NAME_RE  = re.compile(r"^[A-Za-z\u00C0-\u024F][A-Za-z\u00C0-\u024F .'\-]*$")
 _EMAIL_RE = re.compile(r"^([A-Za-z0-9._%+\-]+)@([A-Za-z0-9.\-]+)\.([A-Za-z]{2,})$")
-# Same character 4+ times in a row (case-insensitive), e.g. "LLLL", "aaaa"
 _REPEAT_RE = re.compile(r"(.)\1{3,}", re.IGNORECASE)
 
-PASSWORD_TYPES_REQUIRED = 3  # of: lowercase, uppercase, number, special
+PASSWORD_TYPES_REQUIRED = 3
 
 
 def clean_name(v: str) -> str:
-    v = " ".join(v.split())  # trim + collapse whitespace
+    v = " ".join(v.split())
     if not (NAME_MIN <= len(v) <= NAME_MAX):
         raise ValueError(f"Name must be {NAME_MIN}-{NAME_MAX} characters.")
     if not _NAME_RE.match(v):
@@ -60,7 +58,7 @@ def password_type_flags(v: str) -> dict:
 
 
 def check_password(v: str) -> str:
-    """Registration password policy: 8-72 chars and at least 3 of 4 character types."""
+    """Validate that password is 8-72 chars and includes at least 3 character types."""
     if len(v) < PASSWORD_MIN:
         raise ValueError(f"Password must be at least {PASSWORD_MIN} characters.")
     if len(v) > PASSWORD_MAX:

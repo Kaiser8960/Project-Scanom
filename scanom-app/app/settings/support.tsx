@@ -38,7 +38,7 @@ export default function SupportScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ── Header ── */}
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
           <Ionicons name="chevron-back" size={22} color="#1B4A2F" />
@@ -49,7 +49,7 @@ export default function SupportScreen() {
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
 
-        {/* ── Hero ── */}
+        {/* Intro banner */}
         <View style={styles.hero}>
           <View style={styles.heroIcon}>
             <Ionicons name="help-buoy-outline" size={32} color="#1B4A2F" />
@@ -58,7 +58,7 @@ export default function SupportScreen() {
           <Text style={styles.heroSub}>Browse the FAQ below or reach us directly.</Text>
         </View>
 
-        {/* ── FAQ ── */}
+        {/* FAQ list */}
         <Text style={styles.sectionLabel}>FREQUENTLY ASKED QUESTIONS</Text>
         <View style={styles.card}>
           {FAQ_ITEMS.map((item, i) => (
@@ -83,7 +83,7 @@ export default function SupportScreen() {
           ))}
         </View>
 
-        {/* ── Contact ── */}
+        {/* Contact details */}
         <Text style={styles.sectionLabel}>CONTACT</Text>
         <View style={styles.card}>
           <View style={styles.contactRow}>

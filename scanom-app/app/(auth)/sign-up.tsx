@@ -31,11 +31,11 @@ export default function SignUpScreen() {
   const [showPw, setShowPw]           = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Errors that only the server can know (e.g. email already registered)
+  // Server-side validation error state
   const [emailServerError, setEmailServerError] = useState<string | null>(null);
   const [formError, setFormError]               = useState<string | null>(null);
 
-  // ── live validation ────────────────────────────────────────────────────────
+  // Live field validation rules
   const nameR    = nameRules(name);
   const emailR   = emailRules(email);
   const passR    = passwordRules(password);
@@ -55,7 +55,7 @@ export default function SignUpScreen() {
     setFocus((f) => (f === k ? null : f));
   }
 
-  /** Border color: red = problem shown, green = valid, gray = neutral. */
+  /** Choose input border style based on validation status. */
   function borderFor(k: FieldKey, value: string, ok: boolean, rules: typeof nameR, extraError = false) {
     if (extraError) return styles.inputError;
     if (value.length === 0) return flagged(k) ? styles.inputError : null;
@@ -68,13 +68,11 @@ export default function SignUpScreen() {
   async function handleRegister() {
     setFormError(null);
     if (!formValid) {
-      // Reveal every problem at once instead of one popup at a time
       setSubmitAttempted(true);
       return;
     }
     try {
       setLoading(true);
-      // location defaults to empty string — GPS coordinates are used instead
       await signUp(name.replace(/\s+/g, " ").trim(), "", email.trim(), password);
       router.replace("/(tabs)/map");
     } catch (err: any) {
@@ -101,7 +99,7 @@ export default function SignUpScreen() {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
 
-        {/* Logo header — matches sign-in layout */}
+        {/* Logo header */}
         <View style={styles.logoArea}>
           <ScanomLogo size="md" />
           <Text style={styles.subtitle}>Create your account</Text>

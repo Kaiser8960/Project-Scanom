@@ -38,13 +38,13 @@ export default function SignInScreen() {
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-        {/* ── Logo / Branding ────────────────────────────────────── */}
+        {/* Brand logo */}
         <Animated.View entering={FadeInDown.duration(450)} style={styles.brand}>
           <ScanomLogo size="md" />
           <Text style={styles.tagline}>Plant Disease Detection</Text>
         </Animated.View>
 
-        {/* ── Form Card ─────────────────────────────────────────── */}
+        {/* Sign-in form */}
         <Animated.View entering={FadeInDown.delay(120).duration(450)} style={styles.card}>
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
@@ -89,7 +89,7 @@ export default function SignInScreen() {
           </TouchableOpacity>
         </Animated.View>
 
-        {/* ── Footer ────────────────────────────────────────────── */}
+        {/* Sign-up link */}
         <Animated.View entering={FadeInDown.delay(240).duration(450)} style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
@@ -106,7 +106,6 @@ const styles = StyleSheet.create({
   root:  { flex: 1, backgroundColor: "#FFFFFF" },
   scroll: { flexGrow: 1, justifyContent: "center", padding: 28, paddingTop: 16 },
 
-  // ── Brand area ────────────────────────────────────────────────
   brand: {
     alignItems: "center",
     marginBottom: 8,
@@ -117,7 +116,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // ── Form card (matches image 4 — white card, subtle shadow/border) ─────────
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
@@ -125,7 +123,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    // Subtle card shadow
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -135,7 +132,6 @@ const styles = StyleSheet.create({
   title:    { fontSize: 22, fontWeight: "700", color: "#111827", marginBottom: 4 },
   subtitle: { fontSize: 14, color: "#6B7280", marginBottom: 24 },
 
-  // ── Inputs ────────────────────────────────────────────────────
   inputGroup: { marginBottom: 16 },
   label: {
     fontSize: 12,
@@ -156,7 +152,6 @@ const styles = StyleSheet.create({
     borderColor: "#E5E7EB",
   },
 
-  // ── Sign In button (dark forest green — matches image 4) ──────
   btn: {
     backgroundColor: "#1B4A2F",
     borderRadius: 12,
@@ -167,7 +162,6 @@ const styles = StyleSheet.create({
   btnDisabled: { opacity: 0.6 },
   btnText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700", letterSpacing: 0.4 },
 
-  // ── Footer ────────────────────────────────────────────────────
   footer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
   footerText: { color: "#6B7280", fontSize: 14 },
   footerLink: { color: "#1B4A2F", fontSize: 14, fontWeight: "700" },
