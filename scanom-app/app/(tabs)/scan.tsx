@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert, Platform, Image, Pressable,
+  ActivityIndicator, Alert, Platform, Image, Pressable, ToastAndroid,
 } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -99,8 +99,21 @@ export default function ScanScreen() {
         { base64: true, format: ImageManipulator.SaveFormat.JPEG, compress: 0.9 }
       );
 
-      const loc = await getCurrentLocation() ?? DEFAULT_LOCATION;
-      const result = await detect(resized.base64!, loc.lat, loc.lng);
+      const realLoc = await getCurrentLocation();
+      const hasLocation = realLoc !== null;
+      const loc = realLoc ?? DEFAULT_LOCATION;
+
+      if (!hasLocation) {
+        const msg = "Location is off — diagnosing leaf without risk map.";
+        if (Platform.OS === "android") {
+          ToastAndroid.show(msg, ToastAndroid.LONG);
+        } else {
+          Alert.alert("Location Off", msg);
+        }
+      }
+
+      const result = await detect(resized.base64!, loc.lat, loc.lng, hasLocation);
+      const noLocParam = hasLocation ? undefined : "true";
 
       if (!result.valid) {
         router.push({ pathname: "/rejection", params: { confidence: String(result.confidence) } });
@@ -109,7 +122,7 @@ export default function ScanScreen() {
           "Already scanned",
           "This image was scanned before. Showing your previous result — no new risk circle was added."
         );
-        router.push({ pathname: "/result", params: { data: JSON.stringify(result) } });
+        router.push({ pathname: "/result", params: { data: JSON.stringify(result), noLocation: noLocParam } });
       } else {
         if (!result.is_healthy) {
           sendScanNotification(
@@ -118,7 +131,7 @@ export default function ScanScreen() {
             result.plant ?? "plant"
           );
         }
-        router.push({ pathname: "/result", params: { data: JSON.stringify(result) } });
+        router.push({ pathname: "/result", params: { data: JSON.stringify(result), noLocation: noLocParam } });
       }
     } catch (err: any) {
       Alert.alert("Scan failed", err.message ?? "Please try again.");

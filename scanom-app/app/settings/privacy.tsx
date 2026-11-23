@@ -1,17 +1,33 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert, ActivityIndicator, Platform, ToastAndroid } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { deleteAccount } from "@/services/api";
 import { clearSession } from "@/services/auth";
+import { isLocationSharingEnabled, setLocationSharingEnabled } from "@/services/location";
 
 export default function PrivacyScreen() {
   const insets  = useSafeAreaInsets();
   const router  = useRouter();
-  const [locationSharing, setLocationSharing] = useState(true);
+  const [locationSharing, setLocationSharingRaw] = useState(true);
   const [anonymousData,   setAnonymousData]   = useState(true);
   const [deleting,        setDeleting]        = useState(false);
+
+  useEffect(() => {
+    isLocationSharingEnabled().then(setLocationSharingRaw);
+  }, []);
+
+  function setLocationSharing(val: boolean) {
+    setLocationSharingRaw(val);
+    setLocationSharingEnabled(val);
+    const msg = val
+      ? "Location sharing enabled. Risk Map is now active."
+      : "Location sharing turned off. Scans will not be plotted on the Risk Map.";
+    if (Platform.OS === "android") {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    }
+  }
 
   function handleDeleteAccount() {
     Alert.alert(

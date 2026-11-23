@@ -1,12 +1,24 @@
 /**
- * GPS location service using expo-location.
+ * GPS location service using expo-location and AsyncStorage preference.
  */
 
 import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface Coordinates {
   lat: number;
   lng: number;
+}
+
+const LOCATION_SHARING_KEY = "scanom_location_sharing";
+
+export async function isLocationSharingEnabled(): Promise<boolean> {
+  const val = await AsyncStorage.getItem(LOCATION_SHARING_KEY);
+  return val === null ? true : val === "true";
+}
+
+export async function setLocationSharingEnabled(enabled: boolean): Promise<void> {
+  await AsyncStorage.setItem(LOCATION_SHARING_KEY, String(enabled));
 }
 
 export async function requestLocationPermission(): Promise<boolean> {
@@ -15,6 +27,9 @@ export async function requestLocationPermission(): Promise<boolean> {
 }
 
 export async function getCurrentLocation(): Promise<Coordinates | null> {
+  const sharingEnabled = await isLocationSharingEnabled();
+  if (!sharingEnabled) return null;
+
   const granted = await requestLocationPermission();
   if (!granted) return null;
 

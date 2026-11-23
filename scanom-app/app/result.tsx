@@ -37,7 +37,7 @@ const SEVERITY_CONFIG: Record<string, { color: string; label: string }> = {
 export default function ResultScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data, fromHistory } = useLocalSearchParams<{ data: string; fromHistory?: string }>();
+  const { data, fromHistory, noLocation } = useLocalSearchParams<{ data: string; fromHistory?: string; noLocation?: string }>();
 
   // Parse scan result JSON passed via route params
   const result = JSON.parse(data ?? "{}") as DetectionResult & {
@@ -65,6 +65,7 @@ export default function ResultScreen() {
   // Show spread forecast mini-map for diseased scans with GPS coordinates
   const showMiniMap =
     !isGood &&
+    noLocation !== "true" &&
     result.lat != null &&
     result.lng != null &&
     result.spread_radius > 0;

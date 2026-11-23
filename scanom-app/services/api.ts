@@ -59,9 +59,12 @@ export async function login(email: string, password: string) {
 export async function detect(
   imageBase64: string,
   lat: number,
-  lng: number
+  lng: number,
+  includeAuth: boolean = true
 ): Promise<ScanResult> {
-  const headers = await authHeaders();
+  const headers = includeAuth
+    ? await authHeaders()
+    : { "Content-Type": "application/json" };
   const res = await fetch(`${BASE}/detect`, {
     method: "POST",
     headers,

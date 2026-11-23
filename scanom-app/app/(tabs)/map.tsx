@@ -1,15 +1,15 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   View, Text, StyleSheet, ActivityIndicator,
-  TouchableOpacity, Animated, Modal, Pressable,
+  TouchableOpacity, Animated, Modal, Pressable, Platform, ToastAndroid,
 } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
-import { getCurrentLocation, DEFAULT_LOCATION } from "@/services/location";
+import { useFocusEffect, useRouter } from "expo-router";
+import { getCurrentLocation, DEFAULT_LOCATION, Coordinates } from "@/services/location";
 import { getDetectionsNearby, getRiskSummary } from "@/services/api";
 import { sendRiskWarning } from "@/services/notifications";
-import type { NearbyDetection, RiskSummary, Coordinates } from "@/types";
+import type { NearbyDetection, RiskSummary } from "@/types";
 
 // Risk circle and badge colors
 
@@ -70,8 +70,23 @@ function filterLabel(key: FilterKey): string {
   return all.find((f) => f.key === key)?.label ?? "Filter";
 }
 
+// Compute distance in meters between two GPS coordinates
+function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export default function MapScreen() {
+  const router = useRouter();
   const [location, setLocation]         = useState<Coordinates>(DEFAULT_LOCATION);
+  const [locationOff, setLocationOff]   = useState(false);
   const [detections, setDetections]     = useState<NearbyDetection[]>([]);
   const [riskSummary, setRiskSummary]   = useState<RiskSummary | null>(null);
   const [loading, setLoading]           = useState(true);
@@ -79,6 +94,7 @@ export default function MapScreen() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [dropOpen, setDropOpen]         = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const lastMarkerTap = useRef(0);
 
   useFocusEffect(
     useCallback(() => { loadData(); }, [])
@@ -87,7 +103,18 @@ export default function MapScreen() {
   async function loadData() {
     setLoading(true);
     try {
-      const loc = await getCurrentLocation() ?? DEFAULT_LOCATION;
+      const loc = await getCurrentLocation();
+      if (!loc) {
+        setLocationOff(true);
+        setDetections([]);
+        setRiskSummary(null);
+        setSelected(null);
+        if (Platform.OS === "android") {
+          ToastAndroid.show("Location services off — Risk Map hidden.", ToastAndroid.SHORT);
+        }
+        return;
+      }
+      setLocationOff(false);
       setLocation(loc);
       const [nearbyResp, summary] = await Promise.all([
         getDetectionsNearby(loc.lat, loc.lng),
@@ -250,6 +277,38 @@ export default function MapScreen() {
           <ActivityIndicator size="large" color="#025f00" />
           <Text style={styles.loaderText}>Loading map…</Text>
         </View>
+      ) : locationOff ? (
+        <View style={styles.locationOffWrap}>
+          <View style={styles.locationOffToast}>
+            <Ionicons name="warning-outline" size={18} color="#B91C1C" />
+            <Text style={styles.locationOffToastText}>
+              Location services disabled — Risk Map is unavailable.
+            </Text>
+          </View>
+          <View style={styles.locationOffIcon}>
+            <Ionicons name="location-outline" size={44} color="#1B4A2F" />
+          </View>
+          <Text style={styles.locationOffTitle}>Location Sharing is Off</Text>
+          <Text style={styles.locationOffSub}>
+            Turn on Location Sharing in Privacy & Security (or enable GPS permission on your phone) to view nearby disease risk circles.
+          </Text>
+          <View style={styles.locationOffActions}>
+            <TouchableOpacity
+              style={styles.locationOffBtnPrimary}
+              onPress={() => router.push("/settings/privacy")}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.locationOffBtnPrimaryText}>Open Privacy Settings</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.locationOffBtnSecondary}
+              onPress={loadData}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.locationOffBtnSecondaryText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       ) : (
         <MapView
           style={styles.map}
@@ -263,7 +322,26 @@ export default function MapScreen() {
           }}
           showsUserLocation
           showsMyLocationButton
-          onPress={() => setSelected(null)}
+          onPress={(e) => {
+            if (Date.now() - lastMarkerTap.current < 350) return;
+            const coord = e.nativeEvent?.coordinate;
+            if (!coord) {
+              setSelected(null);
+              return;
+            }
+            // Select the closest risk circle whose radius contains the tapped point
+            let hit: NearbyDetection | null = null;
+            let bestDist = Infinity;
+            for (const d of filteredDetections) {
+              const dist = distanceMeters(coord.latitude, coord.longitude, d.lat, d.lng);
+              const radius = Math.max(d.spread_radius ?? 200, 120);
+              if (dist <= radius && dist < bestDist) {
+                hit = d;
+                bestDist = dist;
+              }
+            }
+            setSelected(hit);
+          }}
         >
           {filteredDetections.map((d) => (
             <Circle
@@ -273,7 +351,6 @@ export default function MapScreen() {
               fillColor={RISK_COLORS[d.risk_level] ?? RISK_COLORS.low}
               strokeColor={RISK_BORDER[d.risk_level] ?? RISK_BORDER.low}
               strokeWidth={1.5}
-              onPress={() => setSelected(d)}
             />
           ))}
           {filteredDetections.map((d) => {
@@ -283,11 +360,15 @@ export default function MapScreen() {
                 key={`m-${d.id}`}
                 coordinate={{ latitude: d.lat, longitude: d.lng }}
                 anchor={{ x: 0.5, y: 1.0 }}
-                onPress={() => setSelected(d)}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  lastMarkerTap.current = Date.now();
+                  setSelected(d);
+                }}
               >
                 <View style={styles.markerWrap}>
                   <View style={[styles.ttlBadge, { backgroundColor: ttl.color }]}>
-                    <Text style={styles.ttlBadgeText}>{ttl.daysLeft}d</Text>
+                    <Text style={styles.ttlBadgeText}>{d.disease_display} · {ttl.daysLeft}d</Text>
                   </View>
                   <View style={[styles.markerPin, { backgroundColor: RISK_BORDER[d.risk_level] ?? "#4ADE80" }]}>
                     <View style={styles.markerPinDot} />
@@ -340,7 +421,7 @@ export default function MapScreen() {
       )}
 
       {/* Risk level legend */}
-      {!selected && (
+      {!selected && !locationOff && (
         <View style={styles.legend}>
           {(["high", "Moderate", "low"] as const).map((key) => {
             const k = key.toLowerCase() as "high" | "moderate" | "low";
@@ -388,6 +469,19 @@ const styles = StyleSheet.create({
   map:        { flex: 1 },
   loader:     { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
   loaderText: { color: "#504c4c", fontSize: 14 },
+
+  // Location disabled state
+  locationOffWrap: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 28, backgroundColor: "#F9FAFB" },
+  locationOffToast: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#FEE2E2", borderColor: "#FECACA", borderWidth: 1, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, marginBottom: 24 },
+  locationOffToastText: { color: "#B91C1C", fontSize: 13, fontWeight: "600", flexShrink: 1 },
+  locationOffIcon: { width: 80, height: 80, borderRadius: 40, backgroundColor: "#E8F5E9", justifyContent: "center", alignItems: "center", marginBottom: 16 },
+  locationOffTitle: { fontSize: 20, fontWeight: "700", color: "#111827", marginBottom: 8, textAlign: "center" },
+  locationOffSub: { fontSize: 14, color: "#6B7280", textAlign: "center", lineHeight: 21, marginBottom: 24 },
+  locationOffActions: { flexDirection: "row", gap: 12 },
+  locationOffBtnPrimary: { backgroundColor: "#1B4A2F", paddingHorizontal: 18, paddingVertical: 13, borderRadius: 12 },
+  locationOffBtnPrimaryText: { color: "#FFFFFF", fontSize: 14, fontWeight: "700" },
+  locationOffBtnSecondary: { backgroundColor: "#FFFFFF", borderWidth: 1.5, borderColor: "#1B4A2F", paddingHorizontal: 18, paddingVertical: 13, borderRadius: 12 },
+  locationOffBtnSecondaryText: { color: "#1B4A2F", fontSize: 14, fontWeight: "700" },
 
   // Callout card
   infoCard:   { position: "absolute", bottom: 24, left: 16, right: 16, backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#D1E8D8", shadowColor: "#1B4A2F", shadowOpacity: 0.10, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 5 },
