@@ -6,9 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 
 const KEYS = {
-  scanAlerts:    "scanom_notif_scan_alerts",
-  riskAlerts:    "scanom_notif_risk_alerts",
-  weeklyReport:  "scanom_notif_weekly_report",
+  scanAlerts: "scanom_notif_scan_alerts",
+  riskAlerts: "scanom_notif_risk_alerts",
 };
 
 async function loadPref(key: string, defaultVal: boolean): Promise<boolean> {
@@ -19,23 +18,20 @@ async function loadPref(key: string, defaultVal: boolean): Promise<boolean> {
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [scanAlerts,    setScanAlertsRaw]    = useState(true);
-  const [riskAlerts,    setRiskAlertsRaw]    = useState(true);
-  const [weeklyReport,  setWeeklyReportRaw]  = useState(false);
+  const [scanAlerts, setScanAlertsRaw] = useState(true);
+  const [riskAlerts, setRiskAlertsRaw] = useState(true);
 
   // Load saved preferences on mount
   useEffect(() => {
     (async () => {
-      setScanAlertsRaw(  await loadPref(KEYS.scanAlerts,   true));
-      setRiskAlertsRaw(  await loadPref(KEYS.riskAlerts,   true));
-      setWeeklyReportRaw(await loadPref(KEYS.weeklyReport, false));
+      setScanAlertsRaw(await loadPref(KEYS.scanAlerts, true));
+      setRiskAlertsRaw(await loadPref(KEYS.riskAlerts, true));
     })();
   }, []);
 
   // Wrapped setters that also persist to AsyncStorage
-  function setScanAlerts(v: boolean)   { setScanAlertsRaw(v);   AsyncStorage.setItem(KEYS.scanAlerts,   String(v)); }
-  function setRiskAlerts(v: boolean)   { setRiskAlertsRaw(v);   AsyncStorage.setItem(KEYS.riskAlerts,   String(v)); }
-  function setWeeklyReport(v: boolean) { setWeeklyReportRaw(v); AsyncStorage.setItem(KEYS.weeklyReport, String(v)); }
+  function setScanAlerts(v: boolean) { setScanAlertsRaw(v); AsyncStorage.setItem(KEYS.scanAlerts, String(v)); }
+  function setRiskAlerts(v: boolean) { setRiskAlertsRaw(v); AsyncStorage.setItem(KEYS.riskAlerts, String(v)); }
 
   return (
     <View style={styles.container}>
@@ -67,18 +63,6 @@ export default function NotificationsScreen() {
             sublabel="Immediate alert when risk level in your area is High"
             value={riskAlerts}
             onToggle={setRiskAlerts}
-          />
-        </View>
-
-        {/* Weekly report toggle */}
-        <Text style={styles.sectionLabel}>REPORTS</Text>
-        <View style={styles.card}>
-          <ToggleRow
-            icon="document-text-outline"
-            label="Weekly Summary"
-            sublabel="Receive a weekly report of nearby disease activity"
-            value={weeklyReport}
-            onToggle={setWeeklyReport}
           />
         </View>
 
@@ -147,21 +131,21 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  backBtn:     { width: 38, height: 38, justifyContent: "center", alignItems: "center" },
+  backBtn: { width: 38, height: 38, justifyContent: "center", alignItems: "center" },
   headerTitle: { fontSize: 17, fontWeight: "700", color: "#111827" },
 
-  body:        { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 40 },
-  sectionLabel:{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 },
+  body: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 40 },
+  sectionLabel: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 },
 
-  card:  { backgroundColor: "#FFFFFF", borderRadius: 16, borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 24, overflow: "hidden" },
+  card: { backgroundColor: "#FFFFFF", borderRadius: 16, borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 24, overflow: "hidden" },
   divider: { height: 1, backgroundColor: "#F3F4F6", marginHorizontal: 16 },
 
-  toggleRow:  { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
+  toggleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
   toggleIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: "#E8F5E9", justifyContent: "center", alignItems: "center" },
   toggleText: { flex: 1 },
-  toggleLabel:{ fontSize: 15, fontWeight: "600", color: "#111827" },
-  toggleSub:  { fontSize: 12, color: "#6B7280", marginTop: 2, lineHeight: 17 },
+  toggleLabel: { fontSize: 15, fontWeight: "600", color: "#111827" },
+  toggleSub: { fontSize: 12, color: "#6B7280", marginTop: 2, lineHeight: 17 },
 
-  notice:     { flexDirection: "row", gap: 8, backgroundColor: "#E8F5E9", borderRadius: 12, padding: 14, alignItems: "flex-start" },
+  notice: { flexDirection: "row", gap: 8, backgroundColor: "#E8F5E9", borderRadius: 12, padding: 14, alignItems: "flex-start" },
   noticeText: { flex: 1, fontSize: 13, color: "#1B4A2F", lineHeight: 19 },
 });

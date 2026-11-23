@@ -27,9 +27,6 @@ export async function requestLocationPermission(): Promise<boolean> {
 }
 
 export async function getCurrentLocation(): Promise<Coordinates | null> {
-  const sharingEnabled = await isLocationSharingEnabled();
-  if (!sharingEnabled) return null;
-
   const granted = await requestLocationPermission();
   if (!granted) return null;
 

@@ -8,11 +8,10 @@ import { clearSession } from "@/services/auth";
 import { isLocationSharingEnabled, setLocationSharingEnabled } from "@/services/location";
 
 export default function PrivacyScreen() {
-  const insets  = useSafeAreaInsets();
-  const router  = useRouter();
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [locationSharing, setLocationSharingRaw] = useState(true);
-  const [anonymousData,   setAnonymousData]   = useState(true);
-  const [deleting,        setDeleting]        = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     isLocationSharingEnabled().then(setLocationSharingRaw);
@@ -22,8 +21,8 @@ export default function PrivacyScreen() {
     setLocationSharingRaw(val);
     setLocationSharingEnabled(val);
     const msg = val
-      ? "Location sharing enabled. Risk Map is now active."
-      : "Location sharing turned off. Scans will not be plotted on the Risk Map.";
+        ? "Location sharing enabled. Your scans will be tagged on the Risk Map."
+        : "Location sharing turned off. Scans will not be plotted on the Risk Map.";
     if (Platform.OS === "android") {
       ToastAndroid.show(msg, ToastAndroid.SHORT);
     }
@@ -91,26 +90,9 @@ export default function PrivacyScreen() {
           </View>
         </View>
 
-        {/* Data and retention section */}
-        <Text style={styles.sectionLabel}>DATA & ANALYTICS</Text>
+        {/* Data retention section */}
+        <Text style={styles.sectionLabel}>DATA RETENTION</Text>
         <View style={styles.card}>
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleIcon}>
-              <Ionicons name="analytics-outline" size={20} color="#1B4A2F" />
-            </View>
-            <View style={styles.toggleText}>
-              <Text style={styles.toggleLabel}>Anonymous Usage Data</Text>
-              <Text style={styles.toggleSub}>Help improve Scanom by sharing anonymous scan statistics</Text>
-            </View>
-            <Switch
-              value={anonymousData}
-              onValueChange={setAnonymousData}
-              trackColor={{ false: "#E5E7EB", true: "#A7C8B0" }}
-              thumbColor={anonymousData ? "#1B4A2F" : "#D1D5DB"}
-              ios_backgroundColor="#E5E7EB"
-            />
-          </View>
-          <View style={styles.divider} />
           {/* 14-day map TTL notice */}
           <View style={styles.infoRow}>
             <View style={styles.toggleIcon}>
@@ -166,20 +148,20 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  backBtn:     { width: 38, height: 38, justifyContent: "center", alignItems: "center" },
+  backBtn: { width: 38, height: 38, justifyContent: "center", alignItems: "center" },
   headerTitle: { fontSize: 17, fontWeight: "700", color: "#111827" },
 
-  body:        { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 40 },
-  sectionLabel:{ fontSize: 11, fontWeight: "700", color: "#9CA3AF", letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 },
+  body: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 40 },
+  sectionLabel: { fontSize: 11, fontWeight: "700", color: "#9CA3AF", letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 },
 
-  card:       { backgroundColor: "#FFFFFF", borderRadius: 16, borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 24, overflow: "hidden" },
-  divider:    { height: 1, backgroundColor: "#F3F4F6", marginHorizontal: 16 },
+  card: { backgroundColor: "#FFFFFF", borderRadius: 16, borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 24, overflow: "hidden" },
+  divider: { height: 1, backgroundColor: "#F3F4F6", marginHorizontal: 16 },
 
-  toggleRow:  { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
-  infoRow:    { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
-  dangerRow:  { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
+  toggleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
+  infoRow: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
+  dangerRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
   toggleIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: "#E8F5E9", justifyContent: "center", alignItems: "center" },
   toggleText: { flex: 1 },
-  toggleLabel:{ fontSize: 15, fontWeight: "600", color: "#111827" },
-  toggleSub:  { fontSize: 12, color: "#6B7280", marginTop: 2, lineHeight: 17 },
+  toggleLabel: { fontSize: 15, fontWeight: "600", color: "#111827" },
+  toggleSub: { fontSize: 12, color: "#6B7280", marginTop: 2, lineHeight: 17 },
 });

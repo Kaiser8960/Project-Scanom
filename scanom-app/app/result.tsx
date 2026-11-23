@@ -37,7 +37,12 @@ const SEVERITY_CONFIG: Record<string, { color: string; label: string }> = {
 export default function ResultScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data, fromHistory, noLocation } = useLocalSearchParams<{ data: string; fromHistory?: string; noLocation?: string }>();
+  const { data, fromHistory, noLocation, noWeather } = useLocalSearchParams<{
+    data: string;
+    fromHistory?: string;
+    noLocation?: string;
+    noWeather?: string;
+  }>();
 
   // Parse scan result JSON passed via route params
   const result = JSON.parse(data ?? "{}") as DetectionResult & {
@@ -178,20 +183,22 @@ export default function ResultScreen() {
         </Reveal>
 
         {/* Weather conditions row */}
-        {result.weather && (
-          <Reveal i={step++}>
-            <View style={styles.weatherRow}>
-              <View style={styles.weatherItem}>
-                <Ionicons name="water-outline" size={16} color="#60A5FA" />
-                <Text style={styles.weatherText}>{result.weather.humidity?.toFixed(0)}% humidity</Text>
-              </View>
-              <View style={styles.weatherItem}>
-                <Ionicons name="thermometer-outline" size={16} color="#F87171" />
-                <Text style={styles.weatherText}>{result.weather.temperature?.toFixed(1)}°C</Text>
-              </View>
-            </View>
-          </Reveal>
-        )}
+          {
+            result.weather && noWeather !== "true" && (
+              <Reveal i={step++}>
+                <View style={styles.weatherRow}>
+                  <View style={styles.weatherItem}>
+                    <Ionicons name="water-outline" size={16} color="#60A5FA" />
+                    <Text style={styles.weatherText}>{result.weather.humidity?.toFixed(0)}% humidity</Text>
+                  </View>
+                  <View style={styles.weatherItem}>
+                    <Ionicons name="thermometer-outline" size={16} color="#F87171" />
+                    <Text style={styles.weatherText}>{result.weather.temperature?.toFixed(1)}°C</Text>
+                  </View>
+                </View>
+              </Reveal>
+            )
+          }
 
         {/* Recommended treatment steps */}
         {result.explanation && !isGood && result.explanation.treatment?.length > 0 && (

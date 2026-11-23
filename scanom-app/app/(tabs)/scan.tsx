@@ -9,13 +9,13 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getCurrentLocation, DEFAULT_LOCATION } from "@/services/location";
+import { getCurrentLocation, DEFAULT_LOCATION, isLocationSharingEnabled } from "@/services/location";
 import { detect } from "@/services/api";
 import ProcessingModal from "@/components/ui/ProcessingModal";
 import { sendScanNotification } from "@/services/notifications";
 
 const ZOOM_LEVELS = [
-  { label: "1×", value: 0.0  },
+  { label: "1×", value: 0.0 },
   { label: "2×", value: 0.10 },
   { label: "3×", value: 0.20 },
 ];
@@ -27,9 +27,9 @@ export default function ScanScreen() {
   const [processing, setProcessing] = useState(false);
   const [facing, setFacing] = useState<"front" | "back">("back");
   const [capturedUri, setCapturedUri] = useState<string | null>(null);
-  const [zoomIndex, setZoomIndex]     = useState(0);
-  const [focusPoint, setFocusPoint]   = useState<{ x: number; y: number } | null>(null);
-  const [autofocus, setAutofocus]     = useState<"on" | "off">("on");
+  const [zoomIndex, setZoomIndex] = useState(0);
+  const [focusPoint, setFocusPoint] = useState<{ x: number; y: number } | null>(null);
+  const [autofocus, setAutofocus] = useState<"on" | "off">("on");
   const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Show a focus ring and trigger camera autofocus on tap
@@ -53,7 +53,7 @@ export default function ScanScreen() {
       if (!photo?.uri) return;
       // Crop the captured photo to a centered square
       const squareSize = Math.min(photo.width, photo.height);
-      const cropX = Math.round((photo.width  - squareSize) / 2);
+      const cropX = Math.round((photo.width - squareSize) / 2);
       const cropY = Math.round((photo.height - squareSize) / 2);
       const cropped = await ImageManipulator.manipulateAsync(
         photo.uri,
@@ -100,210 +100,218 @@ export default function ScanScreen() {
       );
 
       const realLoc = await getCurrentLocation();
-      const hasLocation = realLoc !== null;
+      const sharingOn = await isLocationSharingEnabled();
+      const hasDeviceGps = realLoc !== null;
+      const canShareToMap = hasDeviceGps && sharingOn;
       const loc = realLoc ?? DEFAULT_LOCATION;
 
-      if (!hasLocation) {
-        const msg = "Location is off — diagnosing leaf without risk map.";
-        if (Platform.OS === "android") {
-          ToastAndroid.show(msg, ToastAndroid.LONG);
-        } else {
-          Alert.alert("Location Off", msg);
+        if (!hasDeviceGps) {
+          const msg = "Location services off — diagnosing leaf without weather or risk map.";
+          if (Platform.OS === "android") {
+            ToastAndroid.show(msg, ToastAndroid.LONG);
+          } else {
+            Alert.alert("Location Services Off", msg);
+          }
+        } else if (!sharingOn) {
+          const msg = "Location sharing is off — scan will not be plotted on the public Risk Map.";
+          if (Platform.OS === "android") {
+            ToastAndroid.show(msg, ToastAndroid.SHORT);
+          }
         }
-      }
 
-      const result = await detect(resized.base64!, loc.lat, loc.lng, hasLocation);
-      const noLocParam = hasLocation ? undefined : "true";
+        const result = await detect(resized.base64!, loc.lat, loc.lng, canShareToMap);
+        const noLocParam = canShareToMap ? undefined : "true";
+        const noWeatherParam = hasDeviceGps ? undefined : "true";
 
-      if (!result.valid) {
-        router.push({ pathname: "/rejection", params: { confidence: String(result.confidence) } });
-      } else if (result.duplicate) {
-        Alert.alert(
-          "Already scanned",
-          "This image was scanned before. Showing your previous result — no new risk circle was added."
-        );
-        router.push({ pathname: "/result", params: { data: JSON.stringify(result), noLocation: noLocParam } });
-      } else {
-        if (!result.is_healthy) {
-          sendScanNotification(
-            result.disease_display ?? result.disease,
-            result.risk_level ?? "low",
-            result.plant ?? "plant"
+        if (!result.valid) {
+          router.push({ pathname: "/rejection", params: { confidence: String(result.confidence) } });
+        } else if (result.duplicate) {
+          Alert.alert(
+            "Already scanned",
+            "This image was scanned before. Showing your previous result — no new risk circle was added."
           );
+          router.push({ pathname: "/result", params: { data: JSON.stringify(result), noLocation: noLocParam, noWeather: noWeatherParam } });
+        } else {
+          if (!result.is_healthy) {
+            sendScanNotification(
+              result.disease_display ?? result.disease,
+              result.risk_level ?? "low",
+              result.plant ?? "plant"
+            );
+          }
+          router.push({ pathname: "/result", params: { data: JSON.stringify(result), noLocation: noLocParam, noWeather: noWeatherParam } });
         }
-        router.push({ pathname: "/result", params: { data: JSON.stringify(result), noLocation: noLocParam } });
+      } catch (err: any) {
+        Alert.alert("Scan failed", err.message ?? "Please try again.");
       }
-    } catch (err: any) {
-      Alert.alert("Scan failed", err.message ?? "Please try again.");
     }
-  }
 
   if (!permission) return <View style={styles.container} />;
 
-  if (!permission.granted) {
-    return (
-      <View style={styles.permissionContainer}>
-        <Ionicons name="camera-outline" size={64} color="#025f00" />
-        <Text style={styles.permissionTitle}>Camera Access Required</Text>
-        <Text style={styles.permissionText}>
-          Scanom needs camera access to scan plant leaves for disease detection.
-        </Text>
-        <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission}>
-          <Text style={styles.permissionBtnText}>Grant Permission</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+    if (!permission.granted) {
+      return (
+        <View style={styles.permissionContainer}>
+          <Ionicons name="camera-outline" size={64} color="#025f00" />
+          <Text style={styles.permissionTitle}>Camera Access Required</Text>
+          <Text style={styles.permissionText}>
+            Scanom needs camera access to scan plant leaves for disease detection.
+          </Text>
+          <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission}>
+            <Text style={styles.permissionBtnText}>Grant Permission</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
-  // Photo review screen before sending to backend
-  if (capturedUri) {
+    // Photo review screen before sending to backend
+    if (capturedUri) {
+      return (
+        <View style={styles.container}>
+          <View style={styles.previewContainer}>
+            <View style={styles.previewBorder}>
+              <Image source={{ uri: capturedUri }} style={{ flex: 1 }} resizeMode="cover" />
+            </View>
+          </View>
+
+          <View style={styles.previewLabelWrap}>
+            <Text style={styles.previewLabel}>Review your photo</Text>
+            <Text style={styles.previewSub}>The green box is what the model analyzes.</Text>
+          </View>
+
+          <View style={styles.previewBar}>
+            <TouchableOpacity style={styles.retakeBtn} onPress={handleRetake} disabled={processing}>
+              <Ionicons name="refresh-outline" size={22} color="#1B4A2F" />
+              <Text style={styles.retakeBtnText}>Retake</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.usePhotoBtn} onPress={handleUsePhoto} disabled={processing}>
+              {processing
+                ? <ActivityIndicator color="#FFFFFF" size="small" />
+                : <><Ionicons name="checkmark-circle-outline" size={22} color="#FFFFFF" /><Text style={styles.usePhotoBtnText}>Use Photo</Text></>
+              }
+            </TouchableOpacity>
+          </View>
+
+          <ProcessingModal visible={processing} />
+        </View>
+      );
+    }
+
+    // Live camera view
     return (
       <View style={styles.container}>
-        <View style={styles.previewContainer}>
-          <View style={styles.previewBorder}>
-            <Image source={{ uri: capturedUri }} style={{ flex: 1 }} resizeMode="cover" />
+        <View style={styles.cameraArea}>
+          <CameraView
+            ref={cameraRef}
+            style={StyleSheet.absoluteFill}
+            facing={facing}
+            zoom={ZOOM_LEVELS[zoomIndex].value}
+            autofocus={autofocus}
+            onBarcodeScanned={undefined}
+          />
+          <Pressable style={StyleSheet.absoluteFill} onPress={handleFocusTap} />
+          {focusPoint && (
+            <Animated.View
+              pointerEvents="none"
+              entering={FadeIn.duration(150)}
+              exiting={FadeOut.duration(300)}
+              style={[styles.focusRing, { top: focusPoint.y - 34, left: focusPoint.x - 34 }]}
+            />
+          )}
+          <View style={styles.overlay} pointerEvents="box-none">
+            {/* Square alignment guide */}
+            <View style={styles.scanFrame}>
+              <View style={[styles.corner, styles.cornerTL]} />
+              <View style={[styles.corner, styles.cornerTR]} />
+              <View style={[styles.corner, styles.cornerBL]} />
+              <View style={[styles.corner, styles.cornerBR]} />
+            </View>
+            <Text style={styles.hint}>Align leaf within the frame</Text>
+            <View style={styles.zoomRow}>
+              {ZOOM_LEVELS.map((z, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={[styles.zoomPill, zoomIndex === i && styles.zoomPillActive]}
+                  onPress={() => setZoomIndex(i)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.zoomPillText, zoomIndex === i && styles.zoomPillTextActive]}>
+                    {z.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
 
-        <View style={styles.previewLabelWrap}>
-          <Text style={styles.previewLabel}>Review your photo</Text>
-          <Text style={styles.previewSub}>The green box is what the model analyzes.</Text>
-        </View>
-
-        <View style={styles.previewBar}>
-          <TouchableOpacity style={styles.retakeBtn} onPress={handleRetake} disabled={processing}>
-            <Ionicons name="refresh-outline" size={22} color="#1B4A2F" />
-            <Text style={styles.retakeBtnText}>Retake</Text>
+        <View style={styles.controls}>
+          <TouchableOpacity style={styles.sideBtn} onPress={pickFromGallery} disabled={processing}>
+            <Ionicons name="images-outline" size={28} color={processing ? "#9CA3AF" : "#1B4A2F"} />
+            <Text style={[styles.sideBtnLabel, processing && { color: "#9CA3AF" }]}>Gallery</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.usePhotoBtn} onPress={handleUsePhoto} disabled={processing}>
-            {processing
-              ? <ActivityIndicator color="#FFFFFF" size="small" />
-              : <><Ionicons name="checkmark-circle-outline" size={22} color="#FFFFFF" /><Text style={styles.usePhotoBtnText}>Use Photo</Text></>
-            }
+          <TouchableOpacity style={styles.shutter} onPress={takePicture} disabled={processing} activeOpacity={0.85}>
+            <View style={styles.shutterInner} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.sideBtn} onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))} disabled={processing}>
+            <Ionicons name="camera-reverse-outline" size={28} color={processing ? "#9CA3AF" : "#1B4A2F"} />
+            <Text style={[styles.sideBtnLabel, processing && { color: "#9CA3AF" }]}>Flip</Text>
           </TouchableOpacity>
         </View>
 
         <ProcessingModal visible={processing} />
       </View>
     );
+
   }
 
-  // Live camera view
-  return (
-    <View style={styles.container}>
-      <View style={styles.cameraArea}>
-        <CameraView
-          ref={cameraRef}
-          style={StyleSheet.absoluteFill}
-          facing={facing}
-          zoom={ZOOM_LEVELS[zoomIndex].value}
-          autofocus={autofocus}
-          onBarcodeScanned={undefined}
-        />
-        <Pressable style={StyleSheet.absoluteFill} onPress={handleFocusTap} />
-        {focusPoint && (
-          <Animated.View
-            pointerEvents="none"
-            entering={FadeIn.duration(150)}
-            exiting={FadeOut.duration(300)}
-            style={[styles.focusRing, { top: focusPoint.y - 34, left: focusPoint.x - 34 }]}
-          />
-        )}
-        <View style={styles.overlay} pointerEvents="box-none">
-          {/* Square alignment guide */}
-          <View style={styles.scanFrame}>
-            <View style={[styles.corner, styles.cornerTL]} />
-            <View style={[styles.corner, styles.cornerTR]} />
-            <View style={[styles.corner, styles.cornerBL]} />
-            <View style={[styles.corner, styles.cornerBR]} />
-          </View>
-          <Text style={styles.hint}>Align leaf within the frame</Text>
-          <View style={styles.zoomRow}>
-            {ZOOM_LEVELS.map((z, i) => (
-              <TouchableOpacity
-                key={i}
-                style={[styles.zoomPill, zoomIndex === i && styles.zoomPillActive]}
-                onPress={() => setZoomIndex(i)}
-                activeOpacity={0.75}
-              >
-                <Text style={[styles.zoomPillText, zoomIndex === i && styles.zoomPillTextActive]}>
-                  {z.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: "#000000" },
+    focusRing: { position: "absolute", width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: "#FACC15", backgroundColor: "transparent" },
 
-      <View style={styles.controls}>
-        <TouchableOpacity style={styles.sideBtn} onPress={pickFromGallery} disabled={processing}>
-          <Ionicons name="images-outline" size={28} color={processing ? "#9CA3AF" : "#1B4A2F"} />
-          <Text style={[styles.sideBtnLabel, processing && { color: "#9CA3AF" }]}>Gallery</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.shutter} onPress={takePicture} disabled={processing} activeOpacity={0.85}>
-          <View style={styles.shutterInner} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.sideBtn} onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))} disabled={processing}>
-          <Ionicons name="camera-reverse-outline" size={28} color={processing ? "#9CA3AF" : "#1B4A2F"} />
-          <Text style={[styles.sideBtnLabel, processing && { color: "#9CA3AF" }]}>Flip</Text>
-        </TouchableOpacity>
-      </View>
+    // Camera area
+    cameraArea: { flex: 1, position: "relative" },
+    overlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
 
-      <ProcessingModal visible={processing} />
-    </View>
-  );
+    // Corner-bracket scan frame
+    scanFrame: { width: "88%", aspectRatio: 1, position: "relative" },
+    corner: { position: "absolute", width: 30, height: 30 },
+    cornerTL: { top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 5, borderColor: "#1B4A2F" },
+    cornerTR: { top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 5, borderColor: "#1B4A2F" },
+    cornerBL: { bottom: 0, left: 0, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 5, borderColor: "#1B4A2F" },
+    cornerBR: { bottom: 0, right: 0, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 5, borderColor: "#1B4A2F" },
 
-}
+    hint: { color: "#FFFFFF", fontSize: 13, marginTop: 18, backgroundColor: "rgba(27,74,47,0.80)", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
 
-const styles = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: "#000000" },
-  focusRing:    { position: "absolute", width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: "#FACC15", backgroundColor: "transparent" },
+    // Zoom pills
+    zoomRow: { flexDirection: "row", gap: 10, marginTop: 20 },
+    zoomPill: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.50)", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)" },
+    zoomPillActive: { backgroundColor: "rgba(27,74,47,0.90)", borderColor: "#4CAF50" },
+    zoomPillText: { color: "#FFFFFF", fontWeight: "600", fontSize: 14 },
+    zoomPillTextActive: { color: "#FFFFFF" },
 
-  // Camera area
-  cameraArea:   { flex: 1, position: "relative" },
-  overlay:      { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
+    // Controls bar
+    controls: { flexDirection: "row", alignItems: "center", justifyContent: "space-around", backgroundColor: "#FFFFFF", paddingVertical: 24, paddingBottom: 36, borderTopWidth: 1, borderTopColor: "#E5E7EB" },
+    shutter: { width: 72, height: 72, borderRadius: 36, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: "#E8F5E9" },
+    shutterInner: { width: 56, height: 56, borderRadius: 28, backgroundColor: "#FFFFFF" },
+    sideBtn: { alignItems: "center", width: 70 },
+    sideBtnLabel: { color: "#1B4A2F", fontSize: 11, marginTop: 4, fontWeight: "600" },
 
-  // Corner-bracket scan frame
-  scanFrame:    { width: "88%", aspectRatio: 1, position: "relative" },
-  corner:       { position: "absolute", width: 30, height: 30 },
-  cornerTL:     { top: 0, left: 0,  borderTopWidth: 3, borderLeftWidth: 3,  borderTopLeftRadius: 5,     borderColor: "#1B4A2F" },
-  cornerTR:     { top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 5,    borderColor: "#1B4A2F" },
-  cornerBL:     { bottom: 0, left: 0,  borderBottomWidth: 3, borderLeftWidth: 3,  borderBottomLeftRadius: 5,  borderColor: "#1B4A2F" },
-  cornerBR:     { bottom: 0, right: 0, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 5, borderColor: "#1B4A2F" },
+    // Permission screen
+    permissionContainer: { flex: 1, backgroundColor: "#FFFFFF", justifyContent: "center", alignItems: "center", padding: 32 },
+    permissionTitle: { color: "#111827", fontSize: 20, fontWeight: "700", marginTop: 20, marginBottom: 12 },
+    permissionText: { color: "#504c4c", fontSize: 14, textAlign: "center", lineHeight: 22 },
+    permissionBtn: { marginTop: 24, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32 },
+    permissionBtnText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
 
-  hint:         { color: "#FFFFFF", fontSize: 13, marginTop: 18, backgroundColor: "rgba(27,74,47,0.80)", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+    // Review / preview screen
+    previewContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000000" },
+    previewBorder: { width: "90%", aspectRatio: 1, borderWidth: 3, borderColor: "#1B4A2F", borderRadius: 10, overflow: "hidden" },
+    previewLabelWrap: { position: "absolute", top: 60, left: 0, right: 0, alignItems: "center" },
+    previewLabel: { color: "#FFFFFF", fontSize: 18, fontWeight: "700", backgroundColor: "rgba(0,0,0,0.55)", paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, overflow: "hidden" },
+    previewSub: { color: "#FFFFFF", fontSize: 12, marginTop: 6, backgroundColor: "rgba(0,0,0,0.45)", paddingHorizontal: 14, paddingVertical: 5, borderRadius: 16, overflow: "hidden" },
+    previewBar: { flexDirection: "row", backgroundColor: "#FFFFFF", paddingVertical: 20, paddingBottom: 36, paddingHorizontal: 24, gap: 16, borderTopWidth: 1, borderTopColor: "#E5E7EB" },
+    retakeBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 2, borderColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14 },
+    retakeBtnText: { color: "#1B4A2F", fontWeight: "700", fontSize: 15 },
+    usePhotoBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14 },
+    usePhotoBtnText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
 
-  // Zoom pills
-  zoomRow:      { flexDirection: "row", gap: 10, marginTop: 20 },
-  zoomPill:     { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, backgroundColor: "rgba(0,0,0,0.50)", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)" },
-  zoomPillActive:    { backgroundColor: "rgba(27,74,47,0.90)", borderColor: "#4CAF50" },
-  zoomPillText:      { color: "#FFFFFF", fontWeight: "600", fontSize: 14 },
-  zoomPillTextActive:{ color: "#FFFFFF" },
-
-  // Controls bar
-  controls:     { flexDirection: "row", alignItems: "center", justifyContent: "space-around", backgroundColor: "#FFFFFF", paddingVertical: 24, paddingBottom: 36, borderTopWidth: 1, borderTopColor: "#E5E7EB" },
-  shutter:      { width: 72, height: 72, borderRadius: 36, backgroundColor: "#1B4A2F", justifyContent: "center", alignItems: "center", borderWidth: 3, borderColor: "#E8F5E9" },
-  shutterInner: { width: 56, height: 56, borderRadius: 28, backgroundColor: "#FFFFFF" },
-  sideBtn:      { alignItems: "center", width: 70 },
-  sideBtnLabel: { color: "#1B4A2F", fontSize: 11, marginTop: 4, fontWeight: "600" },
-
-  // Permission screen
-  permissionContainer: { flex: 1, backgroundColor: "#FFFFFF", justifyContent: "center", alignItems: "center", padding: 32 },
-  permissionTitle:     { color: "#111827", fontSize: 20, fontWeight: "700", marginTop: 20, marginBottom: 12 },
-  permissionText:      { color: "#504c4c", fontSize: 14, textAlign: "center", lineHeight: 22 },
-  permissionBtn:       { marginTop: 24, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32 },
-  permissionBtnText:   { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
-
-  // Review / preview screen
-  previewContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000000" },
-  previewBorder:    { width: "90%", aspectRatio: 1, borderWidth: 3, borderColor: "#1B4A2F", borderRadius: 10, overflow: "hidden" },
-  previewLabelWrap: { position: "absolute", top: 60, left: 0, right: 0, alignItems: "center" },
-  previewLabel:     { color: "#FFFFFF", fontSize: 18, fontWeight: "700", backgroundColor: "rgba(0,0,0,0.55)", paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, overflow: "hidden" },
-  previewSub:       { color: "#FFFFFF", fontSize: 12, marginTop: 6, backgroundColor: "rgba(0,0,0,0.45)", paddingHorizontal: 14, paddingVertical: 5, borderRadius: 16, overflow: "hidden" },
-  previewBar:       { flexDirection: "row", backgroundColor: "#FFFFFF", paddingVertical: 20, paddingBottom: 36, paddingHorizontal: 24, gap: 16, borderTopWidth: 1, borderTopColor: "#E5E7EB" },
-  retakeBtn:        { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 2, borderColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14 },
-  retakeBtnText:    { color: "#1B4A2F", fontWeight: "700", fontSize: 15 },
-  usePhotoBtn:      { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#1B4A2F", borderRadius: 14, paddingVertical: 14 },
-  usePhotoBtnText:  { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
-
-});
+  });
